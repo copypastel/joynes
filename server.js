@@ -1,9 +1,6 @@
-// Quick fix for npm installs under Mac OS X
-require.paths.push('/usr/local/lib/node')
-
 // BSD licensed, rock along with it.
 
-var sys = require('sys');
+var util = require('util');
 //var connect = require('connect');
 var express = require('express');
 //  var io = require('socket.io');
@@ -16,7 +13,7 @@ var socket = ws.createServer();
 // App
 
 app.configure( function(){
-  app.use(express.staticProvider(__dirname + '/public'));
+  app.use(express.static(__dirname + '/public'));
 });
 
 app.get('/', function(req, res){
@@ -36,11 +33,11 @@ var mastersWaiting = [];
 var slavesWaiting = [];
 
 socket.addListener("connection", function(conn){
-  sys.puts("Opening: " + conn.id);
+  util.puts("Opening: " + conn.id);
   conn.addListener("message", function(message){
     if(message[0] == "m"){
       // Master
-      sys.puts("Master " + conn.id + " connected.")
+      util.puts("Master " + conn.id + " connected.")
       if( slavesWaiting.length == 0){
         mastersWaiting.push(conn.id);
       }else{
@@ -53,21 +50,21 @@ socket.addListener("connection", function(conn){
     }
     else if(message[0] == "s"){
       // Slave
-      sys.puts("Slave " + conn.id + " connected.")
+      util.puts("Slave " + conn.id + " connected.")
       if( mastersWaiting.length == 0){
         slavesWaiting.push(conn.id);
       }else{
         // Have a pair.
         var master = mastersWaiting.shift();
         var slave = conn.id;
-        sys.puts("Matching slave " + conn.id + " with master " + master);
+        util.puts("Matching slave " + conn.id + " with master " + master);
         channels[master] = slave;
         channels[slave] = master;
       }
     }else{
       // Try to send message
       if(channels[conn.id] != undefined){
-        sys.puts("Sending " + message + " from " + conn.id + " to " + channels[conn.id]);
+        util.puts("Sending " + message + " from " + conn.id + " to " + channels[conn.id]);
         socket.send(channels[conn.id], message);
       }
     }
@@ -75,7 +72,7 @@ socket.addListener("connection", function(conn){
 });
 
 socket.addListener("close", function(conn){
-  sys.puts("Closing: " + conn.id);
+  util.puts("Closing: " + conn.id);
   if( channels[conn.id] != undefined ){
     var partner = channels[conn.id];
     socket.send(partner, JSON.stringify({close: conn.id}));
@@ -88,4 +85,4 @@ socket.addListener("close", function(conn){
 });
 
 socket.listen(8080);
-app.listen(80);
+app.listen(3333);

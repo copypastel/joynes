@@ -1,15 +1,13 @@
 /*-----------------------------------------------
   Requirements:
 -----------------------------------------------*/
-var sys    = require("sys")
+var sys    = require("util")
   , http   = require("http")
   , events = require("events")
   , path   = require("path");
 
-require.paths.unshift(__dirname);
-
-var Manager = require("ws/manager")
-  , Connection = require("ws/connection");
+var Manager = require("./ws/manager")
+  , Connection = require("./ws/connection");
 
 
 /*-----------------------------------------------

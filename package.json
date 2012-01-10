@@ -4,6 +4,7 @@
   "main":"main",
   "dependencies":
   {
-    "express": "~2.5"
+    "express": "~2.5",
+    "ejs": "~0.6"
   }
 }
