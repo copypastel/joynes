@@ -1,0 +1,9 @@
+{
+  "name":"joynes",
+  "version":"0.0.1a",
+  "main":"main",
+  "dependencies":
+  {
+    "express": "~2.5"
+  }
+}
