@@ -1,4 +1,5 @@
 <script>
+  var emulator;
 	$(document).ready( function(){
 		masterNes = new JSNES({
 			'ui': $("#emulator").JSNESUI({
@@ -12,16 +13,19 @@
 
 		// master = new joynes.Master(masterNes);
 
-    var emulator, socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
-    socket.onmessage = function(evt) {
-      var message = JSON.parse(evt.data);
+    //var socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
+    var socket = io.connect('http://' + document.location.hostname + ':3333/');
+    socket.on("role", function(evt) {
+      console.log(evt);
+      var message = JSON.parse(evt);
       if (message.initialize) {
         switch (message.initialize) {
-          case 'm': emulator = new joynes.Master(masterNes, socket);
-          case 's': emulator = new joynes.Slave(socket);
+          case 'm': emulator = new joynes.Master(masterNes, socket); break;
+          case 's': emulator = new joynes.Slave(socket); break;
+          default: alert("something went wrong");
         }
       }
-    }
+    });
 	});
 </script>
 

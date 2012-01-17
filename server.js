@@ -3,14 +3,10 @@
 var util = require('util');
 //var connect = require('connect');
 var express = require('express');
-//  var io = require('socket.io');
-var ws = require('./ws');
 var app = express.createServer();
-var socket = ws.createServer();
+var io = require('socket.io').listen(app);
 
-// Config
-
-// App
+app.listen(3333);
 
 app.configure( function(){
   app.use(express.static(__dirname + '/public'));
@@ -35,7 +31,8 @@ var waiting = [];
  * Once we have two players, we'll automatically pair them,
  * with the older player becoming player one.
  */
-socket.addListener("connection", function(player){
+io.sockets.on("connection", function(player){
+  util.log("Someone connected.");
   waiting.push(player);
   if (waiting.length >= 2) {
     /* Pair the top two; this means our waiting queue should never
@@ -49,22 +46,24 @@ socket.addListener("connection", function(player){
 
   /* After pairing, we're just acting as a proxy for messages
    * between the two players */
-  player.addListener("message", function(message){
+  player.on("message", function(message){
+    util.log("Got message: " + message);
     if(channels[player.id] != undefined){
       util.log("Sending " + message + " from " + player.id + " to " + channels[player.id].id);
-      send(player, message);
+      partner = channels[player.id];
+      partner.send(message);
     } else {
       util.debug("Player " + player.id + " sent a message while not paired.");
     }
   });
 });
 
-socket.addListener("close", function(player){
+io.sockets.on("disconnect", function(player){
   util.log("Player "  + player.id + " has left the arcade.");
   if( channels[conn.id] != undefined ){
     var partner = channels[conn.id];
     /* Let the partner know they're now alone */
-    socket.send(partner.id, JSON.stringify({close: player.id}));
+    partner.send(JSON.stringify({close: player.id}));
     purge(player);
   }else{
     /* Player was in the waiting list; we need to purge him. */
@@ -79,8 +78,8 @@ var pair = function(player, partner) {
   util.log("Pairing players " + player.id + " & " + partner.id);
 
   /* Let the players know their roles: master/slave */
-  player.send(JSON.stringify({initialize: "m"}));
-  partner.send(JSON.stringify({initialize: "s"}));
+  player.emit("role", JSON.stringify({initialize: "m"}));
+  partner.emit("role", JSON.stringify({initialize: "s"}));
 }
 
 /* We know all pairs, so we only need one player
@@ -111,10 +110,3 @@ var purge = function(player) {
     }
   }
 }
-
-var send = function(sender, message) {
-  socket.send(channels[sender.id], message);
-}
-
-socket.listen(8080);
-app.listen(3333);

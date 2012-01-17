@@ -22,8 +22,9 @@ joynes = {
       self.sendImageData();
     });
 
-    this.socket.onmessage = function(evt){
-      var data = JSON.parse(evt.data);
+    this.socket.on("message", function(evt){
+      console.log(evt);
+      var data = JSON.parse(evt);
       var now = Date.now();
       if(data.key){ self.nes.keyboard.setKey(data.key, data.value) };
       if(data.ok){
@@ -42,24 +43,26 @@ joynes = {
       if(data.close){
         self.setFrameRate(60);
       }
-    }
+    });
   },
 
   Slave : function(socket) {
     var self = this;
+    console.log("I'm a slave! Sadness.");
 
     this.initialize();
     this.socket = socket;
-    this.socket.onopen = function(evt){
+    this.socket.on("connection", function(evt){
       //self.socket.send('s');
       self.socket.send(JSON.stringify({ok: 1}));
-    }
-    this.socket.onmessage = function(evt){
-      self.drawCanvas(evt.data);
+    });
+    this.socket.on("message", function(evt){
+      console.log("Image received!");
+      self.drawCanvas(evt);
       self.socket.send(JSON.stringify({ok: 1}));
-    };
+    });
 
-    this.canvas = $("#emulator canvas");
+    this.canvas = document.getElementsByTagName("canvas")[0];
 
     /* TODO: we should only preventDefault for non-controller keys. */
     $(document).
