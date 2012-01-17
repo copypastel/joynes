@@ -1,34 +1,36 @@
 joynes = {
   Base : {},
-  
-  Master : function(nes) {
+
+  Master : function(nes, socket) {
     var self = this;
-    
+
     this.initialize();
-    this.socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
+    this.socket = socket;
+    /*
     this.socket.onopen = function(evt){
       self.socket.send('m');
     }
+    */
 
     this.nes = nes;
     this.frameRate = null;
     this.lastSendTime = null;
     this.nes.ui.romSelect.unbind('change');
-    
+
     this.nes.ui.romSelect.bind('change', function(){
       self.loadRom(self.nes.ui.romSelect.val());
       self.sendImageData();
     });
-    
+
     this.socket.onmessage = function(evt){
       var data = JSON.parse(evt.data);
       var now = Date.now();
       if(data.key){ self.nes.keyboard.setKey(data.key, data.value) };
-      if(data.ok){ 
+      if(data.ok){
         if(!self.lastSendTime){ self.lastSendTime = Date.now() }
-        else{ 
+        else{
           var frameRate = 1/(now - self.lastSendTime) * 1000;
-          console.log(frameRate);
+          //console.log(frameRate);
           if(frameRate < 15){ frameRate = 15 }
           else if(frameRate > 60){ frameRate = 60 };
           // Set to frameRate + 1 so we can increase until reaching limit.
@@ -42,23 +44,24 @@ joynes = {
       }
     }
   },
-  
-  Slave : function() {
+
+  Slave : function(socket) {
     var self = this;
 
     this.initialize();
+    this.socket = socket;
     this.socket.onopen = function(evt){
-      self.socket.send('s');
-      self.socket.send(JSON.stringify({ok: 1})); 
+      //self.socket.send('s');
+      self.socket.send(JSON.stringify({ok: 1}));
     }
     this.socket.onmessage = function(evt){
       self.drawCanvas(evt.data);
       self.socket.send(JSON.stringify({ok: 1}));
     };
-    
 
-    this.canvas = $('<canvas class="nes-screen" width="256" height="240">').appendTo('#emulator_2')[0];
+    this.canvas = $("#emulator canvas");
 
+    /* TODO: we should only preventDefault for non-controller keys. */
     $(document).
     bind('keydown', function(evt) {
       self.sendKey(evt.keyCode, 0x41);

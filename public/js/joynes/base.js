@@ -1,7 +1,7 @@
 joynes.Base.prototype = {
   loadRom : function(url) {
     var self = this;
-    
+
     $.ajax( {
       url: escape(url),
       xhr: function() {
@@ -13,15 +13,15 @@ joynes.Base.prototype = {
       success: function(data) { self.loadRomData(data); }
     })
   },
-  
+
   loadRomData: function(data) {
     this.nes.loadRom(data);
     this.nes.start();
     this.nes.ui.enable();
   },
-  
+
   initialize : function() {
-    this.socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
+    //this.socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
   }
 };
 

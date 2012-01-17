@@ -9,7 +9,7 @@ joynes.Slave.prototype = {
     }
     img.src = data;
   },
-  sendKey: function(key, value) {
+  sendKey: function(key, value){
       switch (key) {
           case 88: this.socket.send(JSON.stringify({key: 103,  value: value})); break;
           case 90: this.socket.send(JSON.stringify({key: 105,  value: value})); break;
