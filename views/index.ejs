@@ -1,7 +1,7 @@
 <script>
   var emulator;
 	$(document).ready( function(){
-		masterNes = new JSNES({
+		emulator = new JSNES({
 			'ui': $("#emulator").JSNESUI({
 				"Nintendo": [["Contra", "/roms/Contra.nes"],
 										 ["Dr. Mario", "/roms/Dr_Mario.nes"],
@@ -20,9 +20,8 @@
       var message = JSON.parse(evt);
       if (message.initialize) {
         switch (message.initialize) {
-          case 'm': emulator = new joynes.Master(masterNes, socket); break;
-          case 's': emulator = new joynes.Slave(socket); break;
-          default: alert("something went wrong");
+          case 'm': joynesClient = new joynes.Master(emulator, socket);
+          case 's': joynesClient = new joynes.Slave(emulator, socket);
         }
       }
     });

@@ -19,9 +19,5 @@ joynes.Base.prototype = {
     this.nes.start();
     this.nes.ui.enable();
   },
-
-  initialize : function() {
-    //this.socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
-  }
 };
 

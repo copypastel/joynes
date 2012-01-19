@@ -4629,7 +4629,6 @@ JSNES.PPU = function(nes) {
     this.curNt = null;
     this.attrib = null;
     this.buffer = null;
-    this.prevBuffer = null;
     this.bgbuffer = null;
     this.pixrendered = null;
     this.spr0dummybuffer = null;
@@ -4744,7 +4743,6 @@ JSNES.PPU.prototype = {
         // Variables used when rendering:
         this.attrib = new Array(32);
         this.buffer = new Array(256*240);
-        this.prevBuffer = new Array(256*240);
         this.bgbuffer = new Array(256*240);
         this.pixrendered = new Array(256*240);
         this.spr0dummybuffer = new Array(256*240);
@@ -5141,7 +5139,7 @@ JSNES.PPU.prototype = {
         }
         
         if (this.nes.opts.showDisplay) {
-            this.nes.ui.writeFrame(buffer, this.prevBuffer);
+            this.nes.ui.writeFrame(buffer);
         }
     },
     
@@ -6657,7 +6655,8 @@ if (typeof jQuery !== 'undefined') {
             var UI = function(nes) {
                 var self = this;
                 self.nes = nes;
-        
+                self.prevBuffer = new Array(256*240);
+
                 self.root = $('<div></div>');
                 self.screen = $('<canvas class="nes-screen" width="256" height="240"></canvas>').appendTo(self.root);
                 
@@ -6848,8 +6847,9 @@ if (typeof jQuery !== 'undefined') {
                     return this.dynamicaudio.writeInt(samples);
                 },
             
-                writeFrame: function(buffer, prevBuffer) {
+                writeFrame: function(buffer) {
                     var imageData = this.canvasImageData.data;
+                    var prevBuffer = this.prevBuffer;
                     var pixel, i, j;
 
                     for (i=0; i<256*240; i++) {

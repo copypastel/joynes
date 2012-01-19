@@ -1,13 +1,28 @@
 joynes.Slave.prototype = {
-  drawCanvas: function(data){
-    var canvas = this.canvas;
-    var img = new Image();
-    img.onload = function(){
-      canvas.width = img.width;
-      canvas.height = img.height;
-      canvas.getContext("2d").drawImage(img, 0, 0);
+  initialize: function(nes, socket) {
+    var self = this;
+    this.nes = nes;
+    this.socket = socket;
+    this.socket.on("connection", function(evt){
+      self.socket.send(JSON.stringify({ok: 1}));
     }
-    img.src = data;
+    this.socket.on("message", function(evt){
+      self.nes.ui.writeFrame(evt.data)
+      self.socket.send(JSON.stringify({ok: 1}));
+    };
+
+    /* TODO: we should only preventDefault for non-controller keys. */
+    $(document).
+    bind('keydown', function(evt) {
+      self.sendKey(evt.keyCode, 0x41);
+    }).
+    bind('keyup', function(evt) {
+      self.sendKey(evt.keyCode, 0x40);
+    }).
+    bind('keypress', function(evt) {
+        evt.preventDefault()
+    });
+
   },
   sendKey: function(key, value){
       switch (key) {
