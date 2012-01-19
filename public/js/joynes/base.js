@@ -1,4 +1,10 @@
 joynes.Base.prototype = {
+  
+  partner : function(command, data) {
+    var self = this;
+    self.socket.emit("proxy", {"command": command, "data": data })
+  },
+  
   loadRom : function(url) {
     var self = this;
 
@@ -16,7 +22,7 @@ joynes.Base.prototype = {
 
   loadRomData: function(data) {
     this.nes.loadRom(data);
-    this.nes.start();
+    if(this.startRom) { this.nes.start() }
     this.nes.ui.enable();
   },
 };

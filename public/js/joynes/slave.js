@@ -1,15 +1,30 @@
 joynes.Slave.prototype = {
   initialize: function(nes, socket) {
     var self = this;
-    this.nes = nes;
-    this.socket = socket;
-    this.socket.on("connection", function(evt){
+    
+    self.nes = nes;
+    self.socket = socket;
+    self.current_instruction = 0;
+    self.startRom = false;
+    
+    self.socket.on("connection", function(evt){
       self.socket.send(JSON.stringify({ok: 1}));
     });
-
-    this.socket.on("message", function(evt){
-      self.nes.ui.writeFrame(JSON.parse(evt));
-      self.socket.send(JSON.stringify({ok: 1}));
+    
+    self.socket.on("Rom:Changed", function(rom_location) {
+      console.log("WOOOO");
+      self.loadRom(rom_location);
+      self.partner("PPU:Read")
+    });
+    
+    self.socket.on("PPU:Write", function(data) {
+      self.nes.ppu.buffer = data['ppu'];
+      self.current_instruction = data['instruction'];
+    });
+    
+    self.socket.on("PPU:Instruction", function(data) {
+      console.log("received instruction " + data['instruction_id'] + ":" + data['instruction_enum'])
+      self.nes.ppu.startVBlank();
     });
 
     /* TODO: we should only preventDefault for non-controller keys. */

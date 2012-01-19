@@ -2249,42 +2249,50 @@ JSNES.Mappers[0].prototype = {
                 // PPU Control register 1
                 this.nes.cpu.mem[address] = value;
                 this.nes.ppu.updateControlReg1(value);
+                console.log('updateControlReg1')
                 break;
             
             case 0x2001:
                 // PPU Control register 2
                 this.nes.cpu.mem[address] = value;
                 this.nes.ppu.updateControlReg2(value);
+                console.log('updateControlReg2')
                 break;
             
             case 0x2003:
                 // Set Sprite RAM address:
                 this.nes.ppu.writeSRAMAddress(value);
+                console.log('writeSRAMaddress')
                 break;
             
             case 0x2004:
                 // Write to Sprite RAM:
                 this.nes.ppu.sramWrite(value);
+                console.log('sramWrite')
                 break;
             
             case 0x2005:
                 // Screen Scroll offsets:
                 this.nes.ppu.scrollWrite(value);
+                console.log('scrollWrite')
                 break;
             
             case 0x2006:
                 // Set VRAM address:
                 this.nes.ppu.writeVRAMAddress(value);
+                console.log('writeVRAMAddress')
                 break;
             
             case 0x2007:
                 // Write to VRAM:
                 this.nes.ppu.vramWrite(value);
+                console.log('vramWrite')
                 break;
             
             case 0x4014:
                 // Sprite Memory DMA Access
                 this.nes.ppu.sramDMA(value);
+                console.log('sramDMA')
                 break;
             
             case 0x4015:

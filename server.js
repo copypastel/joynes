@@ -50,10 +50,17 @@ io.sockets.on("connection", function(player){
     util.log("Got message: " + message);
     if(channels[player.id] != undefined){
       util.log("Sending " + message + " from " + player.id + " to " + channels[player.id].id);
-      partner = channels[player.id];
+      var partner = channels[player.id];
       partner.send(message);
     } else {
       util.debug("Player " + player.id + " sent a message while not paired.");
+    }
+  });
+  
+  player.on("proxy", function(data){
+    if(channels[player.id] != undefined){
+      var partner = channels[player.id];      
+      partner.emit(data['command'], data['data']);
     }
   });
 });
