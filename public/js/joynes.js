@@ -6,8 +6,8 @@ joynes = {
     return this;
   },
 
-  Slave : function(socket) {
-    this.initialize(socket);
+  Slave : function(nes, socket) {
+    this.initialize(nes, socket);
     return this;
   }
 };

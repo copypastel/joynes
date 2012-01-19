@@ -9,6 +9,7 @@ joynes.Master.prototype = {
     this.nes.ui.romSelect.unbind('change');
     this.nes.ui.romSelect.bind('change', function(){
       self.loadRom(self.nes.ui.romSelect.val());
+      self.socket.send(JSON.stringify(self.nes.ui.prevBuffer));
     });
 
     this.socket.on("message", function(evt){
@@ -17,16 +18,17 @@ joynes.Master.prototype = {
       if(data.key)   { self.nes.keyboard.setKey(data.key, data.value) }
       if(data.ok)    {
         self.calculateFrameRate();
-        self.socket.send(self.nes.ui.prevBuffer);
+        self.socket.send(JSON.stringify(self.nes.ui.prevBuffer));
       }
 
-    }
+    });
   },
   setFrameRate: function(rate){
     this.nes.setFramerate(rate);
   },
   calculateFrameRate: function() {
     var now = Date.now();
+    var self = this;
     if(!self.lastSendTime) { self.lastSendTime = now; }
     else {
       var frameRate = 1/(now - self.lastSendTime) * 1000;

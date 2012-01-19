@@ -5,11 +5,12 @@ joynes.Slave.prototype = {
     this.socket = socket;
     this.socket.on("connection", function(evt){
       self.socket.send(JSON.stringify({ok: 1}));
-    }
+    });
+
     this.socket.on("message", function(evt){
-      self.nes.ui.writeFrame(evt.data)
+      self.nes.ui.writeFrame(JSON.parse(evt));
       self.socket.send(JSON.stringify({ok: 1}));
-    };
+    });
 
     /* TODO: we should only preventDefault for non-controller keys. */
     $(document).

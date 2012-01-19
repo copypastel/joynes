@@ -20,8 +20,9 @@
       var message = JSON.parse(evt);
       if (message.initialize) {
         switch (message.initialize) {
-          case 'm': joynesClient = new joynes.Master(emulator, socket);
-          case 's': joynesClient = new joynes.Slave(emulator, socket);
+          case 'm': joynesClient = new joynes.Master(emulator, socket); break;
+          case 's': joynesClient = new joynes.Slave(emulator, socket); break;
+		  default: alert("something's wrong");
         }
       }
     });
