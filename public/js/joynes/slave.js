@@ -12,19 +12,31 @@ joynes.Slave.prototype = {
     });
     
     self.socket.on("Rom:Changed", function(rom_location) {
-      console.log("WOOOO");
       self.loadRom(rom_location);
-      self.partner("PPU:Read")
+      //self.partner("PPU:Sync")
     });
     
-    self.socket.on("PPU:Write", function(data) {
+    self.socket.on("PPU:Initialize", function(data) {
+      self.nes.ppu.updateControlReg1(data['controlReg1Value']);
+      self.nes.ppu.updateControlReg2(data['controlReg2Value']);
       self.nes.ppu.buffer = data['ppu'];
+      self.nes.ppu.cntV = data['cntV'];
+      self.nes.ppu.cntH = data['cntH'];
+      
+      self.nes.ppu.startVBlank();
+
       self.current_instruction = data['instruction'];
+      console.log("Waiting for instruction " + self.current_instruction)
     });
     
-    self.socket.on("PPU:Instruction", function(data) {
-      console.log("received instruction " + data['instruction_id'] + ":" + data['instruction_enum'])
-      self.nes.ppu.startVBlank();
+    self.socket.on("PPU:Frame", function(data) {
+      console.log("Received instruction" + data['instruction'])
+      if(self.current_instruction == data['instruction'] ) {
+        console.log("Parsing the data");
+        self.renderFrame(data['frame_instructions']);
+        self.nes.ppu.startVBlank();
+      }
+      self.current_instruction += 1;
     });
 
     /* TODO: we should only preventDefault for non-controller keys. */
@@ -53,6 +65,53 @@ joynes.Slave.prototype = {
           default: return true;
       }
       return false; // preventDefault
+  },
+  
+  renderFrame: function(instructions) {
+    var self = this;
+    for(i in instructions) {
+      instruction = instructions[i]
+      switch (instruction['enum']) {
+        case 'sramDMA': 
+          self.sramDMA(instruction['value'], instruction['data']);
+        break;
+        case 'scrollWrite':
+          self.scrollWrite(instruction['value']);
+        break;
+        case 'writeSRAMAddress':
+          self.writeSRAMAddress(instruction['value']);
+        break;
+        case 'endScanline':
+          self.endScanline();
+        break;
+      }
+    }
+  },
+  
+  scrollWrite: function(value) {
+    this.nes.ppu.scrollWrite(value);
+  },
+  
+  writeSRAMAddress: function(value) {
+    this.nes.ppu.writeSRAMAddress(value);
+  },
+  
+  endScanline: function() {
+    this.nes.ppu.endScanline();
+  },
+  
+  // CPU Register $4014:
+  // Write 256 bytes of main memory
+  // into Sprite RAM.
+  sramDMA: function(value, datum) {
+    var self = this, 
+        data;
+    
+    for (var i=self.nes.ppu.sramAddress; i < 256; i++) {
+        data = datum[i];
+        self.nes.ppu.spriteMem[i] = data;
+        self.nes.ppu.spriteRamWriteUpdate(i, data);
+    }
   }
 }
 
