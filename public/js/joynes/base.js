@@ -5,7 +5,7 @@ joynes.Base.prototype = {
     self.socket.emit("proxy", {"command": command, "data": data })
   },
   
-  loadRom : function(url) {
+  loadRom : function(url, callback) {
     var self = this;
 
     $.ajax( {
@@ -16,7 +16,7 @@ joynes.Base.prototype = {
         xhr.overrideMimeType('text/plain; charset=x-user-defined');
         return xhr;
       },
-      success: function(data) { self.loadRomData(data); }
+      success: function(data) { self.loadRomData(data); if(callback) { callback() }  }
     })
   },
 
