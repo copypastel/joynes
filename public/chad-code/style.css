@@ -1,0 +1,83 @@
+div#wrapper-main {
+
+}
+
+div#continer-main {
+	
+}
+
+div#container-tv {
+	width: 960px;
+}
+
+div#tv {
+	margin: auto;
+	width: 200px;
+
+}
+
+div#tv p {
+	background: url(images/tv.png) no-repeat;
+	text-indent: -9999px;
+	height: 120px;
+	width: 105px;
+}
+
+div#container-nes {
+	width: inherit;
+}
+
+div#nes {
+	width: 100px;
+	margin: 0 auto;
+
+}
+
+div#nes p {
+	background: url(images/nes.png) no-repeat;
+	text-indent: -9999px;
+	height: 40px;
+	width: 55px;
+	margin: -20px 0 0 200px;
+}
+
+div#container-games {
+	
+}
+
+ul {
+	list-style-type: none;
+	float: left;
+}
+
+li#game1 {
+	background: url(images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: 0 0 0 500px;
+}
+
+li#game2 {
+	background: url(images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: -10px 0 0 445px;
+}
+
+li#game3 {
+	background: url(images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: 0 0 0 395px;
+}
+
+li#game4 {
+	background: url(images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: -50px 0 0 410px;
+}
