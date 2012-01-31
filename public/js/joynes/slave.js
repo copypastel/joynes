@@ -18,8 +18,6 @@ joynes.Slave.prototype = {
     });
     
     self.socket.on("PPU:Initialize", function(data) {      
-      
-      console.log(data);
       self.nes.ppu.vramMem = data["vramMem"];
       self.nes.ppu.spriteMem = data["spriteMem"];
       self.nes.ppu.vramAddress = data["vramAddress"];
@@ -154,6 +152,12 @@ joynes.Slave.prototype = {
         case 'endScanline':
           self.endScanline();
         break;
+        case 'loadVromBank':
+          self.loadVromBank(instruction['bank'], instruction['address']);
+        break;
+        case 'setSprite0HitFlag':
+          self.setSprite0HitFlag();
+        break;
       }
     }
   },
@@ -170,6 +174,10 @@ joynes.Slave.prototype = {
     this.nes.ppu.endScanline();
   },
   
+  loadVromBank: function(bank, address) {
+    this.nes.mmap.loadVromBank(bank, address)
+  },
+  
   // CPU Register $4014:
   // Write 256 bytes of main memory
   // into Sprite RAM.
@@ -182,6 +190,10 @@ joynes.Slave.prototype = {
         self.nes.ppu.spriteMem[i] = data;
         self.nes.ppu.spriteRamWriteUpdate(i, data);
     }
+  },
+  
+  setSprite0HitFlag: function() {
+    this.nes.ppu.setSprite0HitFlag();
   }
 }
 

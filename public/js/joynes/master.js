@@ -15,7 +15,7 @@ joynes.Master.prototype = {
 
     this.nes.ui.romSelect.unbind('change');
     this.nes.ui.romSelect.bind('change', function(){
-      self.loadRom(self.nes.ui.romSelect.val());
+      self.loadRom(self.nes.ui.romSelect.val(), function() { self.romInitialized() });
       self.partner("Rom:Changed", self.nes.ui.romSelect.val());
     });
     
@@ -28,7 +28,7 @@ joynes.Master.prototype = {
       if(data.close) { self.setFrameRate(60); return }
       if(data.key)   { self.nes.keyboard.setKey(data.key, data.value) }
     });
-        
+    
     self.ppuEndFrame = self.nes.ppu.endFrame;
     self.nes.ppu.endFrame = function() { self.endFrame() };
     
@@ -42,7 +42,17 @@ joynes.Master.prototype = {
     self.nes.ppu.sramDMA = function(value) { self.sramDMA(value) };
     
     self.ppuEndScanline = self.nes.ppu.endScanline;
-    self.nes.ppu.endScanline = function(value){ self.endScanline() };
+    self.nes.ppu.endScanline = function() { self.endScanline() };
+    
+    
+    self.ppuSetSprite0HitFlag = self.nes.ppu.setSprite0HitFlag;
+    self.nes.ppu.setSprite0HitFlag = function() { self.setSprite0HitFlag() };
+  },
+  
+  romInitialized: function() {
+    var self = this;    
+    self.mmapLoadVromBank = self.nes.mmap.loadVromBank;
+    self.nes.mmap.loadVromBank = function(bank, address) { self.loadVromBank(bank, address) }
   },
   
   endFrame: function() {
@@ -135,11 +145,6 @@ joynes.Master.prototype = {
       self.partner("PPU:Frame", {"instruction": self.instruction_id, "frame_instructions": self.frame_instructions})
     }
     else {
-      if(self.debug) {
-        console.log(self.frame_instructions);
-        console.log("Would have sent... " + self.frame_instructions.length);
-        console.log(self.frame_instructions);
-      }
     }
     
     this.frame_instructions = [];
@@ -189,6 +194,20 @@ joynes.Master.prototype = {
     var instruction = { "enum": "endScanline" };
     this.frame_instructions.push(instruction);    
   },
+  
+  loadVromBank: function(bank, address) {
+    var self = this;
+    this.mmapLoadVromBank.call(this.nes.ppu, bank, address);
+    var instruction = { "enum": "loadVromBank", "bank": bank, "address": address };
+    this.frame_instructions.push(instruction);    
+  },
+  
+  setSprite0HitFlag: function() {
+    this.ppuSetSprite0HitFlag.call(this.nes.ppu);
+    var instruction = { "enum": "setSprite0HitFlag" };
+    this.frame_instructions.push(instruction);
+  },
+  
 
   setFrameRate: function(rate){
     this.nes.setFramerate(rate);
