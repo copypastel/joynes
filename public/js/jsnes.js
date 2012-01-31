@@ -149,7 +149,7 @@ JSNES.prototype = {
                         ppu.f_spVisibility === 1 &&
                         ppu.scanline - 21 === ppu.spr0HitY) {
                     // Set sprite 0 hit flag:
-                    ppu.setStatusFlag(ppu.STATUS_SPRITE0HIT, true);
+                    ppu.setSprite0HitFlag();
                 }
 
                 if (ppu.requestEndFrame) {
@@ -2469,6 +2469,7 @@ JSNES.Mappers[0].prototype = {
     },
 
     loadVromBank: function(bank, address) {
+      if(this.nes.ppu.debug) { console.log("loadVromBank"); }
         if (this.nes.rom.vromCount === 0) {
             return;
         }
@@ -2487,6 +2488,7 @@ JSNES.Mappers[0].prototype = {
     },
 
     load8kVromBank: function(bank4kStart, address) {
+      if(this.nes.ppu.debug) { console.log("load8kVromBank"); }
         if (this.nes.rom.vromCount === 0) {
             return;
         }
@@ -2498,6 +2500,8 @@ JSNES.Mappers[0].prototype = {
     },
 
     load1kVromBank: function(bank1k, address) {
+      if(this.nes.ppu.debug) { console.log("load1kVromBank"); }
+      
         if (this.nes.rom.vromCount === 0) {
             return;
         }
@@ -2517,6 +2521,8 @@ JSNES.Mappers[0].prototype = {
     },
 
     load2kVromBank: function(bank2k, address) {
+      if(this.nes.ppu.debug) { console.log("load2kVromBank"); }
+      
         if (this.nes.rom.vromCount === 0) {
             return;
         }
@@ -5010,6 +5016,11 @@ JSNES.PPU.prototype = {
                             this.renderBgScanline(true,this.scanline+1-21);
                         }
                         this.scanlineAlreadyRendered=false;
+                        
+                        if(this.debug) {
+                          console.log(this.hitSpr0)
+                          console.log(this.f_spVisibility)
+                        }
 
                         // Check for sprite 0 (next scanline):
                         if (!this.hitSpr0 && this.f_spVisibility == 1) {
@@ -5038,6 +5049,10 @@ JSNES.PPU.prototype = {
         this.regsToAddress();
         this.cntsToAddress();
         
+    },
+    
+    setSprite0HitFlag: function() {
+      this.setStatusFlag(this.STATUS_SPRITE0HIT, true);
     },
     
     startFrame: function(){    
@@ -5604,10 +5619,7 @@ JSNES.PPU.prototype = {
         this.cntHT = this.regHT;
         this.cntH = this.regH;
         this.curNt = this.ntable1[this.cntV+this.cntV+this.cntH];
-        if(this.debug) {
-          console.log(this.ntable1);
-        }
-        
+
         if (scan<240 && (scan-this.cntFV)>=0){
             
             var tscanoffset = this.cntFV<<3;
@@ -5633,13 +5645,6 @@ JSNES.PPU.prototype = {
                         att = attrib[tile];
                     }else {
                         // Fetch data:
-                      if(this.debug) {
-                        console.log(baseTile)
-                        console.log(nameTable[this.curNt])
-                        console.log(this.cntHT)
-                        console.log(this.cntVT)
-                        console.log(nameTable[this.curNt].getTileIndex(this.cntHT,this.cntVT));
-                      }
                         t = ptTile[baseTile+nameTable[this.curNt].getTileIndex(this.cntHT,this.cntVT)];
                         tpix = t.pix;
                         att = nameTable[this.curNt].getAttrib(this.cntHT,this.cntVT);
