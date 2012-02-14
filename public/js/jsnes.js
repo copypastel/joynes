@@ -5016,11 +5016,6 @@ JSNES.PPU.prototype = {
                             this.renderBgScanline(true,this.scanline+1-21);
                         }
                         this.scanlineAlreadyRendered=false;
-                        
-                        if(this.debug) {
-                          console.log(this.hitSpr0)
-                          console.log(this.f_spVisibility)
-                        }
 
                         // Check for sprite 0 (next scanline):
                         if (!this.hitSpr0 && this.f_spVisibility == 1) {
@@ -5847,6 +5842,7 @@ JSNES.PPU.prototype = {
                 // Sprite is in range.
                 // Draw scanline:
                 t = this.ptTile[this.sprTile[0] + tIndexAdd];
+
                 col = this.sprCol[0];
                 bgPri = this.bgPriority[0];
                 
@@ -5857,9 +5853,11 @@ JSNES.PPU.prototype = {
                     toffset = scan - y;
                 }
                 toffset *= 8;
-                
                 bufferIndex = scan * 256 + x;
+                if(this.debug) { console.log(bufferIndex)}
+
                 if (this.horiFlip[0]) {
+                  
                     for (i = 7; i >= 0; i--) {
                         if (x >= 0 && x < 256) {
                             if (bufferIndex>=0 && bufferIndex<61440 && 
@@ -5876,10 +5874,15 @@ JSNES.PPU.prototype = {
                     }
                 }
                 else {
+                  if(this.debug) { console.log(x); console.log(bufferIndex)}
                     for (i = 0; i < 8; i++) {
                         if (x >= 0 && x < 256) {
+                          
+                           if(this.debug) { console.log(this.pixrendered[bufferIndex]) }
                             if (bufferIndex >= 0 && bufferIndex < 61440 && 
                                     this.pixrendered[bufferIndex] !==0 ) {
+                                
+                                      
                                 if (t.pix[toffset+i] !== 0) {
                                     this.spr0HitX = bufferIndex % 256;
                                     this.spr0HitY = scan;
@@ -5898,6 +5901,7 @@ JSNES.PPU.prototype = {
         
             // Check range:
             if (y <= scan && y + 16 > scan && x >= -7 && x < 256) {
+              
                 // Sprite is in range.
                 // Draw scanline:
                 
@@ -5926,6 +5930,7 @@ JSNES.PPU.prototype = {
                 
                 bufferIndex = scan*256+x;
                 if (this.horiFlip[0]) {
+                  
                     for (i=7;i>=0;i--) {
                         if (x>=0 && x<256) {
                             if (bufferIndex>=0 && bufferIndex<61440 && this.pixrendered[bufferIndex]!==0) {
@@ -6400,6 +6405,8 @@ JSNES.PPU.Tile.prototype = {
                             //if(this.debug) { console.log("Rendering upright tile to buffer") }
                             buffer[this.fbIndex] = palette[this.palIndex+palAdd];
                             this.tpri = (this.tpri&0xF00)|pri;
+                            /// DEBUGGING the pixrendered
+                            console.log("DEBUG HERE!!!")
                             priTable[this.fbIndex] =this.tpri;
                         }
                     }
