@@ -104,3 +104,30 @@ div#floor p {
 
 }
 
+li.game {
+	cursor: pointer;
+}
+
+li#game1:hover {
+	background: url(images/contra.png);
+	width: 347px;
+	height: 392px;
+}
+
+li#game2:hover {
+	background: url(images/bb.png);
+	width: 347px;
+	height: 392px;
+}
+
+li#game3:hover {
+	background: url(images/bb2.png);
+	width: 347px;
+	height: 392px;
+}
+
+li#game4:hover {
+	background: url(images/drmario.png);
+	width: 347px;
+	height: 392px;
+}
