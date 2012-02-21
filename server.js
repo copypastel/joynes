@@ -12,16 +12,8 @@ app.configure( function(){
   app.use(express.static(__dirname + '/public'));
 });
 
-app.get('/', function(req, res){
+app.get('/:id?', function(req, res){
   res.render('index.ejs');
-});
-
-app.get('/master', function(req, res){
-  res.render('master.ejs');
-});
-
-app.get('/slave', function(req, res){
-  res.render('slave.ejs');
 });
 
 var channels = {};
@@ -32,16 +24,27 @@ var waiting = [];
  * with the older player becoming player one.
  */
 io.sockets.on("connection", function(player){
-  util.log("Someone connected.");
-  waiting.push(player);
-  if (waiting.length >= 2) {
-    /* Pair the top two; this means our waiting queue should never
-     * grow larger than 2
-     */
-    pair(waiting.shift(), waiting.shift());
-  } else {
-    util.log("Player " + player.id + " is waiting for a partner.");
-    false;
+  util.log(player.id + " connected.");
+
+  player.on("pair", function(partnerId) {
+    util.log(player.id + " wants to pair!");
+    var partner = getPlayer(partnerId);
+    if (partner != undefined) {
+      util.log("Attempting to pair " + player.id + " to " + partner.id);
+      pair(player, partner);
+    } else {
+      waiting.push(player);
+      if (waiting.length >= 2) {
+        /* Pair the top two; this means our waiting queue should never
+         * grow larger than 2
+         */
+        pair(waiting.shift(), waiting.shift());
+      }
+    }
+  }
+
+  player.on("unpair", function() {
+    purge(player.id);
   }
 
   /* After pairing, we're just acting as a proxy for messages
@@ -67,6 +70,7 @@ io.sockets.on("disconnect", function(player){
     purge(player);
   }else{
     /* Player was in the waiting list; we need to purge him. */
+    purge(player);
   }
 });
 
