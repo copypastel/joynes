@@ -1,3 +1,6 @@
+body {
+}
+
 div#wrapper-main {
 	float: left;
 }
@@ -17,7 +20,7 @@ div#tv {
 }
 
 div#tv p {
-	background: url(images/tv.png) no-repeat;
+	background: url(/images/tv.png) no-repeat;
 	text-indent: -9999px;
 	height: 120px;
 	width: 105px;
@@ -35,7 +38,7 @@ div#nes {
 }
 
 div#nes p {
-	background: url(images/nes.png) no-repeat;
+	background: url(/images/nes.png) no-repeat;
 	text-indent: -9999px;
 	height: 40px;
 	width: 55px;
@@ -54,7 +57,7 @@ ul {
 
 .game {
   cursor: pointer;
-	background: url(images/game.png) no-repeat;
+	background: url(/images/game.png) no-repeat;
 	text-indent: -9999px;
   height: 18px;
 	width: 28px;
@@ -63,7 +66,7 @@ ul {
 }
 
 li#game2 {
-	background: url(images/game.png) no-repeat;
+	background: url(/images/game.png) no-repeat;
 	text-indent: -9999px;
 	height: 18px;
 	width: 28px;
@@ -72,7 +75,7 @@ li#game2 {
 }
 
 li#game3 {
-	background: url(images/game.png) no-repeat;
+	background: url(/images/game.png) no-repeat;
 	text-indent: -9999px;
 	height: 18px;
 	width: 28px;
@@ -81,7 +84,7 @@ li#game3 {
 }
 
 li#game4 {
-	background: url(images/game.png) no-repeat;
+	background: url(/images/game.png) no-repeat;
 	text-indent: -9999px;
 	height: 18px;
 	width: 28px;
@@ -94,7 +97,7 @@ div#container-floor {
 }
 
 div#floor {
-	background: url(images/floor.png) no-repeat;
+	background: url(/images/floor.png) no-repeat;
 	height: 383px;
 	width: 763px;
 }
@@ -109,25 +112,45 @@ li.game {
 }
 
 li#game1:hover {
-	background: url(images/contra.png);
+	background: url(/images/contra.png);
 	width: 347px;
 	height: 392px;
 }
 
 li#game2:hover {
-	background: url(images/bb.png);
+	background: url(/images/bb.png);
 	width: 347px;
 	height: 392px;
 }
 
 li#game3:hover {
-	background: url(images/bb2.png);
+	background: url(/images/bb2.png);
 	width: 347px;
 	height: 392px;
 }
 
 li#game4:hover {
-	background: url(images/drmario.png);
+	background: url(/images/drmario.png);
 	width: 347px;
 	height: 392px;
+}
+
+.nes-roms, .nes-controls, .nes-status {
+  display: none;
+}
+
+.nes-screen {
+  position: relative;
+  top: -1105px;
+  left: 165px;
+}
+
+#emulator {
+  -webkit-transform: scale(0.16, 0.185) skewY(24deg);
+  -webkit-transition: all 0.5s ease-in;
+}
+
+#emulator.full-screen {
+  margin: 0;
+  -webkit-transform: scale(2.0) skewY(0deg) rotateX(360deg);
 }
