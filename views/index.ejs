@@ -1,5 +1,6 @@
 <script>
   var emulator;
+  var socket;
 	$(document).ready( function(){
 		emulator = new JSNES({
 			'ui': $("#emulator").JSNESUI({
@@ -14,7 +15,7 @@
 		// master = new joynes.Master(masterNes);
 
     //var socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
-    var socket = io.connect('http://' + document.location.hostname + ':3333/');
+    socket = io.connect('http://' + document.location.hostname + ':3333/');
     socket.on("role", function(evt) {
       console.log(evt);
       var message = JSON.parse(evt);
@@ -26,9 +27,23 @@
         }
       }
     });
-	});
+
+    // partnerId is a URL parameter
+    var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
+    if(partnerIdPresent) {
+      var partnerId = partnerIdPresent[1];
+      pair(partnerId);
+    }
+  });
+
+  var pair = function(partnerId) {
+    socket.emit("pair", partnerId);
+  };
 
   document.onready = function() {
+    document.getElementById("nes").onclick = function() {
+      pair();
+    };
     var games = document.getElementsByClassName("game");
     for(var i = 0; i < games.length; i++) {
       games.item(i).onclick = function(event) {
