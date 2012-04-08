@@ -101,6 +101,7 @@ joynes.Slave.prototype = {
     
     self.socket.on("PPU:Frame", function(data) {
       if(self.current_instruction == data['instruction'] ) {
+        self.nes.ppu.startFrame();
         self.renderFrame(data['frame_instructions']);
         self.nes.ppu.startVBlank();
       }
