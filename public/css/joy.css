@@ -1,108 +1,75 @@
-@font-face { font-family: Pretendo; src: url('Pretendo.ttf'); } 
+div#wrapper-main {
 
-body{
-  min-width: 800px;
-  color: #111;
-  font-family: Arial, Helvetica, sans-serif;
 }
 
-a{
-  color: #FF4F4F;
+div#continer-main {
+
 }
 
-a:visited{
-  color: #37A3C4;
+div#container-tv {
+	width: 960px;
 }
 
-#disclaimer{
-  margin: 0 auto;
-  font-size: 12px;
-  position: relative;
-  bottom: 0;
-  bottom: 0;
-  color: #777;
+div#tv {
+	margin: auto;
+	width: 200px;
+
 }
 
-#cpl{
-  width: 71px;
-  height: 59px;
-  background: url(/img/cpl.png);
-  position: fixed;
-  top: 20px;
-  left: 100px;
+div#tv p {
+	background: url(/img/tv.png) no-repeat;
+	text-indent: -9999px;
+	height: 120px;
+	width: 105px;
 }
 
-#emulator{
-  width: 256px;
-  height: 240px;
-  position: relative;
-  top: 27px;
-  left: 87px;
+div#container-nes {
+	width: inherit;
 }
 
-#brief{
-  position: absolute;
-  left: 740px;
-  font-family: Arial, Helvetica, sans-serif;
-  background: whitesmoke;
-  padding: 10px;
-  padding-top: 20px;
-  top: 0;
+div#nes {
+	width: 100px;
+	margin: 0 auto;
+
 }
 
-#safari{
-  width: 75px;
-  height: 85px;
-  background: url(/img/safari-logo.png);
+div#nes p {
+	background: url(/img/nes.png) no-repeat;
+	text-indent: -9999px;
+	height: 40px;
+	width: 55px;
+	margin: -20px 0 0 200px;
 }
 
-#chrome{
-  width: 75px;
-  height: 75px;
-  background: url(/img/google-chrome-logo.jpg);
+div#container-games {
+
 }
 
-#logo{
-  font-family: Pretendo, sans-serif;
-  font-size: 50px;
-  color: orange;
-  text-align: center;
+ul {
+	list-style-type: none;
+	float: left;
 }
 
-#tv{
-  width: 500px;
-  height: 332px;
-  background: url(/img/tv.jpg);
-  position: fixed;
-  top: 20px;
-  left: 200px;
+.game {
+  cursor: pointer;
+	background: url(/img/game.png) no-repeat;
+	text-indent: -9999px;
+  height: 18px;
+	width: 28px;
+	margin: 0 0 0 500px;
 }
 
-#emulators{
-  margin: 0 auto;
-  width: 650px;
-}
-
-.emulator{
-  display: inline;
-  margin: 10px;
-  padding: 10px;
-}
-
-#sponsors{
-  width: 150px;
-  height: 70px;
-  background: whitesmoke url(/img/logo_joyent.png);
-  position: fixed;
-  bottom: 0;
-}
-
-#console{
-  margin: 0 auto;
-  width: 40%;
-  height: 200px;
-  border: 1px solid #111;
-  overflow: auto;
-  font-family: monospace;
+.nes-roms, .nes-controls, .nes-status {
   display: none;
+}
+
+#emulator {
+  -webkit-transform: scale(0.16, 0.185) skewY(24deg);
+  -webkit-transition: all 0.5s ease-in;
+  margin: 0 auto;
+}
+
+#emulator.full-screen {
+  margin: 0;
+  -webkit-transform: scale(2.0) skewY(0deg) rotateX(360deg);
 }

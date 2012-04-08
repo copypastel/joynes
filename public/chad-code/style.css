@@ -13,7 +13,6 @@ div#wrapper-main {
 
 div#container-main {
 	/*background: url(images/bg.png) no-repeat;*/
-
 }
 
 div#container-title {
@@ -124,10 +123,11 @@ ul {
 	/*float: left;*/
 }
 
-li#game1 {
+.game {
+  cursor: pointer;
 	background: url(images/game.png) no-repeat;
 	text-indent: -9999px;
-	height: 18px;
+  height: 18px;
 	width: 28px;
 	margin: 0 0 0 700px;
 	/*float: left;*/

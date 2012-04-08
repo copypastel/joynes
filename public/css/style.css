@@ -1,0 +1,156 @@
+body {
+}
+
+div#wrapper-main {
+	float: left;
+}
+
+div#continer-main {
+}
+
+div#container-tv {
+	width: 960px;
+}
+
+div#tv {
+	margin: auto;
+	width: 100%;
+	float: left;
+
+}
+
+div#tv p {
+	background: url(/images/tv.png) no-repeat;
+	text-indent: -9999px;
+	height: 120px;
+	width: 105px;
+	margin: 50px 0 0 550px;
+}
+
+div#container-nes {
+	width: inherit;
+}
+
+div#nes {
+	width: 100px;
+	margin: 0 auto;
+
+}
+
+div#nes p {
+	background: url(/images/nes.png) no-repeat;
+	text-indent: -9999px;
+	height: 40px;
+	width: 55px;
+	margin: 0px 0 0 140px;
+	float: left;
+}
+
+div#container-games {
+
+}
+
+ul {
+	list-style-type: none;
+	float: left;
+}
+
+.game {
+  cursor: pointer;
+	background: url(/images/game.png) no-repeat;
+	text-indent: -9999px;
+  height: 18px;
+	width: 28px;
+	margin: 0 0 0 600px;
+	/*float: left;*/
+}
+
+li#game2 {
+	background: url(/images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: -10px 0 0 545px;
+	/*float: left;*/
+}
+
+li#game3 {
+	background: url(/images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: 0 0 0 495px;
+	/*float: left;*/
+}
+
+li#game4 {
+	background: url(/images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: -50px 0 0 510px;
+	/*float: left;*/
+}
+
+div#container-floor {
+	margin: 0 200px 0 200px;
+}
+
+div#floor {
+	background: url(/images/floor.png) no-repeat;
+	height: 383px;
+	width: 763px;
+}
+
+div#floor p {
+	text-indent: -9999px;
+
+}
+
+li.game {
+	cursor: pointer;
+}
+
+li#game1:hover {
+	background: url(/images/contra.png);
+	width: 347px;
+	height: 392px;
+}
+
+li#game2:hover {
+	background: url(/images/bb.png);
+	width: 347px;
+	height: 392px;
+}
+
+li#game3:hover {
+	background: url(/images/bb2.png);
+	width: 347px;
+	height: 392px;
+}
+
+li#game4:hover {
+	background: url(/images/drmario.png);
+	width: 347px;
+	height: 392px;
+}
+
+.nes-roms, .nes-controls, .nes-status {
+  display: none;
+}
+
+.nes-screen {
+  position: relative;
+  top: -1105px;
+  left: 165px;
+}
+
+#emulator {
+  -webkit-transform: scale(0.16, 0.185) skewY(24deg);
+  -webkit-transition: all 0.5s ease-in;
+}
+
+#emulator.full-screen {
+  margin: 0;
+  -webkit-transform: scale(2.0) skewY(0deg) rotateX(360deg);
+}
