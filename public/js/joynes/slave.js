@@ -81,8 +81,14 @@ joynes.Slave.prototype = {
       self.nes.ppu.hitSpr0 = data["hitSpr0"];
       self.nes.ppu.sprPalette = data["sprPalette"];
       self.nes.ppu.imgPalette = data["imgPalette"];
+      var count = 0;
       for(var i in data["ptTile"]) {
+        console.log("Setting up tiles: " + count)
+        count += 1;
         $.extend(self.nes.ppu.ptTile[i], data["ptTile"][i]);
+      }      
+      for(var i in data["rom.vromTile"]) {
+        $.extend(self.nes.rom.vromTile[i], data["rom.vromTile"][i]);
       }
       self.nes.ppu.ntable1 = data["ntable1"];
       self.nes.ppu.currentMirroring = data["currentMirroring"];
@@ -93,7 +99,7 @@ joynes.Slave.prototype = {
 
       self.nes.ppu.updateControlReg1(data['controlReg1Value']);
       self.nes.ppu.updateControlReg2(data['controlReg2Value']);
-      self.nes.ppu.startVBlank();
+      //self.nes.ppu.startVBlank();
 
       self.current_instruction = data['instruction'];
       console.log("Waiting for instruction " + self.current_instruction)
@@ -101,10 +107,16 @@ joynes.Slave.prototype = {
     
     self.socket.on("PPU:Frame", function(data) {
       if(self.current_instruction == data['instruction'] ) {
+        self.nes.ppu.startFrame();
         self.renderFrame(data['frame_instructions']);
         self.nes.ppu.startVBlank();
       }
       self.current_instruction += 1;
+      if(self.nes.ppu.debug) { console.log("Requesting compare from slave for 0") }
+      if(self.nes.ppu.debug) { self.socket.emit("compare", {"index": 0, "compare": self.nes.ppu.buffer}); }
+      if(self.nes.ppu.debug) { console.log("Requesting compare from slave for 1") }
+      if(self.nes.ppu.debug) { console.log("FUCK ME SILLY: " + self.nes.ppu.pixrendered[43334] ) }
+      if(self.nes.ppu.debug) { self.socket.emit("compare", {"index": 1, "compare": self.nes.ppu.pixrendered}); }
     });
 
     /* TODO: we should only preventDefault for non-controller keys. */
@@ -167,6 +179,7 @@ joynes.Slave.prototype = {
   },
   
   writeSRAMAddress: function(value) {
+    if(this.nes.ppu.debug) { console.log("Writing sram value" + value)}
     this.nes.ppu.writeSRAMAddress(value);
   },
   
@@ -181,6 +194,16 @@ joynes.Slave.prototype = {
   // CPU Register $4014:
   // Write 256 bytes of main memory
   // into Sprite RAM.
+//  var baseAddress = value * 0x100;
+//  var data;
+//  for (var i=this.sramAddress; i < 256; i++) {
+//      data = this.nes.cpu.mem[baseAddress+i];
+//      this.spriteMem[i] = data;
+//      this.spriteRamWriteUpdate(i, data);
+//  }
+  
+//  this.nes.cpu.haltCycles(513);
+  
   sramDMA: function(value, datum) {
     var self = this, 
         data;

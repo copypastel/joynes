@@ -129,6 +129,7 @@ joynes.Master.prototype = {
         "sprPalette": this.nes.ppu.sprPalette,
         "imgPalette": this.nes.ppu.imgPalette,
         "ptTile": this.nes.ppu.ptTile,
+        "rom.vromTile": this.nes.rom.vromTile,
         "ntable1": this.nes.ppu.ntable1,
         "currentMirroring": this.nes.ppu.currentMirroring,
         "nameTable": this.nes.ppu.nameTable,
@@ -139,17 +140,18 @@ joynes.Master.prototype = {
       });
       self.syncPPU   = false
       self.syncFrame = true;
+      //self.nes.stop();
     }
     else if(self.syncFrame) {
       console.log("syncing frame");
       self.partner("PPU:Frame", {"instruction": self.instruction_id, "frame_instructions": self.frame_instructions})
+      //self.nes.stop();
     }
     else {
     }
-    
+
     this.frame_instructions = [];
     self.instruction_id += 1;
-    
   },
   
   scrollWrite: function(value) {
@@ -161,6 +163,8 @@ joynes.Master.prototype = {
   
   writeSRAMAddress: function(value) {
     var self = this;
+    if(self.nes.ppu.debug) { console.log("Writing sram address: " + value) }
+
     self.ppuWriteSRAMAddress.call(self.nes.ppu, value)
     var instruction = {"enum": "writeSRAMAddress", "value": value}
     self.frame_instructions.push(instruction)
@@ -168,7 +172,7 @@ joynes.Master.prototype = {
   
   sramDMA: function(value) {
     var self = this;
-    if(self.nes.ppu.debug) { console.log("sramDMA")  }
+    if(self.nes.ppu.debug) { console.log("sramDMA") }
     var baseAddress = value * 0x100;
     var data;
     
@@ -199,7 +203,7 @@ joynes.Master.prototype = {
     var self = this;
     this.mmapLoadVromBank.call(this.nes.ppu, bank, address);
     var instruction = { "enum": "loadVromBank", "bank": bank, "address": address };
-    this.frame_instructions.push(instruction);    
+    this.frame_instructions.push(instruction);
   },
   
   setSprite0HitFlag: function() {

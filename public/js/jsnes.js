@@ -5717,7 +5717,8 @@ JSNES.PPU.prototype = {
         }
     },
     
-    renderSpritesPartially: function(startscan, scancount, bgPri){      
+    renderSpritesPartially: function(startscan, scancount, bgPri){
+      if(this.debug) { console.log("renderSpritesPartially"); }
         if (this.f_spVisibility === 1) {
             
             for (var i=0;i<64;i++) {
@@ -5740,14 +5741,15 @@ JSNES.PPU.prototype = {
                         }
                         
                         if (this.f_spPatternTable===0) {
+                            console.log("sprTile:" + i + ":" + this.sprTile[i]);
                             this.ptTile[this.sprTile[i]].render(this.buffer, 
                                 0, this.srcy1, 8, this.srcy2, this.sprX[i], 
                                 this.sprY[i]+1, this.sprCol[i], this.sprPalette, 
                                 this.horiFlip[i], this.vertFlip[i], i, 
-                                this.pixrendered
+                                this.pixrendered, this
                             );
                         }else {
-                            this.ptTile[this.sprTile[i]+256].render(this.buffer, 0, this.srcy1, 8, this.srcy2, this.sprX[i], this.sprY[i]+1, this.sprCol[i], this.sprPalette, this.horiFlip[i], this.vertFlip[i], i, this.pixrendered);
+                            this.ptTile[this.sprTile[i]+256].render(this.buffer, 0, this.srcy1, 8, this.srcy2, this.sprX[i], this.sprY[i]+1, this.sprCol[i], this.sprPalette, this.horiFlip[i], this.vertFlip[i], i, this.pixrendered, this);
                         }
                     }else {
                         // 8x16 sprites
@@ -5780,7 +5782,7 @@ JSNES.PPU.prototype = {
                             this.horiFlip[i],
                             this.vertFlip[i],
                             i,
-                            this.pixrendered
+                            this.pixrendered, this
                         );
                         
                         srcy1 = 0;
@@ -5807,7 +5809,7 @@ JSNES.PPU.prototype = {
                             this.horiFlip[i],
                             this.vertFlip[i],
                             i,
-                            this.pixrendered
+                            this.pixrendered, this
                         );
                         
                     }
@@ -5854,7 +5856,6 @@ JSNES.PPU.prototype = {
                 }
                 toffset *= 8;
                 bufferIndex = scan * 256 + x;
-                if(this.debug) { console.log(bufferIndex)}
 
                 if (this.horiFlip[0]) {
                   
@@ -5874,15 +5875,11 @@ JSNES.PPU.prototype = {
                     }
                 }
                 else {
-                  if(this.debug) { console.log(x); console.log(bufferIndex)}
                     for (i = 0; i < 8; i++) {
                         if (x >= 0 && x < 256) {
-                          
-                           if(this.debug) { console.log(this.pixrendered[bufferIndex]) }
                             if (bufferIndex >= 0 && bufferIndex < 61440 && 
                                     this.pixrendered[bufferIndex] !==0 ) {
-                                
-                                      
+
                                 if (t.pix[toffset+i] !== 0) {
                                     this.spr0HitX = bufferIndex % 256;
                                     this.spr0HitY = scan;
@@ -5932,7 +5929,7 @@ JSNES.PPU.prototype = {
                 if (this.horiFlip[0]) {
                   
                     for (i=7;i>=0;i--) {
-                        if (x>=0 && x<256) {
+                        if (x>=0 && x<256) {                          
                             if (bufferIndex>=0 && bufferIndex<61440 && this.pixrendered[bufferIndex]!==0) {
                                 if (t.pix[toffset+i] !== 0) {
                                     this.spr0HitX = bufferIndex%256;
@@ -6369,7 +6366,20 @@ JSNES.PPU.Tile.prototype = {
         }
     },
     
-    render: function(buffer, srcx1, srcy1, srcx2, srcy2, dx, dy, palAdd, palette, flipHorizontal, flipVertical, pri, priTable) {
+    render: function(buffer, srcx1, srcy1, srcx2, srcy2, dx, dy, palAdd, palette, flipHorizontal, flipVertical, pri, priTable, ppu) {
+      if(ppu.debug) {
+        console.log("RENDERING")
+       /* console.log(srcy1)
+        console.log(srcx2)
+        console.log(srcy2) 
+        console.log(dx)
+        console.log(dy)
+        console.log(palAdd)
+        console.log(palette)
+        console.log(flipHorizontal)
+        console.log(flipVertical)
+        consele.log(pri)*/
+      }
 
         if (dx<-7 || dx>=256 || dy<-7 || dy>=240) {
             return;
@@ -6405,8 +6415,6 @@ JSNES.PPU.Tile.prototype = {
                             //if(this.debug) { console.log("Rendering upright tile to buffer") }
                             buffer[this.fbIndex] = palette[this.palIndex+palAdd];
                             this.tpri = (this.tpri&0xF00)|pri;
-                            /// DEBUGGING the pixrendered
-                            console.log("DEBUG HERE!!!")
                             priTable[this.fbIndex] =this.tpri;
                         }
                     }

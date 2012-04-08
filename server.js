@@ -26,6 +26,7 @@ app.get('/slave', function(req, res){
 
 var channels = {};
 var waiting = [];
+var compare = [];
 
 /* When a player connects, they join the waiting FIFO queue.
  * Once we have two players, we'll automatically pair them,
@@ -55,6 +56,36 @@ io.sockets.on("connection", function(player){
     } else {
       util.debug("Player " + player.id + " sent a message while not paired.");
     }
+  });
+  
+  player.on("compare", function(data) {
+    console.log("Received request to compare for: " + data.index)
+    if(channels[player.id] != undefined){
+      if(compare[data.index]) { console.log("We have data")}
+      else { console.log("No Data, storing") }
+      if(compare[data.index] && compare[data.index].length > 0) {
+        console.log("Comparing...")
+        console.log(compare[data.index].length);
+        console.log(data["compare"].length);
+        var mismatch = false;
+        
+        if(compare[data.index].length == data["compare"].length) {
+          for(i in compare) {
+            if(compare[data.index][i] == data["compare"][i]) {}
+            else { console.log("MisMatch Found at: " + i); mismatch = true; }
+          }
+          
+          if(!mismatch) { console.log("Exactly Equivelent"); }
+        } else
+        { console.log("Sizes did not match") }
+        
+        compare[data.index] = null;        
+      } else {
+        if(data["compare"].length > 0) {}
+        else { console.log("Received " + data["compare"])}
+        compare[data.index] = data["compare"];
+      }
+    }    
   });
   
   player.on("proxy", function(data){
