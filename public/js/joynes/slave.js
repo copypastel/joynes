@@ -159,6 +159,12 @@ joynes.Slave.prototype = {
         case 'setSprite0HitFlag':
           self.setSprite0HitFlag();
         break;
+        case 'sramWrite':
+          self.sramWrite(instruction['value']);
+        break;
+        case 'vramWrite':
+          self.vramWrite(instruction['value']);
+        break;
       }
     }
   },
@@ -195,6 +201,14 @@ joynes.Slave.prototype = {
   
   setSprite0HitFlag: function() {
     this.nes.ppu.setSprite0HitFlag();
+  },
+  
+  sramWrite: function(value) {
+    this.nes.ppu.sramWrite(value);
+  },
+  
+  vramWrite: function(value) {
+    this.nes.ppu.vramWrite(value);
   }
 }
 
