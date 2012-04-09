@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="/css/joy.css" type="text/css" />
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.js"></script>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/js/dynamicaudio-min.js"></script>
@@ -14,7 +14,13 @@
     <script type="text/javascript" src="/js/joynes/slave.js"></script>
   </head>
   <body>
+		<div id="cpl"></div>
     <%- body %>
+		<div id="emulators">
+		  <div id="emulator_1" class="emulator" style="float: left;"></div>
+		  <div id="emulator_2" class="emulator" style="float: right;"></div>
+		</div>
+		<div id="console"></div>
   </body>
 </html>
 

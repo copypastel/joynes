@@ -60,7 +60,7 @@ ul {
 }
 
 .nes-roms, .nes-controls, .nes-status {
-  display: none;
+  /* display: none; */
 }
 
 #emulator {

@@ -136,7 +136,7 @@ li#game4:hover {
 }
 
 .nes-roms, .nes-controls, .nes-status {
-  display: none;
+  /*display: none;*/
 }
 
 .nes-screen {

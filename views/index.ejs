@@ -1,9 +1,7 @@
 <script>
-  var emulator;
-  var socket;
 	$(document).ready( function(){
-		emulator = new JSNES({
-			'ui': $("#emulator").JSNESUI({
+		masterNes = new JSNES({
+			'ui': $("#emulator_1").JSNESUI({
 				"Nintendo": [["Contra", "/roms/Contra.nes"],
 										 ["Dr. Mario", "/roms/Dr_Mario.nes"],
 										 ["Bubble Bobble", "/roms/Bubble_Bobble.nes"],
@@ -12,82 +10,6 @@
 			})
 		});
 
-		// master = new joynes.Master(masterNes);
-
-    //var socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
-    socket = io.connect('http://' + document.location.hostname + ':3333/');
-    socket.on("role", function(evt) {
-      console.log(evt);
-      var message = JSON.parse(evt);
-      if (message.initialize) {
-        switch (message.initialize) {
-          case 'm': joynesClient = new joynes.Master(emulator, socket); break;
-          case 's': joynesClient = new joynes.Slave(emulator, socket); break;
-		  default: alert("something's wrong");
-        }
-      }
-    });
-
-    // partnerId is a URL parameter
-    var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
-    if(partnerIdPresent) {
-      var partnerId = partnerIdPresent[1];
-      pair(partnerId);
-    }
-  });
-
-  var pair = function(partnerId) {
-    socket.emit("pair", partnerId);
-  };
-
-  document.onready = function() {
-    document.getElementById("nes").onclick = function() {
-      pair();
-    };
-    var games = document.getElementsByClassName("game");
-    for(var i = 0; i < games.length; i++) {
-      games.item(i).onclick = function(event) {
-        var title = event.target.getAttribute("id");
-        var roms = document.querySelector(".nes-roms select");
-
-        for(var j = 0; j < roms.options.length; j++) {
-          var game = roms.options.item(j);
-          if(game.innerHTML == title) {
-            roms.selectedIndex = j;
-            $(".nes-roms select").change();
-          }
-        }
-      }
-    }
-  }
+		master = new joynes.Master(masterNes);
+	});
 </script>
-
-<div id="wrapper-main">
-	<div id="container-main" >
-		<div id="container-tv">
-			<div id="tv">
-				<p>This is a tv.</p>
-			</div>
-		</div>
-		<div id="container-nes">
-			<div id="nes">
-				<p>This is a nes system.</p>
-			</div>
-		</div>
-		<div id="container-games">
-			<ul id="games">
-				<li id="Dr. Mario" class="game" style="margin-left: 400px;">Game 1</li>
-				<li id="Contra" class="game" style="margin-left: 400px;">Game 2</li>
-				<li id="Bubble Bobble" class="game" style="margin-left: 400px;">Game 3</li>
-				<li id="Bubble Bobble 2" class="game" style="margin-left: 400px;">Game 4</li>
-			</ul>
-		</div>
-    <div id="container-floor">
-      <div id="floor">
-        <p>This is the floor.</p>
-      </div>
-    </div>
-	</div>
-</div>
-
-<div id="emulator"></div>
