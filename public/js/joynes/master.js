@@ -59,6 +59,12 @@ joynes.Master.prototype = {
     var self = this;    
     self.mmapLoadVromBank = self.nes.mmap.loadVromBank;
     self.nes.mmap.loadVromBank = function(bank, address) { self.loadVromBank(bank, address) }
+
+    self.mmapLoad1kVromBank = self.nes.mmap.load1kVromBank;
+    self.nes.mmap.load1kVromBank = function(bank, address) { alert("Not Implemented load1kVromBank") }
+
+    self.mmapLoad2kVromBank = self.nes.mmap.load2kVromBank;
+    self.nes.mmap.load2kVromBank = function(bank, address) { alert("Not Implemented load2kVromBank") }
   },
   
   endFrame: function() {
@@ -226,6 +232,21 @@ joynes.Master.prototype = {
     this.mmapLoadVromBank.call(this.nes.ppu, bank, address);
     var instruction = { "enum": "loadVromBank", "bank": bank, "address": address };
     this.frame_instructions.push(instruction);    
+  },
+  
+  load1kVromBank: function(bank, instruction) {
+    var self = this;
+    this.mmapLoad1kVromBank.call(this.nes.ppu, bank, address);
+    var instruction = { "enum": "load1kVromBank", "bank": bank, "address": address };
+    this.frame_instructions.push(instruction);    
+    
+  },
+  
+  load2kVromBank: function(bank, instruction) {
+    var self = this;
+    this.mmapLoad2kVromBank.call(this.nes.ppu, bank, address);
+    var instruction = { "enum": "load1kVromBank", "bank": bank, "address": address };
+    this.frame_instructions.push(instruction);
   },
   
   setSprite0HitFlag: function() {

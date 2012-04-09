@@ -156,6 +156,12 @@ joynes.Slave.prototype = {
         case 'loadVromBank':
           self.loadVromBank(instruction['bank'], instruction['address']);
         break;
+//        case 'load1kVromBank':
+//          self.load1kVromBank(instruction['bank'], instruction['address']);
+//        break;
+//        case 'load2kVromBank':
+//          self.load2kVromBank(instruction['bank'], instruction['address']);
+//        break;
         case 'setSprite0HitFlag':
           self.setSprite0HitFlag();
         break;
