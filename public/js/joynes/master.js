@@ -47,6 +47,12 @@ joynes.Master.prototype = {
     
     self.ppuSetSprite0HitFlag = self.nes.ppu.setSprite0HitFlag;
     self.nes.ppu.setSprite0HitFlag = function() { self.setSprite0HitFlag() };
+    
+    self.ppuSramWrite = self.nes.ppu.sramWrite;
+    self.nes.ppu.sramWrite = function() { self.sramWrite() };
+    
+    self.ppuVramWrite = self.nes.ppu.vramWrite;
+    self.nes.ppu.vramWrite = function(value) { self.vramWrite(value) };
   },
   
   romInitialized: function() {
@@ -186,6 +192,26 @@ joynes.Master.prototype = {
     
     self.frame_instructions.push(instruction)
     self.nes.cpu.haltCycles(513);
+  },
+  
+  sramWrite: function(value) {
+    var self = this;
+    this.ppuSramWrite.call(this.nes.ppu, value);
+    var instruction = {
+      "enum": "sramWrite",
+      "value": value,
+    }
+    self.frame_instructions.push(instruction);
+  },
+  
+  vramWrite: function(value) {
+    var self = this;
+    this.ppuVramWrite.call(this.nes.ppu, value);
+    var instruction = {
+      "enum": "vramWrite",
+      "value": value,
+    }
+    self.frame_instructions.push(instruction);
   },
   
   endScanline: function() {
