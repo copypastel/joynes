@@ -47,12 +47,15 @@
     var games = document.getElementsByClassName("game");
     for(var i = 0; i < games.length; i++) {
       games.item(i).onclick = function(event) {
-        var title = event.target.getAttribute("id");
+        var title = event.target.getAttribute("data-game");
         var roms = document.querySelector(".nes-roms select");
 
         for(var j = 0; j < roms.options.length; j++) {
           var game = roms.options.item(j);
+          console.log(game);
+          console.log("Comparing " + title + " with " + game.innerHTML);
           if(game.innerHTML == title) {
+            console.log("Loading: " + title);
             roms.selectedIndex = j;
             $(".nes-roms select").change();
           }
@@ -64,29 +67,52 @@
 
 <div id="wrapper-main">
 	<div id="container-main" >
+		<div id="container-title">
+			<div id="title">
+				<p>This is the title.</p>
+			</div>
+		</div>
 		<div id="container-tv">
 			<div id="tv">
-				<p>This is a tv.</p>
+				<!-- <p>This is a tv.</p> -->
 			</div>
 		</div>
 		<div id="container-nes">
 			<div id="nes">
-				<p>This is a nes system.</p>
+				<!-- <p>This is a nes system.</p> -->
+			</div>
+		</div>
+		<div id="container-controllers">
+			<div id="controllers">
+				<ul id="controllers">
+					<li class="controllers" id="controller1"></li>
+					<li class="controllers" id="controller2"></li>
+				</ul>
 			</div>
 		</div>
 		<div id="container-games">
 			<ul id="games">
-				<li id="Dr. Mario" class="game" style="margin-left: 400px;">Game 1</li>
-				<li id="Contra" class="game" style="margin-left: 400px;">Game 2</li>
-				<li id="Bubble Bobble" class="game" style="margin-left: 400px;">Game 3</li>
-				<li id="Bubble Bobble 2" class="game" style="margin-left: 400px;">Game 4</li>
+				<li class="game" id="game1" data-game="Dr. Mario">Game 1</li>
+				<li class="game" id="game2" data-game="Contra">Game 2</li>
+				<li class="game" id="game3" data-game="Bubble Bobble">Game 3</li>
+				<li class="game" id="game4" data-game="Bubble Bobble 2">Game 4</li>
 			</ul>
 		</div>
-    <div id="container-floor">
-      <div id="floor">
-        <p>This is the floor.</p>
-      </div>
-    </div>
+		<div id="container-couch">
+			<div id="couch">
+				<!-- <p>This is the couch.</p> -->
+			</div>
+		</div>
+		<div id="container-bg">
+			<div id="bg">
+				<!-- <p>This is the background</p> -->
+			</div>
+		</div>
+<!-- 		<div id="container-floor">
+			<div id="floor">
+				<p>This is the floor</p>
+			</div>
+		</div> -->
 	</div>
 </div>
 

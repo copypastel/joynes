@@ -1,10 +1,10 @@
 
 body {
-	background: white;
+	background: black;
 }
 
 div#wrapper-main {
-	background: url(/images/bg.png no-repeat;
+	background: url(images/bg.png) no-repeat;
 	width: 1024px;
 	height: 768px;
 	margin: 0 auto;
@@ -12,7 +12,7 @@ div#wrapper-main {
 }
 
 div#container-main {
-	/*background: url(/images/bg.png) no-repeat;*/
+	/*background: url(images/bg.png) no-repeat;*/
 }
 
 div#container-title {
@@ -26,7 +26,7 @@ div#title {
 }
 
 div#title p {
-	background: url(/images/title.png) no-repeat;
+	background: url(images/title.png) no-repeat;
 	text-indent: -9999px;
 	width: 441px;
 	height: 96px;
@@ -41,7 +41,7 @@ div#container-tv {
 }
 
 div#tv {
-	background: url(/images/tv.png) no-repeat;
+	background: url(images/tv.png) no-repeat;
 	text-indent: -9999px;
 	height: 120px;
 	width: 105px;
@@ -57,7 +57,7 @@ div#container-nes {
 	float: left;
 	width: 55px;
 	height: 40px;
-	background: url(/images/nes.png) no-repeat;
+	background: url(images/nes.png) no-repeat;
 	margin: 320px 0 0 20px;
 }
 
@@ -66,7 +66,7 @@ div#nes {
 }
 
 div#nes p {
-	background: url(/images/nes.png) no-repeat;
+	background: url(images/nes.png) no-repeat;
 	text-indent: -9999px;
 	height: 40px;
 	width: 55px;
@@ -91,7 +91,7 @@ ul#controllers {
 }
 
 li#controller1 {
-	background: url(/images/controller.png) no-repeat;
+	background: url(images/controller.png) no-repeat;
 	width: 23px;
 	height: 15px;
 	margin: 315px 0 0 -200px;
@@ -99,7 +99,7 @@ li#controller1 {
 }
 
 li#controller2 {
-	background: url(/images/controller.png) no-repeat;
+	background: url(images/controller.png) no-repeat;
 	width: 23px;
 	height: 15px;
 	margin: 300px 0 0 -250px;
@@ -125,7 +125,7 @@ ul {
 
 .game {
   cursor: pointer;
-	background: url(/images/game.png) no-repeat;
+	background: url(images/game.png) no-repeat;
 	text-indent: -9999px;
   height: 18px;
 	width: 28px;
@@ -134,7 +134,7 @@ ul {
 }
 
 li#game2 {
-	background: url(/images/game.png) no-repeat;
+	background: url(images/game.png) no-repeat;
 	text-indent: -9999px;
 	height: 18px;
 	width: 28px;
@@ -143,7 +143,7 @@ li#game2 {
 }
 
 li#game3 {
-	background: url(/images/game.png) no-repeat;
+	background: url(images/game.png) no-repeat;
 	text-indent: -9999px;
 	height: 18px;
 	width: 28px;
@@ -152,7 +152,7 @@ li#game3 {
 }
 
 li#game4 {
-	background: url(/images/game.png) no-repeat;
+	background: url(images/game.png) no-repeat;
 	text-indent: -9999px;
 	height: 18px;
 	width: 28px;
@@ -167,7 +167,7 @@ div#container-couch {
 }
 
 div#couch {
-	background: url(/images/couch.png) no-repeat;
+	background: url(images/couch.png) no-repeat;
 	/*text-indent: -9999px;	*/
 	width: 195px;
 	height: 150px;
@@ -187,7 +187,7 @@ div#bg {
 }
 
 div#floor {
-	background: url(/images/floor.png) no-repeat;
+	background: url(images/floor.png) no-repeat;
 	height: 383px;
 	width: 763px;
 }
@@ -206,25 +206,25 @@ li.game {
 }
 
 /*li#game1:hover {
-	background: url(/images/contra.png);
+	background: url(images/contra.png);
 	width: 347px;
 	height: 392px;
 }
 
 li#game2:hover {
-	background: url(/images/bb.png);
+	background: url(images/bb.png);
 	width: 347px;
 	height: 392px;
 }
 
 li#game3:hover {
-	background: url(/images/bb2.png);
+	background: url(images/bb2.png);
 	width: 347px;
 	height: 392px;
 }
 
 li#game4:hover {
-	background: url(/images/drmario.png);
+	background: url(images/drmario.png);
 	width: 347px;
 	height: 392px;
 }*/
