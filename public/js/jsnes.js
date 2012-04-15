@@ -5016,11 +5016,6 @@ JSNES.PPU.prototype = {
                             this.renderBgScanline(true,this.scanline+1-21);
                         }
                         this.scanlineAlreadyRendered=false;
-                        
-                        if(this.debug) {
-                          console.log(this.hitSpr0)
-                          console.log(this.f_spVisibility)
-                        }
 
                         // Check for sprite 0 (next scanline):
                         if (!this.hitSpr0 && this.f_spVisibility == 1) {

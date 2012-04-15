@@ -162,11 +162,20 @@ joynes.Slave.prototype = {
 //        case 'load2kVromBank':
 //          self.load2kVromBank(instruction['bank'], instruction['address']);
 //        break;
+        case 'updateControlReg1':
+          self.updateControlReg1(instruction['value']);
+        break;
+        case 'updateControlReg2':
+          self.updateControlReg2(instruction['value']);
+        break;
         case 'setSprite0HitFlag':
           self.setSprite0HitFlag();
         break;
         case 'sramWrite':
           self.sramWrite(instruction['value']);
+        break;
+        case 'writeVRAMAddress':
+          self.writeVRAMAddress(instruction['value']);
         break;
         case 'vramWrite':
           self.vramWrite(instruction['value']);
@@ -214,7 +223,15 @@ joynes.Slave.prototype = {
   sramWrite: function(value) {
     this.nes.ppu.sramWrite(value);
   },
-  
+
+  updateControlReg1: function(value) {
+    this.nes.ppu.updateControlReg1(value);
+  },
+
+  updateControlReg2: function(value) {
+    this.nes.ppu.updateControlReg2(value);
+  },
+
   vramWrite: function(value) {
     this.nes.ppu.vramWrite(value);
   },

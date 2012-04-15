@@ -257,7 +257,18 @@ joynes.Master.prototype = {
     var instruction = { "enum": "setSprite0HitFlag" };
     this.frame_instructions.push(instruction);
   },
-  
+
+  updateControlReg1: function(value) {
+    this.ppuUpdateControlReg1.call(this.nes.ppu, value);
+    var instruction = { "enum": "updateControlReg1", "value": value };
+    this.frame_instructions.push(instruction);
+  },
+
+  updateControlReg2: function(value) {
+    this.ppuUpdateControlReg2.call(this.nes.ppu, value);
+    var instruction = { "enum": "updateControlReg2", "value": value };
+    this.frame_instructions.push(instruction);
+  },
 
   setFrameRate: function(rate){
     this.nes.setFramerate(rate);
