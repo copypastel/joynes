@@ -1,23 +1,23 @@
 joynes.Slave.prototype = {
   initialize: function(nes, socket) {
     var self = this;
-    
+
     self.nes = nes;
     self.socket = socket;
     self.current_instruction = 0;
     self.startRom = false;
-    
+
     self.socket.on("connection", function(evt){
       self.socket.send(JSON.stringify({ok: 1}));
     });
-    
+
     self.socket.on("Rom:Changed", function(rom_location) {
       self.nes.ppu.reset();
       self.loadRom(rom_location);
       //self.partner("PPU:Sync")
     });
-    
-    self.socket.on("PPU:Initialize", function(data) {      
+
+    self.socket.on("PPU:Initialize", function(data) {
       self.nes.ppu.vramMem = data["vramMem"];
       self.nes.ppu.spriteMem = data["spriteMem"];
       self.nes.ppu.vramAddress = data["vramAddress"];
@@ -98,7 +98,7 @@ joynes.Slave.prototype = {
       self.current_instruction = data['instruction'];
       console.log("Waiting for instruction " + self.current_instruction)
     });
-    
+
     self.socket.on("PPU:Frame", function(data) {
       if(self.current_instruction == data['instruction'] ) {
         self.nes.ppu.startFrame();
@@ -135,13 +135,13 @@ joynes.Slave.prototype = {
       }
       return false; // preventDefault
   },
-  
+
   renderFrame: function(instructions) {
     var self = this;
     for(i in instructions) {
       instruction = instructions[i]
       switch (instruction['enum']) {
-        case 'sramDMA': 
+        case 'sramDMA':
           self.sramDMA(instruction['value'], instruction['data']);
         break;
         case 'scrollWrite':
@@ -174,48 +174,50 @@ joynes.Slave.prototype = {
       }
     }
   },
-  
+
   scrollWrite: function(value) {
     this.nes.ppu.scrollWrite(value);
   },
-  
+
   writeSRAMAddress: function(value) {
     this.nes.ppu.writeSRAMAddress(value);
   },
-  
+
   endScanline: function() {
     this.nes.ppu.endScanline();
   },
-  
+
   loadVromBank: function(bank, address) {
     this.nes.mmap.loadVromBank(bank, address)
   },
-  
+
   // CPU Register $4014:
   // Write 256 bytes of main memory
   // into Sprite RAM.
   sramDMA: function(value, datum) {
-    var self = this, 
+    var self = this,
         data;
-    
+
+    if(self.nes.ppu.debug) { console.log("sramDMA"); }
+
     for (var i=self.nes.ppu.sramAddress; i < 256; i++) {
         data = datum[i];
         self.nes.ppu.spriteMem[i] = data;
         self.nes.ppu.spriteRamWriteUpdate(i, data);
     }
   },
-  
+
   setSprite0HitFlag: function() {
     this.nes.ppu.setSprite0HitFlag();
   },
-  
+
   sramWrite: function(value) {
     this.nes.ppu.sramWrite(value);
   },
   
   vramWrite: function(value) {
     this.nes.ppu.vramWrite(value);
-  }
+  },
 }
 
 $.extend(joynes.Slave.prototype,  joynes.Base.prototype);

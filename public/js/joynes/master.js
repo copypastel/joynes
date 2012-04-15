@@ -10,7 +10,7 @@ joynes.Master.prototype = {
     self.syncPPU = false;
     self.syncFrame = false;
     self.debug = false;
-    
+
     this.lastSendTime = null;
 
     this.nes.ui.romSelect.unbind('change');
@@ -18,7 +18,7 @@ joynes.Master.prototype = {
       self.loadRom(self.nes.ui.romSelect.val(), function() { self.romInitialized() });
       self.partner("Rom:Changed", self.nes.ui.romSelect.val());
     });
-    
+
     self.socket.on("PPU:Sync", function() {
       self.syncPPU = true;
     })
@@ -28,35 +28,41 @@ joynes.Master.prototype = {
       if(data.close) { self.setFrameRate(60); return }
       if(data.key)   { self.nes.keyboard.setKey(data.key, data.value) }
     });
-    
+
     self.ppuEndFrame = self.nes.ppu.endFrame;
     self.nes.ppu.endFrame = function() { self.endFrame() };
-    
+
     self.ppuScrollWrite = self.nes.ppu.scrollWrite;
     self.nes.ppu.scrollWrite = function(value) { self.scrollWrite(value) };
-    
+
     self.ppuWriteSRAMAddress = self.nes.ppu.writeSRAMAddress;
     self.nes.ppu.writeSRAMAddress = function(value) { self.writeSRAMAddress(value) };
-    
+
     self.ppuSramDMA = self.nes.ppu.sramDMA;
     self.nes.ppu.sramDMA = function(value) { self.sramDMA(value) };
-    
+
     self.ppuEndScanline = self.nes.ppu.endScanline;
     self.nes.ppu.endScanline = function() { self.endScanline() };
-    
-    
+
+
     self.ppuSetSprite0HitFlag = self.nes.ppu.setSprite0HitFlag;
     self.nes.ppu.setSprite0HitFlag = function() { self.setSprite0HitFlag() };
-    
+
     self.ppuSramWrite = self.nes.ppu.sramWrite;
     self.nes.ppu.sramWrite = function() { self.sramWrite() };
-    
+
     self.ppuVramWrite = self.nes.ppu.vramWrite;
     self.nes.ppu.vramWrite = function(value) { self.vramWrite(value) };
+
+    self.ppuUpdateControlReg1 = self.nes.ppu.updateControlReg1;
+    self.nes.ppu.updateControlReg1 = function(value) { self.updateControlReg1(value) };
+
+    self.ppuUpdateControlReg2 = self.nes.ppu.updateControlReg2;
+    self.nes.ppu.updateControlReg2 = function(value) { self.updateControlReg2(value) };
   },
-  
+
   romInitialized: function() {
-    var self = this;    
+    var self = this;
     self.mmapLoadVromBank = self.nes.mmap.loadVromBank;
     self.nes.mmap.loadVromBank = function(bank, address) { self.loadVromBank(bank, address) }
 
@@ -66,17 +72,17 @@ joynes.Master.prototype = {
     self.mmapLoad2kVromBank = self.nes.mmap.load2kVromBank;
     self.nes.mmap.load2kVromBank = function(bank, address) { alert("Not Implemented load2kVromBank") }
   },
-  
+
   endFrame: function() {
     var self = this;
-    
+
     self.ppuEndFrame.call(self.nes.ppu);
-    
+
     if(self.syncPPU) {
       this.nes.ppu.ptTile[1].initialized = true;
       console.log(this.nes.ppu.ptTile[1])
       self.partner("PPU:Initialize", {
-        "instruction": self.instruction_id + 1, 
+        "instruction": self.instruction_id + 1,
         "vramMem": this.nes.ppu.vramMem,
         "spriteMem": this.nes.ppu.spriteMem,
         "vramAddress": this.nes.ppu.vramAddress,
@@ -158,32 +164,32 @@ joynes.Master.prototype = {
     }
     else {
     }
-    
+
     this.frame_instructions = [];
     self.instruction_id += 1;
-    
+
   },
-  
+
   scrollWrite: function(value) {
     var self = this;
     self.ppuScrollWrite.call(self.nes.ppu, value);
     var instruction = {"enum": "scrollWrite", "value": value}
     self.frame_instructions.push(instruction)
   },
-  
+
   writeSRAMAddress: function(value) {
     var self = this;
     self.ppuWriteSRAMAddress.call(self.nes.ppu, value)
     var instruction = {"enum": "writeSRAMAddress", "value": value}
     self.frame_instructions.push(instruction)
   },
-  
+
   sramDMA: function(value) {
     var self = this;
     if(self.nes.ppu.debug) { console.log("sramDMA")  }
     var baseAddress = value * 0x100;
     var data;
-    
+
     for (var i=self.nes.ppu.sramAddress; i < 256; i++) {
         data = this.nes.cpu.mem[baseAddress+i];
         self.sramBuffer[i] = self.nes.ppu.spriteMem[i] = data;
@@ -195,11 +201,11 @@ joynes.Master.prototype = {
       "value": value,
       "data": self.sramBuffer,
     };
-    
+
     self.frame_instructions.push(instruction)
     self.nes.cpu.haltCycles(513);
   },
-  
+
   sramWrite: function(value) {
     var self = this;
     this.ppuSramWrite.call(this.nes.ppu, value);
@@ -209,46 +215,43 @@ joynes.Master.prototype = {
     }
     self.frame_instructions.push(instruction);
   },
-  
+
   vramWrite: function(value) {
     var self = this;
     this.ppuVramWrite.call(this.nes.ppu, value);
-    var instruction = {
-      "enum": "vramWrite",
-      "value": value,
-    }
+    var instruction = { "enum": "vramWrite", "value": value }
     self.frame_instructions.push(instruction);
   },
-  
+
   endScanline: function() {
     var self = this;
     this.ppuEndScanline.call(this.nes.ppu);
     var instruction = { "enum": "endScanline" };
-    this.frame_instructions.push(instruction);    
+    this.frame_instructions.push(instruction);
   },
-  
+
   loadVromBank: function(bank, address) {
     var self = this;
     this.mmapLoadVromBank.call(this.nes.ppu, bank, address);
     var instruction = { "enum": "loadVromBank", "bank": bank, "address": address };
-    this.frame_instructions.push(instruction);    
+    this.frame_instructions.push(instruction);
   },
-  
+
   load1kVromBank: function(bank, instruction) {
     var self = this;
     this.mmapLoad1kVromBank.call(this.nes.ppu, bank, address);
     var instruction = { "enum": "load1kVromBank", "bank": bank, "address": address };
-    this.frame_instructions.push(instruction);    
-    
+    this.frame_instructions.push(instruction);
+
   },
-  
+
   load2kVromBank: function(bank, instruction) {
     var self = this;
     this.mmapLoad2kVromBank.call(this.nes.ppu, bank, address);
     var instruction = { "enum": "load1kVromBank", "bank": bank, "address": address };
     this.frame_instructions.push(instruction);
   },
-  
+
   setSprite0HitFlag: function() {
     this.ppuSetSprite0HitFlag.call(this.nes.ppu);
     var instruction = { "enum": "setSprite0HitFlag" };
@@ -259,7 +262,7 @@ joynes.Master.prototype = {
   setFrameRate: function(rate){
     this.nes.setFramerate(rate);
   },
-  
+
   calculateFrameRate: function() {
     var now = Date.now();
     var self = this;
