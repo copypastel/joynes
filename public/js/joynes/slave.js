@@ -235,6 +235,10 @@ joynes.Slave.prototype = {
   vramWrite: function(value) {
     this.nes.ppu.vramWrite(value);
   },
+
+  writeVRAMAddress: function(value) {
+    this.nes.ppu.writeVRAMAddress(value);
+  }
 }
 
 $.extend(joynes.Slave.prototype,  joynes.Base.prototype);

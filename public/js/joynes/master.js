@@ -54,6 +54,9 @@ joynes.Master.prototype = {
     self.ppuVramWrite = self.nes.ppu.vramWrite;
     self.nes.ppu.vramWrite = function(value) { self.vramWrite(value) };
 
+    self.ppuWriteVRAMAddress = self.nes.ppu.writeVRAMAddress;
+    self.nes.ppu.writeVRAMAddress = function(value) { self.writeVRAMAddress(value) }
+
     self.ppuUpdateControlReg1 = self.nes.ppu.updateControlReg1;
     self.nes.ppu.updateControlReg1 = function(value) { self.updateControlReg1(value) };
 
@@ -220,6 +223,13 @@ joynes.Master.prototype = {
     var self = this;
     this.ppuVramWrite.call(this.nes.ppu, value);
     var instruction = { "enum": "vramWrite", "value": value }
+    self.frame_instructions.push(instruction);
+  },
+
+  writeVRAMAddress: function(value) {
+    var self = this;
+    this.ppuWriteVRAMAddress.call(this.nes.ppu, value);
+    var instruction = { "enum": "writeVRAMAddress", "value": value }
     self.frame_instructions.push(instruction);
   },
 
