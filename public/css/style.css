@@ -42,7 +42,6 @@ div#container-tv {
 
 div#tv {
 	background: url(/images/tv.png) no-repeat;
-	text-indent: -9999px;
 	height: 120px;
 	width: 105px;
 	margin: 0 auto;
@@ -74,9 +73,20 @@ div#nes p {
 	/*float: left;*/
 }
 
+/* Try to change this to #screen */
+.nes-screen {
+  width: 41px;
+  height: 47px;
+  -webkit-transform: skewY(26deg);
+  -webkit-transition: all 0.5s ease-in;
+  position: relative;
+  top: 36px;
+  left: 7px;
+}
 
-
-
+.nes-roms { display: none; }
+.nes-controls { display: none; }
+.nes-status { display: none; }
 
 div#container-controllers {
 
@@ -105,14 +115,6 @@ li#controller2 {
 	margin: 300px 0 0 -250px;
 	float: left;
 }
-
-
-
-
-
-
-
-
 
 div#container-games {
 	float: left;
