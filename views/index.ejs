@@ -40,19 +40,47 @@
     socket.emit("pair", partnerId);
   };
 
+  var displayPoster = function(title) {
+    var posters = document.querySelectorAll("#poster img");
+    for(var j = 0; j < posters.length; j++) {
+      var poster = posters.item(j);
+
+      if(poster.getAttribute("data-game") == title) {
+        poster.style.display = "block";
+      } else {
+        poster.style.display = "none";
+      }
+    }
+  }
+
   document.onready = function() {
     var games = document.getElementsByClassName("game");
     for(var i = 0; i < games.length; i++) {
+
+      games.item(i).onmouseover = function(event) {
+        var title = event.target.getAttribute("data-game");
+        displayPoster(title);
+      }
+
+      // Restore poster to loaded game
+      games.item(i).onmouseout = function(event) {
+        var gameIndex = document.querySelector("select").selectedIndex;
+        var games = document.querySelectorAll("select option");
+        var title = games.item(gameIndex).innerHTML;
+
+        displayPoster(title);
+      }
+
       games.item(i).onclick = function(event) {
         var title = event.target.getAttribute("data-game");
         var roms = document.querySelector(".nes-roms select");
 
+        displayPoster(title);
+
+        // Load game's ROM
         for(var j = 0; j < roms.options.length; j++) {
           var game = roms.options.item(j);
-          console.log(game);
-          console.log("Comparing " + title + " with " + game.innerHTML);
           if(game.innerHTML == title) {
-            console.log("Loading: " + title);
             roms.selectedIndex = j;
             $(".nes-roms select").change();
           }
@@ -80,6 +108,12 @@
 				<!-- <p>This is a nes system.</p> -->
 			</div>
 		</div>
+    <div id="poster">
+      <img src="/images/bubble_bobble.png" data-game="Bubble Bobble"/>
+      <img src="/images/bubble_bobble_2.png" data-game="Bubble Bobble 2"/>
+      <img src="/images/contra.png" data-game="Contra"/>
+      <img src="/images/dr_mario.png" data-game="Dr. Mario"/>
+    </div>
 		<div id="container-controllers">
 			<div id="controllers">
 				<ul id="controllers">

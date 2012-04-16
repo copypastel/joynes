@@ -73,6 +73,14 @@ div#nes p {
 	/*float: left;*/
 }
 
+#poster img {
+  -webkit-transform: skewY(-26deg);
+  height: 130px;
+  width: 80px;
+  position: absolute;
+  display: none;
+}
+
 /* Try to change this to #screen */
 .nes-screen {
   width: 41px;
