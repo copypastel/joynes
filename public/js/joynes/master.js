@@ -62,6 +62,9 @@ joynes.Master.prototype = {
 
     self.ppuUpdateControlReg2 = self.nes.ppu.updateControlReg2;
     self.nes.ppu.updateControlReg2 = function(value) { self.updateControlReg2(value) };
+
+    self.ppuReadStatusRegister = self.nes.ppu.readStatusRegister;
+    self.nes.ppu.readStatusRegister = function() { return self.readStatusRegister() };
   },
 
   romInitialized: function() {
@@ -278,6 +281,13 @@ joynes.Master.prototype = {
     this.ppuUpdateControlReg2.call(this.nes.ppu, value);
     var instruction = { "enum": "updateControlReg2", "value": value };
     this.frame_instructions.push(instruction);
+  },
+
+  readStatusRegister: function() {
+    res = this.ppuReadStatusRegister.call(this.nes.ppu);
+    var instruction = { "enum": "readStatusRegister" }
+    this.frame_instructions.push(instruction);
+    return res;
   },
 
   setFrameRate: function(rate){

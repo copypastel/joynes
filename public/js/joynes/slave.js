@@ -180,6 +180,9 @@ joynes.Slave.prototype = {
         case 'vramWrite':
           self.vramWrite(instruction['value']);
         break;
+        case 'readStatusRegister':
+          self.readStatusRegister();
+        break;
       }
     }
   },
@@ -238,6 +241,10 @@ joynes.Slave.prototype = {
 
   writeVRAMAddress: function(value) {
     this.nes.ppu.writeVRAMAddress(value);
+  },
+
+  readStatusRegister: function() {
+    this.nes.ppu.readStatusRegister();
   }
 }
 
