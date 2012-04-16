@@ -72,6 +72,13 @@ io.sockets.on("connection", function(player){
       util.debug("Player " + player.id + " sent a message while not paired.");
     }
   });
+
+  player.on("proxy", function(data){
+    if(channels[player.id] != undefined){
+      var partner = channels[player.id];
+      partner.emit(data['command'], data['data']);
+    }
+  });
 });
 
 io.sockets.on("disconnect", function(player){

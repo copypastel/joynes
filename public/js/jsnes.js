@@ -149,7 +149,7 @@ JSNES.prototype = {
                         ppu.f_spVisibility === 1 &&
                         ppu.scanline - 21 === ppu.spr0HitY) {
                     // Set sprite 0 hit flag:
-                    ppu.setStatusFlag(ppu.STATUS_SPRITE0HIT, true);
+                    ppu.setSprite0HitFlag();
                 }
 
                 if (ppu.requestEndFrame) {
@@ -2469,6 +2469,7 @@ JSNES.Mappers[0].prototype = {
     },
 
     loadVromBank: function(bank, address) {
+      if(this.nes.ppu.debug) { console.log("loadVromBank"); }
         if (this.nes.rom.vromCount === 0) {
             return;
         }
@@ -2487,6 +2488,7 @@ JSNES.Mappers[0].prototype = {
     },
 
     load8kVromBank: function(bank4kStart, address) {
+      if(this.nes.ppu.debug) { console.log("load8kVromBank"); }
         if (this.nes.rom.vromCount === 0) {
             return;
         }
@@ -2498,6 +2500,8 @@ JSNES.Mappers[0].prototype = {
     },
 
     load1kVromBank: function(bank1k, address) {
+      if(this.nes.ppu.debug) { console.log("load1kVromBank"); }
+
         if (this.nes.rom.vromCount === 0) {
             return;
         }
@@ -2517,6 +2521,8 @@ JSNES.Mappers[0].prototype = {
     },
 
     load2kVromBank: function(bank2k, address) {
+      if(this.nes.ppu.debug) { console.log("load2kVromBank"); }
+
         if (this.nes.rom.vromCount === 0) {
             return;
         }
@@ -4656,6 +4662,8 @@ JSNES.PPU = function(nes) {
     this.nameTable = null;
     this.vramMirrorTable = null;
     this.palTable = null;
+    this.controlReg1Value = null;
+    this.controlReg2Value = null;
 
 
     // Rendering Options:
@@ -4671,8 +4679,11 @@ JSNES.PPU.prototype = {
     STATUS_SLSPRITECOUNT: 5,
     STATUS_SPRITE0HIT: 6,
     STATUS_VBLANK: 7,
+    debug: false,
 
     reset: function() {
+      if(this.debug) { console.log("rest") }
+
         var i;
 
         // Memory
@@ -4804,6 +4815,8 @@ JSNES.PPU.prototype = {
 
     // Sets Nametable mirroring.
     setMirroring: function(mirroring){
+      if(this.debug) { console.log("setMirroring") }
+
 
         if (mirroring == this.currentMirroring) {
             return;
@@ -4895,12 +4908,15 @@ JSNES.PPU.prototype = {
     // Assumes the regions don't overlap.
     // The 'to' region is the region that is physically in memory.
     defineMirrorRegion: function(fromStart, toStart, size){
+      if(this.debug) { console.log("defineMirrorRegion") }
+
         for (var i=0;i<size;i++) {
             this.vramMirrorTable[fromStart+i] = toStart+i;
         }
     },
 
     startVBlank: function(){
+      if(this.debug) { console.log("startVBlank") }
 
         // Do NMI:
         this.nes.cpu.requestIrq(this.nes.cpu.IRQ_NMI);
@@ -4920,6 +4936,8 @@ JSNES.PPU.prototype = {
     },
 
     endScanline: function(){
+      if(this.debug) { console.log("endScanline: " + this.scanline) }
+
         switch (this.scanline) {
             case 19:
                 // Dummy scanline.
@@ -5028,7 +5046,14 @@ JSNES.PPU.prototype = {
 
     },
 
+    setSprite0HitFlag: function() {
+      if(this.debug) { console.log("setSprite0HitFlag"); }
+      this.setStatusFlag(this.STATUS_SPRITE0HIT, true);
+    },
+
     startFrame: function(){
+      if(this.debug) { console.log("startFrame") }
+
         // Set background color:
         var bgColor=0;
 
@@ -5080,6 +5105,8 @@ JSNES.PPU.prototype = {
     },
 
     endFrame: function(){
+      if(this.debug) { console.log("endFrame") }
+
         var i, x, y;
         var buffer = this.buffer;
 
@@ -5144,8 +5171,11 @@ JSNES.PPU.prototype = {
     },
 
     updateControlReg1: function(value){
+      if(this.debug) { console.log("updateControlReg1") }
+
 
         this.triggerRendering();
+        this.controlReg1Value = value;
 
         this.f_nmiOnVblank =    (value>>7)&1;
         this.f_spriteSize =     (value>>5)&1;
@@ -5161,8 +5191,10 @@ JSNES.PPU.prototype = {
     },
 
     updateControlReg2: function(value){
+        if(this.debug) { console.log("updateControlReg2") }
 
         this.triggerRendering();
+        this.controlReg2Value = value;
 
         this.f_color =       (value>>5)&7;
         this.f_spVisibility = (value>>4)&1;
@@ -5178,6 +5210,8 @@ JSNES.PPU.prototype = {
     },
 
     setStatusFlag: function(flag, value){
+      if(this.debug) { console.log("setStatusFlag(" + flag + "," + value + ")"); }
+
         var n = 1<<flag;
         this.nes.cpu.mem[0x2002] =
             ((this.nes.cpu.mem[0x2002] & (255-n)) | (value?n:0));
@@ -5186,6 +5220,8 @@ JSNES.PPU.prototype = {
     // CPU Register $2002:
     // Read the Status Register.
     readStatusRegister: function(){
+      if(this.debug) { console.log("readStatusRegister") }
+
 
         var tmp = this.nes.cpu.mem[0x2002];
 
@@ -5203,6 +5239,8 @@ JSNES.PPU.prototype = {
     // CPU Register $2003:
     // Write the SPR-RAM address that is used for sramWrite (Register 0x2004 in CPU memory map)
     writeSRAMAddress: function(address) {
+      if(this.debug) { console.log("writeSRAMAddress") }
+
         this.sramAddress = address;
     },
 
@@ -5210,6 +5248,8 @@ JSNES.PPU.prototype = {
     // Read from SPR-RAM (Sprite RAM).
     // The address should be set first.
     sramLoad: function() {
+      if(this.debug) { console.log("sramLoad") }
+
         /*short tmp = sprMem.load(sramAddress);
         sramAddress++; // Increment address
         sramAddress%=0x100;
@@ -5221,6 +5261,8 @@ JSNES.PPU.prototype = {
     // Write to SPR-RAM (Sprite RAM).
     // The address should be set first.
     sramWrite: function(value){
+      if(this.debug) { console.log("sramWrite") }
+
         this.spriteMem[this.sramAddress] = value;
         this.spriteRamWriteUpdate(this.sramAddress,value);
         this.sramAddress++; // Increment address
@@ -5232,6 +5274,8 @@ JSNES.PPU.prototype = {
     // The first write is the vertical offset, the second is the
     // horizontal offset:
     scrollWrite: function(value){
+      if(this.debug) { console.log("scrollWrite") }
+
         this.triggerRendering();
 
         if (this.firstWrite) {
@@ -5254,6 +5298,8 @@ JSNES.PPU.prototype = {
     // Sets the adress used when reading/writing from/to VRAM.
     // The first write sets the high byte, the second the low byte.
     writeVRAMAddress: function(address){
+      if(this.debug) { console.log("writeVRAMAddress") }
+
 
         if (this.firstWrite) {
 
@@ -5290,6 +5336,8 @@ JSNES.PPU.prototype = {
     // CPU Register $2007(R):
     // Read from PPU memory. The address should be set first.
     vramLoad: function(){
+      if(this.debug) { console.log("vramLoad") }
+
         var tmp;
 
         this.cntsToAddress();
@@ -5338,6 +5386,8 @@ JSNES.PPU.prototype = {
     // CPU Register $2007(W):
     // Write to PPU memory. The address should be set first.
     vramWrite: function(value){
+      if(this.debug) { console.log("vramWrite") }
+
 
         this.triggerRendering();
         this.cntsToAddress();
@@ -5367,6 +5417,8 @@ JSNES.PPU.prototype = {
     // Write 256 bytes of main memory
     // into Sprite RAM.
     sramDMA: function(value){
+      if(this.debug) { console.log("sramDMA") }
+
         var baseAddress = value * 0x100;
         var data;
         for (var i=this.sramAddress; i < 256; i++) {
@@ -5381,6 +5433,8 @@ JSNES.PPU.prototype = {
 
     // Updates the scroll registers from a new VRAM address.
     regsFromAddress: function(){
+      if(this.debug) { console.log("regsFromAddress") }
+
 
         var address = (this.vramTmpAddress>>8)&0xFF;
         this.regFV = (address>>4)&7;
@@ -5395,6 +5449,7 @@ JSNES.PPU.prototype = {
 
     // Updates the scroll registers from a new VRAM address.
     cntsFromAddress: function(){
+        if(this.debug) { console.log("cntsFromAddress") }
 
         var address = (this.vramAddress>>8)&0xFF;
         this.cntFV = (address>>4)&3;
@@ -5433,6 +5488,8 @@ JSNES.PPU.prototype = {
     },
 
     incTileCounter: function(count) {
+      if(this.debug) { console.log("incTileCounter") }
+
         for (var i=count; i!==0; i--) {
             this.cntHT++;
             if (this.cntHT == 32) {
@@ -5457,12 +5514,16 @@ JSNES.PPU.prototype = {
     // Reads from memory, taking into account
     // mirroring/mapping of address ranges.
     mirroredLoad: function(address) {
+      if(this.debug) { console.log("mirroredLoad") }
+
         return this.vramMem[this.vramMirrorTable[address]];
     },
 
     // Writes to memory, taking into account
     // mirroring/mapping of address ranges.
     mirroredWrite: function(address, value){
+      if(this.debug) { console.log("mirroredWrite") }
+
         if (address>=0x3f00 && address<0x3f20) {
             // Palette write mirroring.
             if (address==0x3F00 || address==0x3F10) {
@@ -5502,6 +5563,8 @@ JSNES.PPU.prototype = {
     },
 
     triggerRendering: function(){
+      if(this.debug) { console.log("triggerRendering") }
+
         if (this.scanline >= 21 && this.scanline <= 260) {
             // Render sprites, and combine:
             this.renderFramePartially(
@@ -5515,6 +5578,7 @@ JSNES.PPU.prototype = {
     },
 
     renderFramePartially: function(startScan, scanCount){
+
         if (this.f_spVisibility == 1) {
             this.renderSpritesPartially(startScan,scanCount,true);
         }
@@ -5754,6 +5818,8 @@ JSNES.PPU.prototype = {
     },
 
     checkSprite0: function(scan){
+      if(this.debug) { console.log("checkSprite0") }
+
 
         this.spr0HitX = -1;
         this.spr0HitY = -1;
@@ -5900,6 +5966,8 @@ JSNES.PPU.prototype = {
     // update internally buffered data
     // appropriately.
     writeMem: function(address, value){
+      if(this.debug) { console.log("writeMem") }
+
         this.vramMem[address] = value;
 
         // Update internally buffered data:
@@ -5939,6 +6007,8 @@ JSNES.PPU.prototype = {
     // Reads data from $3f00 to $f20
     // into the two buffered palettes.
     updatePalettes: function(){
+      if(this.debug) { console.log("updatePalettes") }
+
         var i;
 
         for (i = 0; i < 16; i++) {
@@ -5971,6 +6041,8 @@ JSNES.PPU.prototype = {
     // table buffers with this new byte.
     // In vNES, there is a version of this with 4 arguments which isn't used.
     patternWrite: function(address, value){
+      if(this.debug) { console.log("patternWrite") }
+
         var tileIndex = parseInt(address / 16, 10);
         var leftOver = address%16;
         if (leftOver<8) {
@@ -5992,6 +6064,8 @@ JSNES.PPU.prototype = {
     // Updates the internal name table buffers
     // with this new byte.
     nameTableWrite: function(index, address, value){
+      if(this.debug) { console.log("nameTableWrite") }
+
         this.nameTable[index].tile[address] = value;
 
         // Update Sprite #0 hit:
@@ -6003,12 +6077,16 @@ JSNES.PPU.prototype = {
     // table buffers with this new attribute
     // table byte.
     attribTableWrite: function(index, address, value){
+      if(this.debug) { console.log("attribTableWrite") }
+
         this.nameTable[index].writeAttrib(address,value);
     },
 
     // Updates the internally buffered sprite
     // data with this new byte of info.
     spriteRamWriteUpdate: function(address, value){
+      if(this.debug) { console.log("spriteRamWriteUpdate") }
+
         var tIndex = parseInt(address / 4, 10);
 
         if (tIndex === 0) {
@@ -6036,6 +6114,8 @@ JSNES.PPU.prototype = {
     },
 
     doNMI: function(){
+      if(this.debug) { console.log("doNMIu") }
+
         // Set VBlank flag:
         this.setStatusFlag(this.STATUS_VBLANK,true);
         //nes.getCpu().doNonMaskableInterrupt();
@@ -6313,7 +6393,7 @@ JSNES.PPU.Tile.prototype = {
                         this.palIndex = this.pix[this.tIndex];
                         this.tpri = priTable[this.fbIndex];
                         if (this.palIndex!==0 && pri<=(this.tpri&0xFF)) {
-                            //console.log("Rendering upright tile to buffer");
+                            //if(this.debug) { console.log("Rendering upright tile to buffer") }
                             buffer[this.fbIndex] = palette[this.palIndex+palAdd];
                             this.tpri = (this.tpri&0xF00)|pri;
                             priTable[this.fbIndex] =this.tpri;

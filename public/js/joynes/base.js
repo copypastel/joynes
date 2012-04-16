@@ -1,5 +1,11 @@
 joynes.Base.prototype = {
-  loadRom : function(url) {
+  
+  partner : function(command, data) {
+    var self = this;
+    self.socket.emit("proxy", {"command": command, "data": data })
+  },
+  
+  loadRom : function(url, callback) {
     var self = this;
 
     $.ajax( {
@@ -10,13 +16,13 @@ joynes.Base.prototype = {
         xhr.overrideMimeType('text/plain; charset=x-user-defined');
         return xhr;
       },
-      success: function(data) { self.loadRomData(data); }
+      success: function(data) { self.loadRomData(data); if(callback) { callback() }  }
     })
   },
 
   loadRomData: function(data) {
     this.nes.loadRom(data);
-    this.nes.start();
+    if(this.startRom) { this.nes.start() }
     this.nes.ui.enable();
   },
 };
