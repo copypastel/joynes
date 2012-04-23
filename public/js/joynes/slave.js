@@ -156,12 +156,12 @@ joynes.Slave.prototype = {
         case 'loadVromBank':
           self.loadVromBank(instruction['bank'], instruction['address']);
         break;
-//        case 'load1kVromBank':
-//          self.load1kVromBank(instruction['bank'], instruction['address']);
-//        break;
-//        case 'load2kVromBank':
-//          self.load2kVromBank(instruction['bank'], instruction['address']);
-//        break;
+        case 'load1kVromBank':
+          self.load1kVromBank(instruction['bank'], instruction['address']);
+        break;
+        case 'load2kVromBank':
+          self.load2kVromBank(instruction['bank'], instruction['address']);
+        break;
         case 'updateControlReg1':
           self.updateControlReg1(instruction['value']);
         break;
@@ -201,6 +201,14 @@ joynes.Slave.prototype = {
 
   loadVromBank: function(bank, address) {
     this.nes.mmap.loadVromBank(bank, address)
+  },
+
+  load1kVromBank: function(bank, address) {
+    this.nes.mmap.load1kVromBank(bank, address)
+  },
+
+  load2kVromBank: function(bank, address) {
+    this.nes.mmap.load2kVromBank(bank, address)
   },
 
   // CPU Register $4014:
