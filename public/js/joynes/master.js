@@ -73,10 +73,13 @@ joynes.Master.prototype = {
     self.nes.mmap.loadVromBank = function(bank, address) { self.loadVromBank(bank, address) }
 
     self.mmapLoad1kVromBank = self.nes.mmap.load1kVromBank;
-    self.nes.mmap.load1kVromBank = function(bank, address) { alert("Not Implemented load1kVromBank") }
+    self.nes.mmap.load1kVromBank = function(bank, address) { self.load1kVromBank(bank, address) }
 
     self.mmapLoad2kVromBank = self.nes.mmap.load2kVromBank;
-    self.nes.mmap.load2kVromBank = function(bank, address) { alert("Not Implemented load2kVromBank") }
+    self.nes.mmap.load2kVromBank = function(bank, address) { self.load2kVromBank(bank, address) }
+
+    self.mmapWrite = self.nes.mmap.write;
+    self.nes.mmap.write = function(address, value) { self.f_mmapWrite(address, value) }
   },
 
   endFrame: function() {
@@ -161,11 +164,25 @@ joynes.Master.prototype = {
         "controlReg1Value": this.nes.ppu.controlReg1Value,
         "controlReg2Value": this.nes.ppu.controlReg2Value,
       });
-      self.syncPPU   = false
+
+      self.partner("MMAP:Initialize", {
+        "mapperType": self.nes.rom.mapperType,
+        "regBuffer": self.nes.mmap.regBuffer,
+        "regBufferCounter": self.nes.mmap.regBufferCounter,
+        "mirroring": self.nes.mmap.mirroring,
+        "oneScreenMirroring": self.nes.mmap.oneScreenMirroring,
+        "prgSwitchingArea": self.nes.mmap.prgSwitchingArea,
+        "prgSwitchingSize": self.nes.mmap.prgSwitchingSize,
+        "vromSwitchingSize": self.nes.mmap.vromSwitchingSize,
+        "romSelectionReg0": self.nes.mmap.romSelectionReg0,
+        "romSelectionReg1": self.nes.mmap.romSelectionReg1,
+        "romBankSelect": self.nes.mmap.romBankSelect,
+      });
+
+      self.syncPPU = false;
       self.syncFrame = true;
     }
     else if(self.syncFrame) {
-      console.log("syncing frame");
       self.partner("PPU:Frame", {"instruction": self.instruction_id, "frame_instructions": self.frame_instructions})
     }
     else {
@@ -245,24 +262,35 @@ joynes.Master.prototype = {
 
   loadVromBank: function(bank, address) {
     var self = this;
-    this.mmapLoadVromBank.call(this.nes.ppu, bank, address);
+    this.mmapLoadVromBank.call(this.nes.mmap, bank, address);
     var instruction = { "enum": "loadVromBank", "bank": bank, "address": address };
     this.frame_instructions.push(instruction);
   },
 
-  load1kVromBank: function(bank, instruction) {
+  load1kVromBank: function(bank, address) {
     var self = this;
-    this.mmapLoad1kVromBank.call(this.nes.ppu, bank, address);
+    this.mmapLoad1kVromBank.call(this.nes.mmap, bank, address);
     var instruction = { "enum": "load1kVromBank", "bank": bank, "address": address };
     this.frame_instructions.push(instruction);
 
   },
 
-  load2kVromBank: function(bank, instruction) {
+  load2kVromBank: function(bank, address) {
     var self = this;
-    this.mmapLoad2kVromBank.call(this.nes.ppu, bank, address);
-    var instruction = { "enum": "load1kVromBank", "bank": bank, "address": address };
+    this.mmapLoad2kVromBank.call(this.nes.mmap, bank, address);
+    var instruction = { "enum": "load2kVromBank", "bank": bank, "address": address };
     this.frame_instructions.push(instruction);
+  },
+
+  f_mmapWrite: function(address, value) {
+    var self = this;
+    self.mmapWrite.call(this.nes.mmap, address, value);
+
+    if (address < 0x8000) {
+    } else {
+      var instruction = { "enum": "mmapWrite", "address": address, "value": value }
+      this.frame_instructions.push(instruction);
+    }
   },
 
   setSprite0HitFlag: function() {

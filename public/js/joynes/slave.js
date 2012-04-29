@@ -99,6 +99,20 @@ joynes.Slave.prototype = {
       console.log("Waiting for instruction " + self.current_instruction)
     });
 
+    self.socket.on("MMAP:Initialize", function(data) {
+      //TODO: Respec mapperType
+      self.nes.mmap.regBuffer = data["regBuffer"];
+      self.nes.mmap.regBufferCounter = data["regBufferCounter"];
+      self.nes.mmap.mirroring = data["mirroring"];
+      self.nes.mmap.oneScreenMirroring = data["oneScreenMirroring"];
+      self.nes.mmap.prgSwitchingArea = data["prgSwitchingArea"];
+      self.nes.mmap.prgSwitchingSize = data["prgSwitchingSize"];
+      self.nes.mmap.vromSwitchingSize = data["vromSwitchingSize"];
+      self.nes.mmap.romSelectionReg0 = data["romSelectionReg0"];
+      self.nes.mmap.romSelectionReg1 = data["romSelectionReg1"];
+      self.nes.mmap.romBankSelect = data["romBankSelect"];
+    });
+
     self.socket.on("PPU:Frame", function(data) {
       if(self.current_instruction == data['instruction'] ) {
         self.nes.ppu.startFrame();
@@ -156,12 +170,15 @@ joynes.Slave.prototype = {
         case 'loadVromBank':
           self.loadVromBank(instruction['bank'], instruction['address']);
         break;
-//        case 'load1kVromBank':
-//          self.load1kVromBank(instruction['bank'], instruction['address']);
-//        break;
-//        case 'load2kVromBank':
-//          self.load2kVromBank(instruction['bank'], instruction['address']);
-//        break;
+        case 'load1kVromBank':
+          self.load1kVromBank(instruction['bank'], instruction['address']);
+        break;
+        case 'load2kVromBank':
+          self.load2kVromBank(instruction['bank'], instruction['address']);
+        break;
+        case 'mmapWrite':
+          self.mmapWrite(instruction['address'], instruction['value']);
+        break;
         case 'updateControlReg1':
           self.updateControlReg1(instruction['value']);
         break;
@@ -201,6 +218,18 @@ joynes.Slave.prototype = {
 
   loadVromBank: function(bank, address) {
     this.nes.mmap.loadVromBank(bank, address)
+  },
+
+  load1kVromBank: function(bank, address) {
+    this.nes.mmap.load1kVromBank(bank, address)
+  },
+
+  load2kVromBank: function(bank, address) {
+    this.nes.mmap.load2kVromBank(bank, address)
+  },
+
+  mmapWrite: function(address, value) {
+    this.nes.mmap.write(address, value);
   },
 
   // CPU Register $4014:
