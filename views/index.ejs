@@ -60,13 +60,15 @@
     var games = document.getElementsByClassName("game");
     for(var i = 0; i < games.length; i++) {
 
-      games.item(i).onmouseover = function(event) {
+      var game = games.item(i);
+
+      game.onmouseover = function(event) {
         var title = event.target.getAttribute("data-game");
         displayPoster(title);
       }
 
       // Restore poster to loaded game
-      games.item(i).onmouseout = function(event) {
+      game.onmouseout = function(event) {
         var gameIndex = document.querySelector("select").selectedIndex;
         var games = document.querySelectorAll("select option");
         var title = games.item(gameIndex).innerHTML;
@@ -74,7 +76,7 @@
         displayPoster(title);
       }
 
-      games.item(i).onclick = function(event) {
+      game.onclick = function(event) {
         var title = event.target.getAttribute("data-game");
         var roms = document.querySelector(".nes-roms select");
 
@@ -82,12 +84,21 @@
 
         // Load game's ROM
         for(var j = 0; j < roms.options.length; j++) {
-          var game = roms.options.item(j);
-          if(game.innerHTML == title) {
+          var rom = roms.options.item(j);
+          if(rom.innerHTML == title) {
             roms.selectedIndex = j;
             $(".nes-roms select").change();
           }
         }
+
+        setTimeout(function() {
+          // We're scaling element up; if this causes a slowdown
+          // in rendering, we should be removing a negative scale here.
+          $(".nes-screen").
+            css("-webkit-transform", "skewY(0) scale(5)").
+            css("left", "-79px");
+          $("#wrapper-main").css("opacity", "0.4");
+        }, 1000);
       }
     }
   }
@@ -102,7 +113,6 @@
 		</div>
 		<div id="container-tv">
 			<div id="tv">
-        <div id="emulator"></div>
 				<!-- <p>This is a tv.</p> -->
 			</div>
 		</div>
@@ -148,4 +158,5 @@
 		</div> -->
 	</div>
 </div>
+<div id="emulator"></div>
 

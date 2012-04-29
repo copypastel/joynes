@@ -8,6 +8,7 @@ div#wrapper-main {
 	width: 1024px;
 	height: 768px;
 	margin: 0 auto;
+  -webkit-transition: opacity 0.5s ease-in;
 }
 
 div#container-main {
@@ -49,8 +50,12 @@ div#tv {
 	/*float: left;*/
 }
 
-div#tv p {
-
+#emulator {
+  position: absolute;
+  top: 309px;
+  left: 622px;
+  width: 41px;
+  height: 47px;
 }
 
 div#container-nes {
@@ -95,6 +100,7 @@ div#nes p {
   position: relative;
   top: 36px;
   left: 7px;
+  z-index: 9999;
 }
 
 .nes-roms { display: none; }
