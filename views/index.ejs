@@ -12,19 +12,20 @@
 			})
 		});
 
-		// master = new joynes.Master(masterNes);
-
-    //var socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
     socket = io.connect('http://' + document.location.hostname + ':3333/');
+
+    // Display sessionId
+    socket.on("connect", function(evt) {
+      var sessionId = document.createElement("div");
+      document.querySelector("#sessionId").innerHTML = sessionId;
+    });
+
     socket.on("role", function(evt) {
-      console.log(evt);
       var message = JSON.parse(evt);
-      if (message.initialize) {
-        switch (message.initialize) {
-          case 'm': joynesClient = new joynes.Master(emulator, socket); break;
-          case 's': joynesClient = new joynes.Slave(emulator, socket); break;
-		  default: alert("something's wrong");
-        }
+      switch (message.initialize) {
+        case 'm': joynesClient = new joynes.Master(emulator, socket); break;
+        case 's': joynesClient = new joynes.Slave(emulator, socket); break;
+        default: alert("something's wrong");
       }
     });
 
@@ -54,6 +55,8 @@
   }
 
   document.onready = function() {
+
+    // Game setup (cartridges, posters)
     var games = document.getElementsByClassName("game");
     for(var i = 0; i < games.length; i++) {
 
@@ -115,12 +118,10 @@
       <img src="/images/dr_mario.png" data-game="Dr. Mario"/>
     </div>
 		<div id="container-controllers">
-			<div id="controllers">
-				<ul id="controllers">
-					<li class="controllers" id="controller1"></li>
-					<li class="controllers" id="controller2"></li>
-				</ul>
-			</div>
+      <ul>
+        <li class="controller" id="controller1"></li>
+        <li class="controller" id="controller2"></li>
+      </ul>
 		</div>
 		<div id="container-games">
 			<ul id="games">
