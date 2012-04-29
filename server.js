@@ -74,9 +74,12 @@ io.sockets.on("connection", function(player){
   });
 
   player.on("proxy", function(data){
-    if(channels[player.id] != undefined){
-      var partner = channels[player.id];
+    var partner = getPartner(player.id);
+    if(partner != undefined){
+      console.log("Sending data " + data);
       partner.emit(data['command'], data['data']);
+    } else {
+      console.log("!! Tried sending message to ghost partner");
     }
   });
 });
