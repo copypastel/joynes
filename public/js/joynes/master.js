@@ -204,15 +204,15 @@ joynes.Master.prototype = {
   scrollWrite: function(value) {
     var self = this;
     self.ppuScrollWrite.call(self.nes.ppu, value);
-    var instruction = {"enum": "scrollWrite", "value": value}
-    self.frame_instructions.push(instruction)
+    var instruction = [self.INSTRUCTIONS.scrollWrite, value];
+    self.frame_instructions.push(instruction);
   },
 
   writeSRAMAddress: function(value) {
     var self = this;
     self.ppuWriteSRAMAddress.call(self.nes.ppu, value)
-    var instruction = {"enum": "writeSRAMAddress", "value": value}
-    self.frame_instructions.push(instruction)
+    var instruction = [self.INSTRUCTIONS.writeSRAMAddress, value];
+    self.frame_instructions.push(instruction);
   },
 
   sramDMA: function(value) {
@@ -227,11 +227,11 @@ joynes.Master.prototype = {
         self.nes.ppu.spriteRamWriteUpdate(i, data);
     }
     // Assuming we only receive 1 sramDMA per screen cycle, need to verify this
-    var instruction = {
-      "enum": "sramDMA",
-      "value": value,
-      "data": self.sramBuffer,
-    };
+    var instruction = [
+      self.INSTRUCTIONS.sramDMA,
+      value,
+      self.sramBuffer,
+    ];
 
     self.frame_instructions.push(instruction)
     self.nes.cpu.haltCycles(513);
@@ -240,45 +240,45 @@ joynes.Master.prototype = {
   sramWrite: function(value) {
     var self = this;
     this.ppuSramWrite.call(this.nes.ppu, value);
-    var instruction = {
-      "enum": "sramWrite",
-      "value": value,
-    }
+    var instruction = [
+      self.INSTRUCTIONS.sramWrite,
+      value,
+    ]
     self.frame_instructions.push(instruction);
   },
 
   vramWrite: function(value) {
     var self = this;
     this.ppuVramWrite.call(this.nes.ppu, value);
-    var instruction = { "enum": "vramWrite", "value": value }
+    var instruction = [ self.INSTRUCTIONS.vramWrite, value ]
     self.frame_instructions.push(instruction);
   },
 
   writeVRAMAddress: function(value) {
     var self = this;
     this.ppuWriteVRAMAddress.call(this.nes.ppu, value);
-    var instruction = { "enum": "writeVRAMAddress", "value": value }
+    var instruction = [this.INSTRUCTIONS.writeVRAMAddress, value];
     self.frame_instructions.push(instruction);
   },
 
   endScanline: function() {
     var self = this;
     this.ppuEndScanline.call(this.nes.ppu);
-    var instruction = { "enum": "endScanline" };
+    var instruction = [self.INSTRUCTIONS.endScanLine];
     this.frame_instructions.push(instruction);
   },
 
   loadVromBank: function(bank, address) {
     var self = this;
     this.mmapLoadVromBank.call(this.nes.mmap, bank, address);
-    var instruction = { "enum": "loadVromBank", "bank": bank, "address": address };
+    var instruction = [self.INSTRUCTIONS.loadVromBank, bank, address];
     this.frame_instructions.push(instruction);
   },
 
   load1kVromBank: function(bank, address) {
     var self = this;
     this.mmapLoad1kVromBank.call(this.nes.mmap, bank, address);
-    var instruction = { "enum": "load1kVromBank", "bank": bank, "address": address };
+    var instruction = [self.INSTRUCTIONS.load1kVromBank, bank, address];
     this.frame_instructions.push(instruction);
 
   },
@@ -286,7 +286,7 @@ joynes.Master.prototype = {
   load2kVromBank: function(bank, address) {
     var self = this;
     this.mmapLoad2kVromBank.call(this.nes.mmap, bank, address);
-    var instruction = { "enum": "load2kVromBank", "bank": bank, "address": address };
+    var instruction = [self.INSTRUCTIONS.load2kVromBank, bank, address];
     this.frame_instructions.push(instruction);
   },
 
@@ -296,32 +296,32 @@ joynes.Master.prototype = {
 
     if (address < 0x8000) {
     } else {
-      var instruction = { "enum": "mmapWrite", "address": address, "value": value }
+      var instruction = [self.INSTRUCTIONS.mmapWrite, address, value];
       this.frame_instructions.push(instruction);
     }
   },
 
   setSprite0HitFlag: function() {
     this.ppuSetSprite0HitFlag.call(this.nes.ppu);
-    var instruction = { "enum": "setSprite0HitFlag" };
+    var instruction = [this.INSTRUCTIONS.setSprite0HitFlag];
     this.frame_instructions.push(instruction);
   },
 
   updateControlReg1: function(value) {
     this.ppuUpdateControlReg1.call(this.nes.ppu, value);
-    var instruction = { "enum": "updateControlReg1", "value": value };
+    var instruction = [this.INSTRUCTIONS.updateControlReg1, value];
     this.frame_instructions.push(instruction);
   },
 
   updateControlReg2: function(value) {
     this.ppuUpdateControlReg2.call(this.nes.ppu, value);
-    var instruction = { "enum": "updateControlReg2", "value": value };
+    var instruction = [this.INSTRUCTIONS.updateControlReg2, value];
     this.frame_instructions.push(instruction);
   },
 
   readStatusRegister: function() {
     res = this.ppuReadStatusRegister.call(this.nes.ppu);
-    var instruction = { "enum": "readStatusRegister" }
+    var instruction = [this.INSTRUCTIONS.readStatusRegister];
     this.frame_instructions.push(instruction);
     return res;
   },
