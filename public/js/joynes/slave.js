@@ -158,52 +158,56 @@ joynes.Slave.prototype = {
   renderFrame: function(instructions) {
     var self = this;
     for(i in instructions) {
-      instruction = instructions[i]
-      switch (instruction['enum']) {
-        case 'sramDMA':
-          self.sramDMA(instruction['value'], instruction['data']);
+      instruction = instructions[i][0];
+      args = instructions[i].slice(1, instruction.length);
+//      self.apply(FUNCTION_MAPPINGS[instruction[0]], instruction.slice(1, instruction.length)
+      switch (instruction) {
+        case self.INSTRUCTIONS.sramDMA:
+          self.sramDMA.apply(self, args);
         break;
-        case 'scrollWrite':
-          self.scrollWrite(instruction['value']);
+        case self.INSTRUCTIONS.scrollWrite:
+          self.scrollWrite.apply(self, args);
         break;
-        case 'writeSRAMAddress':
-          self.writeSRAMAddress(instruction['value']);
+        case self.INSTRUCTIONS.writeSRAMAddress:
+          self.writeSRAMAddress.apply(self, args);
         break;
-        case 'endScanline':
-          self.endScanline();
+        case self.INSTRUCTIONS.endScanLine:
+          for(var j = 0; j < args[0]; j++) {
+            self.endScanline.apply(self);
+          }
         break;
-        case 'loadVromBank':
-          self.loadVromBank(instruction['bank'], instruction['address']);
+        case self.INSTRUCTIONS.loadVromBank:
+          self.loadVromBank.apply(self, args);
         break;
-        case 'load1kVromBank':
-          self.load1kVromBank(instruction['bank'], instruction['address']);
+        case self.INSTRUCTIONS.load1kVromBank:
+          self.load1kVromBank.apply(self, args);
         break;
-        case 'load2kVromBank':
-          self.load2kVromBank(instruction['bank'], instruction['address']);
+        case self.INSTRUCTIONS.load2kVromBank:
+          self.load2kVromBank.apply(self, args);
         break;
-        case 'mmapWrite':
-          self.mmapWrite(instruction['address'], instruction['value']);
+        case self.INSTRUCTIONS.mmapWrite:
+          self.mmapWrite.apply(self, args);
         break;
-        case 'updateControlReg1':
-          self.updateControlReg1(instruction['value']);
+        case self.INSTRUCTIONS.updateControlReg1:
+          self.updateControlReg1.apply(self, args);
         break;
-        case 'updateControlReg2':
-          self.updateControlReg2(instruction['value']);
+        case self.INSTRUCTIONS.updateControlReg2:
+          self.updateControlReg2.apply(self, args);
         break;
-        case 'setSprite0HitFlag':
-          self.setSprite0HitFlag();
+        case self.INSTRUCTIONS.setSprite0HitFlag:
+          self.setSprite0HitFlag.apply(self, args);
         break;
-        case 'sramWrite':
-          self.sramWrite(instruction['value']);
+        case self.INSTRUCTIONS.sramWrite:
+          self.sramWrite.apply(self, args);
         break;
-        case 'writeVRAMAddress':
-          self.writeVRAMAddress(instruction['value']);
+        case self.INSTRUCTIONS.writeVRAMAddress:
+          self.writeVRAMAddress.apply(self, args);
         break;
-        case 'vramWrite':
-          self.vramWrite(instruction['value']);
+        case self.INSTRUCTIONS.vramWrite:
+          self.vramWrite.apply(self, args);
         break;
-        case 'readStatusRegister':
-          self.readStatusRegister();
+        case self.INSTRUCTIONS.readStatusRegister:
+          self.readStatusRegister.apply(self, args);
         break;
       }
     }
