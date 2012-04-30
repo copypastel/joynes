@@ -42,22 +42,26 @@
     }
   });
 
-  var displayPoster = function(title) {
-    var posters = document.querySelectorAll("#poster img");
-    for(var j = 0; j < posters.length; j++) {
-      var poster = posters.item(j);
+  var currentPoster = undefined;
 
-      if(poster.getAttribute("data-game") == title) {
-        poster.style.display = "block";
-      } else {
-        poster.style.display = "none";
-      }
+  var displayPoster = function(title, timeout) {
+    timeout = timeout || 500;
+    var poster = document.querySelector("#posters li[data-game='" + title + "']");
+
+    // Hide previous poster
+    if(currentPoster) {
+      currentPoster.style.opacity = 0;
+    }
+
+    currentPoster = poster;
+    // Display title's poster
+    if(currentPoster) {
+      currentPoster.style.opacity = 1;
     }
   }
 
   var popScreen = function(timeout) {
     var nesScreen = $(".nes-screen");
-    console.log(nesScreen.data("popped"));
     if(!nesScreen.data("popped")) {
       timeout = timeout || 1000;
       nesScreen.data("popped", true);
@@ -75,7 +79,7 @@
   document.onready = function() {
 
     // Game setup (cartridges, posters)
-    var games = document.getElementsByClassName("game");
+    var games = document.querySelectorAll("#games li");
     for(var i = 0; i < games.length; i++) {
 
       var game = games.item(i);
@@ -130,11 +134,13 @@
 				<!-- <p>This is a nes system.</p> -->
 			</div>
 		</div>
-    <div id="poster">
-      <img src="/images/bubble_bobble.png" data-game="Bubble Bobble"/>
-      <img src="/images/bubble_bobble_2.png" data-game="Bubble Bobble 2"/>
-      <img src="/images/contra.png" data-game="Contra"/>
-      <img src="/images/dr_mario.png" data-game="Dr. Mario"/>
+    <div id="container-posters">
+      <ul id="posters">
+        <li data-game="Dr. Mario"/>
+        <li data-game="Contra"/>
+        <li data-game="Bubble Bobble"/>
+        <li data-game="Bubble Bobble 2"/>
+      </ul>
     </div>
 		<div id="container-controllers">
       <ul>
@@ -142,14 +148,14 @@
         <li class="controller" id="controller2"></li>
       </ul>
 		</div>
-		<div id="container-games">
-			<ul id="games">
-				<li class="game" id="game1" data-game="Dr. Mario">Game 1</li>
-				<li class="game" id="game2" data-game="Contra">Game 2</li>
-				<li class="game" id="game3" data-game="Bubble Bobble">Game 3</li>
-				<li class="game" id="game4" data-game="Bubble Bobble 2">Game 4</li>
-			</ul>
-		</div>
+    <div id="container-games">
+      <ul id="games">
+        <li data-game="Dr. Mario" />
+        <li data-game="Contra" />
+        <li data-game="Bubble Bobble" />
+        <li data-game="Bubble Bobble 2" />
+      </ul>
+    </div>
 		<div id="container-couch">
 			<div id="couch">
 				<!-- <p>This is the couch.</p> -->
