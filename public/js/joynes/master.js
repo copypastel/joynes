@@ -264,8 +264,14 @@ joynes.Master.prototype = {
   endScanline: function() {
     var self = this;
     this.ppuEndScanline.call(this.nes.ppu);
-    var instruction = [self.INSTRUCTIONS.endScanLine];
-    this.frame_instructions.push(instruction);
+    var instruction = [self.INSTRUCTIONS.endScanLine, 1];
+    var last_instruction = self.frame_instructions[self.frame_instructions.length - 1]
+    if(last_instruction && last_instruction[0] == self.INSTRUCTIONS.endScanLine) {
+      self.frame_instructions[self.frame_instructions.length -1][1]++;
+    }
+    else {
+      self.frame_instructions.push(instruction);
+    }
   },
 
   loadVromBank: function(bank, address) {

@@ -172,7 +172,9 @@ joynes.Slave.prototype = {
           self.writeSRAMAddress.apply(self, args);
         break;
         case self.INSTRUCTIONS.endScanLine:
-          self.endScanline.apply(self, args);
+          for(var j = 0; j < args[0]; j++) {
+            self.endScanline.apply(self);
+          }
         break;
         case self.INSTRUCTIONS.loadVromBank:
           self.loadVromBank.apply(self, args);
