@@ -7,26 +7,37 @@ joynes.Master.prototype = {
     self.frame_instructions = [];
     self.startRom = true;
     self.sramBuffer = new Array(256);
-    self.syncPPU = false;
     self.syncFrame = false;
     self.debug = false;
+    self.selectedRom = null;
 
     this.lastSendTime = null;
 
-    this.nes.ui.romSelect.unbind('change');
-    this.nes.ui.romSelect.bind('change', function(){
-      self.loadRom(self.nes.ui.romSelect.val(), function() { self.romInitialized() });
-      self.partner("Rom:Changed", self.nes.ui.romSelect.val());
-    });
+    this.setupRomListener();
 
     self.socket.on("PPU:Sync", function() {
-      self.syncPPU = true;
-    })
+      self.nes.stop();
+      self.syncPPU();
+    });
 
     this.socket.on("message", function(evt){
       var data = JSON.parse(evt);
       if(data.close) { self.setFrameRate(60); return }
       if(data.key)   { self.nes.keyboard.setKey(data.key, data.value) }
+    });
+
+    this.socket.on("state:partner_joined", function(partner_id) {
+      // TODO: Update UI to indicate new challenger
+      if(self.selectedRom) {
+        self.nes.stop();
+        self.partner("Rom:Changed", self.selectedRom);
+      }  else {}
+    });
+
+    this.socket.on("state:partner_ready", function() {
+      console.log("Player is ready");
+      self.syncFrame = true;
+      self.nes.start();
     });
 
     self.ppuEndFrame = self.nes.ppu.endFrame;
@@ -82,110 +93,107 @@ joynes.Master.prototype = {
     self.nes.mmap.write = function(address, value) { self.f_mmapWrite(address, value) }
   },
 
+  syncPPU: function() {
+    console.log("Syncing PPU");
+    this.nes.ppu.ptTile[1].initialized = true;
+    console.log(this.nes.ppu.ptTile[1]);
+    var self = this;
+    self.partner("PPU:Initialize", {
+      "instruction": self.instruction_id,
+      "vramMem": this.nes.ppu.vramMem,
+      "spriteMem": this.nes.ppu.spriteMem,
+      "vramAddress": this.nes.ppu.vramAddress,
+      "vramTmpAddress": this.nes.ppu.vramTmpAddress,
+      "vramBufferedReadValue": this.nes.ppu.vramBufferedReadValue,
+      "firstWrite": this.nes.ppu.firstWrite,
+      "sramAddress": this.nes.ppu.sramAddress,
+      "mapperIrqCounter": this.nes.ppu.mapperIrqCounter,
+      "currentMirroring": this.nes.ppu.currentMirroring,
+      "requestEndFrame": this.nes.ppu.requestEndFrame,
+      "nmiOk": this.nes.ppu.nmiOk,
+      "dummyCycleToggle": this.nes.ppu.dummyCycleToggle,
+      "validTileData": this.nes.ppu.validTileData,
+      "nmiCounter": this.nes.ppu.nmiCounter,
+      "scanlineAlreadyRendered": this.nes.ppu.scanlineAlreadyRendered,
+      "f_nmiOnVblank": this.nes.ppu.f_nmiOnVblank,
+      "f_spriteSize": this.nes.ppu.f_spriteSize,
+      "f_bgPatternTable": this.nes.ppu.f_bgPatternTable,
+      "f_spPatternTable": this.nes.ppu.f_spPatternTable,
+      "f_addrInc": this.nes.ppu.f_addrInc,
+      "f_nTblAddress": this.nes.ppu.f_nTblAddress,
+      "f_color": this.nes.ppu.f_color,
+      "f_spVisibility": this.nes.ppu.f_spVisibility,
+      "f_bgVisibility": this.nes.ppu.f_bgVisibility,
+      "f_spClipping": this.nes.ppu.f_spClipping,
+      "f_bgClipping": this.nes.ppu.f_bgClipping,
+      "f_dispType": this.nes.ppu.f_dispType,
+      "cntFV": this.nes.ppu.cntFV,
+      "cntV": this.nes.ppu.cntV,
+      "cntH": this.nes.ppu.cntH,
+      "cntVT": this.nes.ppu.cntVT,
+      "cntHT": this.nes.ppu.cntHT,
+      "regFV": this.nes.ppu.regFV,
+      "regV": this.nes.ppu.regV,
+      "regH": this.nes.ppu.regH,
+      "regVT": this.nes.ppu.regVT,
+      "regHT": this.nes.ppu.regHT,
+      "regFH": this.nes.ppu.regFH,
+      "regS": this.nes.ppu.regS,
+      "curNt": this.nes.ppu.curNt,
+      "attrib": this.nes.ppu.attrib,
+      "buffer": this.nes.ppu.buffer,
+      "bgbuffer": this.nes.ppu.bgbuffer,
+      "pixrendered": this.nes.ppu.pixrendered,
+      "spr0dummybuffer": this.nes.ppu.spr0dummybuffer,
+      "dummyPixPriTable": this.nes.ppu.dummyPixPriTable,
+      "validTileData": this.nes.ppu.validTileData,
+      "scantile": this.nes.ppu.scantile,
+      "scanline": this.nes.ppu.scanline,
+      "lastRenderedScanline": this.nes.ppu.lastRenderedScanline,
+      "curX": this.nes.ppu.curX,
+      "sprX": this.nes.ppu.sprX,
+      "sprY": this.nes.ppu.sprY,
+      "sprTile": this.nes.ppu.sprTile,
+      "sprCol": this.nes.ppu.sprCol,
+      "vertFlip": this.nes.ppu.vertFlip,
+      "horiFlip": this.nes.ppu.horiFlip,
+      "bgPriority": this.nes.ppu.bgPriority,
+      "spr0HitX": this.nes.ppu.spr0HitX,
+      "spr0HitY": this.nes.ppu.spr0HitY,
+      "hitSpr0": this.nes.ppu.hitSpr0,
+      "sprPalette": this.nes.ppu.sprPalette,
+      "imgPalette": this.nes.ppu.imgPalette,
+      "ptTile": this.nes.ppu.ptTile,
+      "ntable1": this.nes.ppu.ntable1,
+      "currentMirroring": this.nes.ppu.currentMirroring,
+      "nameTable": this.nes.ppu.nameTable,
+      "vramMirrorTable": this.nes.ppu.vramMirrorTable,
+      "palTable": this.nes.ppu.palTable,
+      "controlReg1Value": this.nes.ppu.controlReg1Value,
+      "controlReg2Value": this.nes.ppu.controlReg2Value,
+    });
+
+    self.partner("MMAP:Initialize", {
+      "mapperType": self.nes.rom.mapperType,
+      "regBuffer": self.nes.mmap.regBuffer,
+      "regBufferCounter": self.nes.mmap.regBufferCounter,
+      "mirroring": self.nes.mmap.mirroring,
+      "oneScreenMirroring": self.nes.mmap.oneScreenMirroring,
+      "prgSwitchingArea": self.nes.mmap.prgSwitchingArea,
+      "prgSwitchingSize": self.nes.mmap.prgSwitchingSize,
+      "vromSwitchingSize": self.nes.mmap.vromSwitchingSize,
+      "romSelectionReg0": self.nes.mmap.romSelectionReg0,
+      "romSelectionReg1": self.nes.mmap.romSelectionReg1,
+      "romBankSelect": self.nes.mmap.romBankSelect,
+    });
+  },
+
   endFrame: function() {
     var self = this;
 
     self.ppuEndFrame.call(self.nes.ppu);
-
-    if(self.syncPPU) {
-      this.nes.ppu.ptTile[1].initialized = true;
-      console.log(this.nes.ppu.ptTile[1])
-      self.partner("PPU:Initialize", {
-        "instruction": self.instruction_id + 1,
-        "vramMem": this.nes.ppu.vramMem,
-        "spriteMem": this.nes.ppu.spriteMem,
-        "vramAddress": this.nes.ppu.vramAddress,
-        "vramTmpAddress": this.nes.ppu.vramTmpAddress,
-        "vramBufferedReadValue": this.nes.ppu.vramBufferedReadValue,
-        "firstWrite": this.nes.ppu.firstWrite,
-        "sramAddress": this.nes.ppu.sramAddress,
-        "mapperIrqCounter": this.nes.ppu.mapperIrqCounter,
-        "currentMirroring": this.nes.ppu.currentMirroring,
-        "requestEndFrame": this.nes.ppu.requestEndFrame,
-        "nmiOk": this.nes.ppu.nmiOk,
-        "dummyCycleToggle": this.nes.ppu.dummyCycleToggle,
-        "validTileData": this.nes.ppu.validTileData,
-        "nmiCounter": this.nes.ppu.nmiCounter,
-        "scanlineAlreadyRendered": this.nes.ppu.scanlineAlreadyRendered,
-        "f_nmiOnVblank": this.nes.ppu.f_nmiOnVblank,
-        "f_spriteSize": this.nes.ppu.f_spriteSize,
-        "f_bgPatternTable": this.nes.ppu.f_bgPatternTable,
-        "f_spPatternTable": this.nes.ppu.f_spPatternTable,
-        "f_addrInc": this.nes.ppu.f_addrInc,
-        "f_nTblAddress": this.nes.ppu.f_nTblAddress,
-        "f_color": this.nes.ppu.f_color,
-        "f_spVisibility": this.nes.ppu.f_spVisibility,
-        "f_bgVisibility": this.nes.ppu.f_bgVisibility,
-        "f_spClipping": this.nes.ppu.f_spClipping,
-        "f_bgClipping": this.nes.ppu.f_bgClipping,
-        "f_dispType": this.nes.ppu.f_dispType,
-        "cntFV": this.nes.ppu.cntFV,
-        "cntV": this.nes.ppu.cntV,
-        "cntH": this.nes.ppu.cntH,
-        "cntVT": this.nes.ppu.cntVT,
-        "cntHT": this.nes.ppu.cntHT,
-        "regFV": this.nes.ppu.regFV,
-        "regV": this.nes.ppu.regV,
-        "regH": this.nes.ppu.regH,
-        "regVT": this.nes.ppu.regVT,
-        "regHT": this.nes.ppu.regHT,
-        "regFH": this.nes.ppu.regFH,
-        "regS": this.nes.ppu.regS,
-        "curNt": this.nes.ppu.curNt,
-        "attrib": this.nes.ppu.attrib,
-        "buffer": this.nes.ppu.buffer,
-        "bgbuffer": this.nes.ppu.bgbuffer,
-        "pixrendered": this.nes.ppu.pixrendered,
-        "spr0dummybuffer": this.nes.ppu.spr0dummybuffer,
-        "dummyPixPriTable": this.nes.ppu.dummyPixPriTable,
-        "validTileData": this.nes.ppu.validTileData,
-        "scantile": this.nes.ppu.scantile,
-        "scanline": this.nes.ppu.scanline,
-        "lastRenderedScanline": this.nes.ppu.lastRenderedScanline,
-        "curX": this.nes.ppu.curX,
-        "sprX": this.nes.ppu.sprX,
-        "sprY": this.nes.ppu.sprY,
-        "sprTile": this.nes.ppu.sprTile,
-        "sprCol": this.nes.ppu.sprCol,
-        "vertFlip": this.nes.ppu.vertFlip,
-        "horiFlip": this.nes.ppu.horiFlip,
-        "bgPriority": this.nes.ppu.bgPriority,
-        "spr0HitX": this.nes.ppu.spr0HitX,
-        "spr0HitY": this.nes.ppu.spr0HitY,
-        "hitSpr0": this.nes.ppu.hitSpr0,
-        "sprPalette": this.nes.ppu.sprPalette,
-        "imgPalette": this.nes.ppu.imgPalette,
-        "ptTile": this.nes.ppu.ptTile,
-        "ntable1": this.nes.ppu.ntable1,
-        "currentMirroring": this.nes.ppu.currentMirroring,
-        "nameTable": this.nes.ppu.nameTable,
-        "vramMirrorTable": this.nes.ppu.vramMirrorTable,
-        "palTable": this.nes.ppu.palTable,
-        "controlReg1Value": this.nes.ppu.controlReg1Value,
-        "controlReg2Value": this.nes.ppu.controlReg2Value,
-      });
-
-      self.partner("MMAP:Initialize", {
-        "mapperType": self.nes.rom.mapperType,
-        "regBuffer": self.nes.mmap.regBuffer,
-        "regBufferCounter": self.nes.mmap.regBufferCounter,
-        "mirroring": self.nes.mmap.mirroring,
-        "oneScreenMirroring": self.nes.mmap.oneScreenMirroring,
-        "prgSwitchingArea": self.nes.mmap.prgSwitchingArea,
-        "prgSwitchingSize": self.nes.mmap.prgSwitchingSize,
-        "vromSwitchingSize": self.nes.mmap.vromSwitchingSize,
-        "romSelectionReg0": self.nes.mmap.romSelectionReg0,
-        "romSelectionReg1": self.nes.mmap.romSelectionReg1,
-        "romBankSelect": self.nes.mmap.romBankSelect,
-      });
-
-      self.syncPPU = false;
-      self.syncFrame = true;
-    }
-    else if(self.syncFrame) {
+    if(self.syncFrame) {
       self.partner("PPU:Frame", {"instruction": self.instruction_id, "frame_instructions": self.frame_instructions})
-    }
-    else {
     }
 
     this.frame_instructions = [];
@@ -335,6 +343,21 @@ joynes.Master.prototype = {
       self.setFrameRate(frameRate + 1);
     }
     self.lastSendTime = now;
+  },
+
+  setupRomListener: function() {
+    var self = this;
+    this.nes.ui.romSelect.unbind('change');
+    this.nes.ui.romSelect.bind('change', function(){
+      console.log(self.nes);
+      self.loadRom(self.nes.ui.romSelect.val(), function() {
+        self.romInitialized();
+        self.selectedRom = self.nes.ui.romSelect.val();
+        console.log("Rom changed.");
+        self.partner("Rom:Changed", self.selectedRom);
+        self.onRomLoaded();
+      });
+    });
   }
 }
 

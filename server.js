@@ -29,7 +29,10 @@ var waiting = [];
 io.sockets.on("connection", function(player){
   util.log(player.id + " connected.");
 
-  player.on("pair", function(partnerId) {
+  player.on("register:m", function() {
+    player.emit("role", {initialize: "m"});
+  });
+  player.on("register:s", function(partnerId) {
     // if player with partnerId is already paired, ignore request
     // TODO: return an error
     var partnerAlreadyPaired = getPartner(partnerId);
@@ -41,7 +44,10 @@ io.sockets.on("connection", function(player){
     // If there is a player with the given partnerId, let's pair 'em
     if (partner != undefined) {
       // partner is actually player 1
-      pair(partner, player);
+      pair(player, partner);
+      player.emit("role", {initialize: "s"});
+      //TODO: Investigate race condition.  Master processes partner joined before slave finishes initializing
+      partner.emit("state:partner_joined", partner.id);
     } else {
       // couldn't find a player given a partnerId;
       // might prefer to throw an error in this case...
@@ -112,9 +118,6 @@ var pair = function(player, partner) {
 
   util.log("Pairing players " + player.id + " & " + partner.id);
 
-  /* Let the players know their roles: master/slave */
-  player.emit("role", JSON.stringify({initialize: "m"}));
-  partner.emit("role", JSON.stringify({initialize: "s"}));
 }
 
 /* We know all pairs, so we only need one player

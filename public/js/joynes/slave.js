@@ -11,10 +11,12 @@ joynes.Slave.prototype = {
       self.socket.send(JSON.stringify({ok: 1}));
     });
 
+    console.log("listening to Rom:Changed message");
     self.socket.on("Rom:Changed", function(rom_location) {
+      console.log("Got rom changed.")
       self.nes.ppu.reset();
       self.loadRom(rom_location);
-      //self.partner("PPU:Sync")
+      self.partner("PPU:Sync")
     });
 
     self.socket.on("PPU:Initialize", function(data) {
@@ -111,6 +113,9 @@ joynes.Slave.prototype = {
       self.nes.mmap.romSelectionReg0 = data["romSelectionReg0"];
       self.nes.mmap.romSelectionReg1 = data["romSelectionReg1"];
       self.nes.mmap.romBankSelect = data["romBankSelect"];
+
+      self.partner("state:partner_ready");
+      self.onRomLoaded();
     });
 
     self.socket.on("PPU:Frame", function(data) {
