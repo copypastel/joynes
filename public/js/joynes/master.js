@@ -361,7 +361,7 @@ joynes.Master.prototype = {
         self.selectedRom = self.nes.ui.romSelect.val();
         console.log("Rom changed.");
         self.partner("Rom:Changed", self.selectedRom);
-        self.onRomLoaded();
+        self.onRomLoaded(self.selectedRom);
       });
     });
   }

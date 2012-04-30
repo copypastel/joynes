@@ -2,12 +2,14 @@
   var emulator;
   var socket;
 	$(document).ready( function(){
+    var roms = [["Contra", "/roms/Contra.nes"],
+                 ["Dr. Mario", "/roms/Dr_Mario.nes"],
+                 ["Bubble Bobble", "/roms/Bubble_Bobble.nes"],
+                 ["Bubble Bobble 2", "/roms/Bubble_Bobble2.nes"]]
+
 		emulator = new JSNES({
 			'ui': $("#emulator").JSNESUI({
-				"Nintendo": [["Contra", "/roms/Contra.nes"],
-										 ["Dr. Mario", "/roms/Dr_Mario.nes"],
-										 ["Bubble Bobble", "/roms/Bubble_Bobble.nes"],
-										 ["Bubble Bobble 2", "/roms/Bubble_Bobble2.nes"]],
+				"Nintendo": roms,
 				"Homebrew": [["Concentration Room", "/roms/croom.nes"]]
 			})
 		});
@@ -27,8 +29,14 @@
         default: alert("something's wrong");
       }
 
-      joynesClient.onRomLoaded = function() {
+      joynesClient.onRomLoaded = function(gameUrl) {
         popScreen();
+        for(var i in roms) {
+          if(roms[i][1] == gameUrl) {
+            displayPoster(roms[i][0]);
+            break;
+          }
+        }
       }
     });
 
@@ -45,11 +53,12 @@
   var currentPoster = undefined;
 
   var displayPoster = function(title, timeout) {
+    console.log(title);
     timeout = timeout || 500;
     var poster = document.querySelector("#posters li[data-game='" + title + "']");
 
     // Hide previous poster
-    if(currentPoster) {
+    if(currentPoster && (!poster || currentPoster.getAttribute('data-game') != poster.getAttribute('data-game'))) {
       currentPoster.style.opacity = 0;
     }
 
