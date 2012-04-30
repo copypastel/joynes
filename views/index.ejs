@@ -20,8 +20,7 @@
       //document.querySelector("#sessionId").innerHTML = sessionId;
     });
 
-    socket.on("role", function(evt) {
-      var message = JSON.parse(evt);
+    socket.on("role", function(message) {
       switch (message.initialize) {
         case 'm': joynesClient = new joynes.Master(emulator, socket); break;
         case 's': joynesClient = new joynes.Slave(emulator, socket); break;
@@ -33,13 +32,11 @@
     var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
     if(partnerIdPresent) {
       var partnerId = partnerIdPresent[1];
-      pair(partnerId);
+      socket.emit("register:s", partnerId);
+    } else {
+      socket.emit("register:m");
     }
   });
-
-  var pair = function(partnerId) {
-    socket.emit("pair", partnerId);
-  };
 
   var displayPoster = function(title) {
     var posters = document.querySelectorAll("#poster img");
