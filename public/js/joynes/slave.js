@@ -115,6 +115,7 @@ joynes.Slave.prototype = {
       self.nes.mmap.romBankSelect = data["romBankSelect"];
 
       self.partner("state:partner_ready");
+      self.onRomLoaded();
     });
 
     self.socket.on("PPU:Frame", function(data) {

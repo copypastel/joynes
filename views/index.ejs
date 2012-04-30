@@ -26,6 +26,10 @@
         case 's': joynesClient = new joynes.Slave(emulator, socket); break;
         default: alert("something's wrong");
       }
+
+      joynesClient.onRomLoaded = function() {
+        popScreen();
+      }
     });
 
     // partnerId is a URL parameter
@@ -48,6 +52,23 @@
       } else {
         poster.style.display = "none";
       }
+    }
+  }
+
+  var popScreen = function(timeout) {
+    var nesScreen = $(".nes-screen");
+    console.log(nesScreen.data("popped"));
+    if(!nesScreen.data("popped")) {
+      timeout = timeout || 1000;
+      nesScreen.data("popped", true);
+      setTimeout(function() {
+        // We're scaling element up; if this causes a slowdown
+        // in rendering, we should be removing a negative scale here.
+        nesScreen.
+          css("-webkit-transform", "skewY(0) scale(5)").
+          css("left", "-79px");
+        $("#wrapper-main").css("opacity", "0.4");
+      }, timeout);
     }
   }
 
@@ -87,15 +108,6 @@
             $(".nes-roms select").change();
           }
         }
-
-        setTimeout(function() {
-          // We're scaling element up; if this causes a slowdown
-          // in rendering, we should be removing a negative scale here.
-          $(".nes-screen").
-            css("-webkit-transform", "skewY(0) scale(5)").
-            css("left", "-79px");
-          $("#wrapper-main").css("opacity", "0.4");
-        }, 1000);
       }
     }
   }

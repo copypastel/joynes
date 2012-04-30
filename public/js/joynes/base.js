@@ -25,5 +25,7 @@ joynes.Base.prototype = {
     if(this.startRom) { this.nes.start() }
     this.nes.ui.enable();
   },
+
+  onRomLoaded: function() {},
 };
 
