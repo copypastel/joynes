@@ -1,10 +1,10 @@
 joynes.Base.prototype = {
-  
+
   partner : function(command, data) {
     var self = this;
     self.socket.emit("proxy", {"command": command, "data": data })
   },
-  
+
   loadRom : function(url, callback) {
     var self = this;
 
