@@ -1,7 +1,24 @@
 <script>
   var emulator;
   var socket;
+  var canRun;
+
+  var promptChrome = function() {
+    var chromeRegex = /chrome/i
+    if (navigator.userAgent.match(chromeRegex)) {
+      canRun = true;
+    } else {
+      canRun = false;
+      var answer = confirm("Does not run in chrome, press ok to be redirected to aquire it.");
+      if(answer) {
+        window.location = "http://google.com/chrome";
+      }
+    }
+  }
+
+  promptChrome();
 	$(document).ready( function(){
+    if(!canRun) { return ; }
     var roms = [["Contra", "/roms/Contra.nes"],
                  ["Dr. Mario", "/roms/Dr_Mario.nes"],
                  ["Bubble Bobble", "/roms/Bubble_Bobble.nes"],
@@ -87,6 +104,7 @@
 
   document.onready = function() {
 
+    if(!canRun) { return ; }
     // Game setup (cartridges, posters)
     var games = document.querySelectorAll("#games li");
     for(var i = 0; i < games.length; i++) {
