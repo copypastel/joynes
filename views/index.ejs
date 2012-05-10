@@ -2,6 +2,7 @@
   var emulator;
   var socket;
   var canRun;
+  var shareId;
 
   var promptChrome = function() {
     var chromeRegex = /chrome/i
@@ -33,10 +34,11 @@
 
     socket = io.connect('http://' + document.location.hostname + ':3333/');
 
-    // Display sessionId
+    // Display shareId
     socket.on("connect", function(evt) {
-      var sessionId = document.createElement("div");
-      //document.querySelector("#sessionId").innerHTML = sessionId;
+      var shareId = encodeShareId(socket.socket.sessionid);
+      var hostname = location.protocol + "//" + location.host + "/";
+      document.querySelector("#shareId span").innerHTML += hostname + shareId;
     });
 
     socket.on("role", function(message) {
@@ -61,11 +63,24 @@
     var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
     if(partnerIdPresent) {
       var partnerId = partnerIdPresent[1];
-      socket.emit("register:s", partnerId);
+      socket.emit("register:s", decodeShareId(partnerId));
+      document.querySelector("#shareId").style.display = "none";
     } else {
       socket.emit("register:m");
     }
   });
+
+  var encodeShareId = function(payload) {
+    var prefix = payload.slice(0, payload.length/2);
+    var suffix = payload.slice(payload.length/2, payload.length);
+    return parseInt(prefix).toString(36) + parseInt(suffix).toString(36);
+  }
+
+  var decodeShareId = function(payload) {
+    var prefix = payload.slice(0, payload.length/2);
+    var suffix = payload.slice(payload.length/2, payload.length);
+    return parseInt(prefix, 36).toString() + parseInt(suffix, 36).toString();
+  }
 
   var currentPoster = undefined;
 
@@ -148,6 +163,7 @@
 	<div id="container-main" >
 		<div id="container-title">
 			<div id="title">
+        <div id="shareId">Share this game! <span class=id></span></div>
         <!-- <p>This is the title.</p> -->
 			</div>
 		</div>

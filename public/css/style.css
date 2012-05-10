@@ -28,6 +28,11 @@ div#title {
 	clear: both;
 }
 
+div#shareId {
+  color: white;
+  font-weight: bold;
+}
+
 div#title p {
 	background: url(/images/title.png) no-repeat;
 	text-indent: -9999px;
