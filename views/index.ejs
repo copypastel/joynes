@@ -3,6 +3,7 @@
   var socket;
   var canRun;
   var shareId;
+  var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
 
   var promptChrome = function() {
     var chromeRegex = /chrome/i
@@ -60,7 +61,6 @@
     });
 
     // partnerId is a URL parameter
-    var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
     if(partnerIdPresent) {
       var partnerId = partnerIdPresent[1];
       socket.emit("register:s", decodeShareId(partnerId));
@@ -140,18 +140,20 @@
         displayPoster(title);
       }
 
-      game.onclick = function(event) {
-        var title = event.target.getAttribute("data-game");
-        var roms = document.querySelector(".nes-roms select");
+      if (!partnerIdPresent) {
+        game.onclick = function(event) {
+          var title = event.target.getAttribute("data-game");
+          var roms = document.querySelector(".nes-roms select");
 
-        displayPoster(title);
+          displayPoster(title);
 
-        // Load game's ROM
-        for(var j = 0; j < roms.options.length; j++) {
-          var rom = roms.options.item(j);
-          if(rom.innerHTML == title) {
-            roms.selectedIndex = j;
-            $(".nes-roms select").change();
+          // Load game's ROM
+          for(var j = 0; j < roms.options.length; j++) {
+            var rom = roms.options.item(j);
+            if(rom.innerHTML == title) {
+              roms.selectedIndex = j;
+              $(".nes-roms select").change();
+            }
           }
         }
       }
