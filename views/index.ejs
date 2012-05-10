@@ -33,6 +33,14 @@
 			})
 		});
 
+    $('#message-box .trigger').confirm({
+      dialogShow:'fadeIn',
+      dialogSpeed:'fast',
+      buttons: {
+          wrapper:'<span class="message-box-confirm"></span>',
+          separator:'  '
+      }  
+    })
     socket = io.connect('http://' + document.location.hostname + ':3333/');
 
     // Display shareId
@@ -40,6 +48,11 @@
       var shareId = encodeShareId(socket.socket.sessionid);
       var hostname = location.protocol + "//" + location.host + "/";
       document.querySelector("#shareId span").innerHTML += hostname + shareId;
+    });
+
+    socket.on("change-request", function(game) {
+      //$("#message-box span").html(game);
+      $("#message-box .trigger").click();
     });
 
     socket.on("role", function(message) {
@@ -140,9 +153,13 @@
         displayPoster(title);
       }
 
-      if (!partnerIdPresent) {
-        game.onclick = function(event) {
-          var title = event.target.getAttribute("data-game");
+      game.onclick = function(event) {
+        var title = event.target.getAttribute("data-game");
+        if (partnerIdPresent) {
+          // We're sending a request to master to select a game
+          socket.emit("proxy", {"command": "change-request", "data": title})
+        }
+        else {
           var roms = document.querySelector(".nes-roms select");
 
           displayPoster(title);
@@ -165,10 +182,13 @@
 	<div id="container-main" >
 		<div id="container-title">
 			<div id="title">
-        <div id="shareId">Share this game! <span class=id></span></div>
+        <div id="shareId">Share this game! <span></span></div>
         <!-- <p>This is the title.</p> -->
 			</div>
 		</div>
+    <div id="container-message-box">
+      <div id="message-box"><span class="trigger"></span></div>
+    </div>
 		<div id="container-tv">
 			<div id="tv">
 				<!-- <p>This is a tv.</p> -->
