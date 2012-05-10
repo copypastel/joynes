@@ -4,6 +4,7 @@
   var canRun;
   var shareId;
   var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
+  var requestedTitle;
 
   var promptChrome = function() {
     var chromeRegex = /chrome/i
@@ -33,14 +34,18 @@
 			})
 		});
 
-    $('#message-box .trigger').confirm({
+    $('#message-box .trigger').click( function() {
+      console.log(requestedTitle);
+      loadGame(requestedTitle);
+    }).confirm({
       dialogShow:'fadeIn',
       dialogSpeed:'fast',
       buttons: {
           wrapper:'<span class="message-box-confirm"></span>',
           separator:'  '
       }  
-    })
+    });
+
     socket = io.connect('http://' + document.location.hostname + ':3333/');
 
     // Display shareId
@@ -50,8 +55,8 @@
       document.querySelector("#shareId span").innerHTML += hostname + shareId;
     });
 
-    socket.on("change-request", function(game) {
-      //$("#message-box span").html(game);
+    socket.on("change-request", function(title) {
+      requestedTitle = title;
       $("#message-box .trigger").click();
     });
 
@@ -130,6 +135,19 @@
     }
   }
 
+  var loadGame = function(title) {
+    var roms = document.querySelector(".nes-roms select");
+
+    // Load game's ROM
+    for(var j = 0; j < roms.options.length; j++) {
+      var rom = roms.options.item(j);
+      if(rom.innerHTML == title) {
+        roms.selectedIndex = j;
+        $(".nes-roms select").change();
+      }
+    }
+  }
+
   document.onready = function() {
 
     if(!canRun) { return ; }
@@ -152,7 +170,7 @@
 
         displayPoster(title);
       }
-
+    
       game.onclick = function(event) {
         var title = event.target.getAttribute("data-game");
         if (partnerIdPresent) {
@@ -160,18 +178,8 @@
           socket.emit("proxy", {"command": "change-request", "data": title})
         }
         else {
-          var roms = document.querySelector(".nes-roms select");
-
           displayPoster(title);
-
-          // Load game's ROM
-          for(var j = 0; j < roms.options.length; j++) {
-            var rom = roms.options.item(j);
-            if(rom.innerHTML == title) {
-              roms.selectedIndex = j;
-              $(".nes-roms select").change();
-            }
-          }
+          loadGame(title);
         }
       }
     }
