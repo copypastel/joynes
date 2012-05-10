@@ -4,6 +4,7 @@
   var canRun;
   var shareId;
   var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
+  var requestedTitle;
 
   var promptChrome = function() {
     var chromeRegex = /chrome/i
@@ -33,6 +34,18 @@
 			})
 		});
 
+    $('#message-box .trigger').click( function() {
+      console.log(requestedTitle);
+      loadGame(requestedTitle);
+    }).confirm({
+      dialogShow:'fadeIn',
+      dialogSpeed:'fast',
+      buttons: {
+          wrapper:'<span class="message-box-confirm"></span>',
+          separator:'  '
+      }  
+    });
+
     socket = io.connect('http://' + document.location.hostname + ':3333/');
 
     // Display shareId
@@ -40,6 +53,11 @@
       var shareId = encodeShareId(socket.socket.sessionid);
       var hostname = location.protocol + "//" + location.host + "/";
       document.querySelector("#shareId span").innerHTML += hostname + shareId;
+    });
+
+    socket.on("change-request", function(title) {
+      requestedTitle = title;
+      $("#message-box .trigger").click();
     });
 
     socket.on("role", function(message) {
@@ -117,6 +135,19 @@
     }
   }
 
+  var loadGame = function(title) {
+    var roms = document.querySelector(".nes-roms select");
+
+    // Load game's ROM
+    for(var j = 0; j < roms.options.length; j++) {
+      var rom = roms.options.item(j);
+      if(rom.innerHTML == title) {
+        roms.selectedIndex = j;
+        $(".nes-roms select").change();
+      }
+    }
+  }
+
   document.onready = function() {
 
     if(!canRun) { return ; }
@@ -139,22 +170,16 @@
 
         displayPoster(title);
       }
-
-      if (!partnerIdPresent) {
-        game.onclick = function(event) {
-          var title = event.target.getAttribute("data-game");
-          var roms = document.querySelector(".nes-roms select");
-
+    
+      game.onclick = function(event) {
+        var title = event.target.getAttribute("data-game");
+        if (partnerIdPresent) {
+          // We're sending a request to master to select a game
+          socket.emit("proxy", {"command": "change-request", "data": title})
+        }
+        else {
           displayPoster(title);
-
-          // Load game's ROM
-          for(var j = 0; j < roms.options.length; j++) {
-            var rom = roms.options.item(j);
-            if(rom.innerHTML == title) {
-              roms.selectedIndex = j;
-              $(".nes-roms select").change();
-            }
-          }
+          loadGame(title);
         }
       }
     }
@@ -165,10 +190,13 @@
 	<div id="container-main" >
 		<div id="container-title">
 			<div id="title">
-        <div id="shareId">Share this game! <span class=id></span></div>
+        <div id="shareId">Share this game! <span></span></div>
         <!-- <p>This is the title.</p> -->
 			</div>
 		</div>
+    <div id="container-message-box">
+      <div id="message-box"><span class="trigger"></span></div>
+    </div>
 		<div id="container-tv">
 			<div id="tv">
 				<!-- <p>This is a tv.</p> -->
