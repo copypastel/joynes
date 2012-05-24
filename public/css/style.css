@@ -1,39 +1,98 @@
+
 body {
+	background: black;
 }
 
 div#wrapper-main {
-	float: left;
+  position: relative;
+	margin: 0 auto;
+	width: 1024px;
+	height: 768px;
 }
 
-div#continer-main {
+div#container-main {
+  padding-top: 100px;
+	background: url(/images/bg.png) no-repeat;
+	width: 100%;
+	height: 100%;
+  -webkit-transition: opacity 0.5s ease-in;
+}
+
+div#container-title {
+
+}
+
+div#title {
+	width:  100%;
+	height: auto;
+	clear: both;
+}
+
+div#message-box {
+  top: 300px;
+	height: 120px;
+  width: 300px;
+  margin: 0 auto;
+}
+
+div#message-box span{
+  background-color: gray;
+  width: 100%;
+  height: 100%;
+}
+
+div#message-box-confirm {
+  width: 50px;
+  height: 50px;
+  background-color: #ffbb00;
+}
+
+div#shareId {
+  color: white;
+  font-weight: bold;
+}
+
+div#title p {
+	background: url(/images/title.png) no-repeat;
+	text-indent: -9999px;
+	width: 441px;
+	height: 96px;
+	margin: 0 auto;
 }
 
 div#container-tv {
-	width: 960px;
+  position: absolute;
+  top: 300px;
+  left: 575px;
+	height: 120px;
+	/*overflow: hidden;*/
 }
 
 div#tv {
-	margin: auto;
-	width: 100%;
-	float: left;
-
-}
-
-div#tv p {
 	background: url(/images/tv.png) no-repeat;
-	text-indent: -9999px;
 	height: 120px;
 	width: 105px;
-	margin: 50px 0 0 550px;
+	/*float: left;*/
+}
+
+#emulator {
+  position: absolute;
+  top: 301px;
+  left: 576px;
+  width: 41px;
+  height: 67px;
 }
 
 div#container-nes {
-	width: inherit;
+  position: absolute;
+	width: 55px;
+	height: 40px;
+	background: url(/images/nes.png) no-repeat;
+  top: 430px;
+  left: 680px;
 }
 
 div#nes {
-	width: 100px;
-	margin: 0 auto;
 
 }
 
@@ -42,57 +101,144 @@ div#nes p {
 	text-indent: -9999px;
 	height: 40px;
 	width: 55px;
-	margin: 0px 0 0 140px;
-	float: left;
+	/*margin: 0px 0 0 140px;*/
+	/*float: left;*/
 }
 
-div#container-games {
+/* Try to change this to #screen */
+.nes-screen {
+  width: 41px;
+  height: 47px;
+  -webkit-transform: skewY(26deg);
+  -webkit-transition: -webkit-transform 0.5s ease-in, left 0.5s ease-in;
+  position: relative;
+  top: 36px;
+  left: 7px;
+  z-index: 9999;
+}
 
+.nes-roms { display: none; }
+.nes-controls { display: none; }
+.nes-status { display: none; }
+
+div#container-controllers {
+  position: absolute;
+  top: 390px;
+  left: 475px;
+}
+
+.controller {
+  width: 23px;
+  height: 15px;
+	background: url(/images/controller.png) no-repeat;
+}
+
+#controller2 {
+  position: absolute;
+  left: 80px;
+  top: 40px;
+}
+
+
+#container-games {
+  top: 470px;
+  left: 650px;
+  position: absolute;
+}
+
+#games {
+  width: 100%;
+  height: 100%;
 }
 
 ul {
 	list-style-type: none;
-	float: left;
+	/*float: left;*/
 }
 
-.game {
+#games li {
   cursor: pointer;
 	background: url(/images/game.png) no-repeat;
 	text-indent: -9999px;
   height: 18px;
 	width: 28px;
-	margin: 0 0 0 600px;
-	/*float: left;*/
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }
 
-li#game2 {
-	background: url(/images/game.png) no-repeat;
-	text-indent: -9999px;
-	height: 18px;
-	width: 28px;
-	margin: -10px 0 0 545px;
-	/*float: left;*/
+#games li:nth-child(2) {
+  left: -55px;
+  top: -10px;
 }
 
-li#game3 {
-	background: url(/images/game.png) no-repeat;
-	text-indent: -9999px;
-	height: 18px;
-	width: 28px;
-	margin: 0 0 0 495px;
-	/*float: left;*/
+#games li:nth-child(3) {
+  left: 15px;
+  top: 20px;
 }
 
-li#game4 {
-	background: url(/images/game.png) no-repeat;
-	text-indent: -9999px;
-	height: 18px;
-	width: 28px;
-	margin: -50px 0 0 510px;
-	/*float: left;*/
+#games li:nth-child(4) {
+  top: 40px;
+  left: -10px;
 }
 
-div#container-floor {
+#posters li {
+  position: absolute;
+  -webkit-transform: skewY(-26deg);
+  height: 130px;
+  width: 80px;
+  position: absolute;
+  opacity: 0;
+  display: block;
+  top: 210px;
+  left: 300px;
+  background-size: 100%;
+  -webkit-transition: opacity 0.5s linear;
+}
+
+#posters li:nth-child(1) {
+  background: url(/images/dr_mario.png);
+}
+
+#posters li:nth-child(2) {
+  background: url(/images/contra.png);
+}
+
+#posters li:nth-child(3) {
+  background: url(/images/bubble_bobble.png);
+}
+
+#posters li:nth-child(4) {
+  background: url(/images/bubble_bobble_2.png);
+}
+
+
+
+div#container-couch {
+  position: absolute;
+  top: 400px;
+  left: 370px;
+  width: 195px;
+	/*overflow: hidden;*/
+}
+
+div#couch {
+	background: url(/images/couch.png) no-repeat;
+	/*text-indent: -9999px;	*/
+	width: 195px;
+	height: 150px;
+	/*width: -25px 0 0 -375px;*/
+}
+
+div#container-bg {
+	width: 100%;
+}
+
+div#bg {
+
+}
+
+/*div#container-floor {
 	margin: 0 200px 0 200px;
 }
 
@@ -105,13 +251,17 @@ div#floor {
 div#floor p {
 	text-indent: -9999px;
 
-}
+}*/
+
+/**************************************************
+Game Hover States
+**************************************************/
 
 li.game {
 	cursor: pointer;
 }
 
-li#game1:hover {
+/*li#game1:hover {
 	background: url(/images/contra.png);
 	width: 347px;
 	height: 392px;
@@ -133,24 +283,7 @@ li#game4:hover {
 	background: url(/images/drmario.png);
 	width: 347px;
 	height: 392px;
-}
+}*/
 
-.nes-roms, .nes-controls, .nes-status {
-  display: none;
-}
-
-.nes-screen {
-  position: relative;
-  top: -1105px;
-  left: 165px;
-}
-
-#emulator {
-  -webkit-transform: scale(0.16, 0.185) skewY(24deg);
-  -webkit-transition: all 0.5s ease-in;
-}
-
-#emulator.full-screen {
-  margin: 0;
-  -webkit-transform: scale(2.0) skewY(0deg) rotateX(360deg);
-}
+/**************************************************
+**************************************************/

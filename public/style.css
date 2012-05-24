@@ -1,0 +1,233 @@
+
+body {
+	background: black;
+}
+
+div#wrapper-main {
+	background: url(images/bg.png) no-repeat;
+	width: 1024px;
+	height: 768px;
+	margin: 0 auto;
+
+}
+
+div#container-main {
+	/*background: url(images/bg.png) no-repeat;*/
+}
+
+div#container-title {
+
+}
+
+div#title {
+	width:  100%;
+	height: auto;
+	clear: both;
+}
+
+div#title p {
+	background: url(images/title.png) no-repeat;
+	text-indent: -9999px;
+	width: 441px;
+	height: 96px;
+	margin: 0 auto;
+}
+
+div#container-tv {
+	float: left;
+	margin: 200px 0 0 575px;
+	height: 120px;
+	/*overflow: hidden;*/
+}
+
+div#tv {
+	background: url(images/tv.png) no-repeat;
+	text-indent: -9999px;
+	height: 120px;
+	width: 105px;
+	margin: 0 auto;
+	/*float: left;*/
+}
+
+div#tv p {
+
+}
+
+div#container-nes {
+	float: left;
+	width: 55px;
+	height: 40px;
+	background: url(images/nes.png) no-repeat;
+	margin: 320px 0 0 20px;
+}
+
+div#nes {
+
+}
+
+div#nes p {
+	background: url(images/nes.png) no-repeat;
+	text-indent: -9999px;
+	height: 40px;
+	width: 55px;
+	/*margin: 0px 0 0 140px;*/
+	/*float: left;*/
+}
+
+
+
+
+
+div#container-controllers {
+
+}
+
+div#controllers {
+
+}
+
+ul#controllers {
+
+}
+
+li#controller1 {
+	background: url(images/controller.png) no-repeat;
+	width: 23px;
+	height: 15px;
+	margin: 315px 0 0 -200px;
+	float: left;
+}
+
+li#controller2 {
+	background: url(images/controller.png) no-repeat;
+	width: 23px;
+	height: 15px;
+	margin: 300px 0 0 -250px;
+	float: left;
+}
+
+
+
+
+
+
+
+
+
+div#container-games {
+	float: left;
+}
+
+ul {
+	list-style-type: none;
+	/*float: left;*/
+}
+
+.game {
+  cursor: pointer;
+	background: url(images/game.png) no-repeat;
+	text-indent: -9999px;
+  height: 18px;
+	width: 28px;
+	margin: 0 0 0 700px;
+	/*float: left;*/
+}
+
+li#game2 {
+	background: url(images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: -10px 0 0 645px;
+	/*float: left;*/
+}
+
+li#game3 {
+	background: url(images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: 0 0 0 595px;
+	/*float: left;*/
+}
+
+li#game4 {
+	background: url(images/game.png) no-repeat;
+	text-indent: -9999px;
+	height: 18px;
+	width: 28px;
+	margin: -50px 0 0 610px;
+	/*float: left;*/
+}
+
+div#container-couch {
+	float: left;
+	margin: -50px 0 0 -425px;
+	/*overflow: hidden;*/
+}
+
+div#couch {
+	background: url(images/couch.png) no-repeat;
+	/*text-indent: -9999px;	*/
+	width: 195px;
+	height: 150px;
+	/*width: -25px 0 0 -375px;*/
+}
+
+div#container-bg {
+	width: 100%;
+}
+
+div#bg {
+
+}
+
+/*div#container-floor {
+	margin: 0 200px 0 200px;
+}
+
+div#floor {
+	background: url(images/floor.png) no-repeat;
+	height: 383px;
+	width: 763px;
+}
+
+div#floor p {
+	text-indent: -9999px;
+
+}*/
+
+/**************************************************
+Game Hover States
+**************************************************/
+
+li.game {
+	cursor: pointer;
+}
+
+/*li#game1:hover {
+	background: url(images/contra.png);
+	width: 347px;
+	height: 392px;
+}
+
+li#game2:hover {
+	background: url(images/bb.png);
+	width: 347px;
+	height: 392px;
+}
+
+li#game3:hover {
+	background: url(images/bb2.png);
+	width: 347px;
+	height: 392px;
+}
+
+li#game4:hover {
+	background: url(images/drmario.png);
+	width: 347px;
+	height: 392px;
+}*/
+
+/**************************************************
+**************************************************/

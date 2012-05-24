@@ -1,61 +1,185 @@
 <script>
   var emulator;
   var socket;
+  var canRun;
+  var shareId;
+  var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
+  var requestedTitle;
+
+  var promptChrome = function() {
+    var chromeRegex = /chrome/i
+    if (navigator.userAgent.match(chromeRegex)) {
+      canRun = true;
+    } else {
+      canRun = false;
+      var answer = confirm("Does not run in chrome, press ok to be redirected to aquire it.");
+      if(answer) {
+        window.location = "http://google.com/chrome";
+      }
+    }
+  }
+
+  promptChrome();
 	$(document).ready( function(){
+    if(!canRun) { return ; }
+    var roms = [["Contra", "/roms/Contra.nes"],
+                 ["Dr. Mario", "/roms/Dr_Mario.nes"],
+                 ["Bubble Bobble", "/roms/Bubble_Bobble.nes"],
+                 ["Bubble Bobble 2", "/roms/Bubble_Bobble2.nes"]]
+
 		emulator = new JSNES({
 			'ui': $("#emulator").JSNESUI({
-				"Nintendo": [["Contra", "/roms/Contra.nes"],
-										 ["Dr. Mario", "/roms/Dr_Mario.nes"],
-										 ["Bubble Bobble", "/roms/Bubble_Bobble.nes"],
-										 ["Bubble Bobble 2", "/roms/Bubble_Bobble2.nes"]],
+				"Nintendo": roms,
 				"Homebrew": [["Concentration Room", "/roms/croom.nes"]]
 			})
 		});
 
-		// master = new joynes.Master(masterNes);
+    $('#message-box .trigger').click( function() {
+      console.log(requestedTitle);
+      loadGame(requestedTitle);
+    }).confirm({
+      dialogShow:'fadeIn',
+      dialogSpeed:'fast',
+      buttons: {
+          wrapper:'<span class="message-box-confirm"></span>',
+          separator:'  '
+      }  
+    });
 
-    //var socket = new WebSocket('ws://' + document.location.hostname + ':8080/');
     socket = io.connect('http://' + document.location.hostname + ':3333/');
-    socket.on("role", function(evt) {
-      console.log(evt);
-      var message = JSON.parse(evt);
-      if (message.initialize) {
-        switch (message.initialize) {
-          case 'm': joynesClient = new joynes.Master(emulator, socket); break;
-          case 's': joynesClient = new joynes.Slave(emulator, socket); break;
-		  default: alert("something's wrong");
+
+    // Display shareId
+    socket.on("connect", function(evt) {
+      var shareId = encodeShareId(socket.socket.sessionid);
+      var hostname = location.protocol + "//" + location.host + "/";
+      document.querySelector("#shareId span").innerHTML += hostname + shareId;
+    });
+
+    socket.on("change-request", function(title) {
+      requestedTitle = title;
+      $("#message-box .trigger").click();
+    });
+
+    socket.on("role", function(message) {
+      switch (message.initialize) {
+        case 'm': joynesClient = new joynes.Master(emulator, socket); break;
+        case 's': joynesClient = new joynes.Slave(emulator, socket); break;
+        default: alert("something's wrong");
+      }
+
+      joynesClient.onRomLoaded = function(gameUrl) {
+        popScreen();
+        for(var i in roms) {
+          if(roms[i][1] == gameUrl) {
+            displayPoster(roms[i][0]);
+            break;
+          }
         }
       }
     });
 
     // partnerId is a URL parameter
-    var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
     if(partnerIdPresent) {
       var partnerId = partnerIdPresent[1];
-      pair(partnerId);
+      socket.emit("register:s", decodeShareId(partnerId));
+      document.querySelector("#shareId").style.display = "none";
+    } else {
+      socket.emit("register:m");
     }
   });
 
-  var pair = function(partnerId) {
-    socket.emit("pair", partnerId);
-  };
+  var encodeShareId = function(payload) {
+    var prefix = payload.slice(0, payload.length/2);
+    var suffix = payload.slice(payload.length/2, payload.length);
+    return parseInt(prefix).toString(36) + parseInt(suffix).toString(36);
+  }
+
+  var decodeShareId = function(payload) {
+    var prefix = payload.slice(0, payload.length/2);
+    var suffix = payload.slice(payload.length/2, payload.length);
+    return parseInt(prefix, 36).toString() + parseInt(suffix, 36).toString();
+  }
+
+  var currentPoster = undefined;
+
+  var displayPoster = function(title, timeout) {
+    console.log(title);
+    timeout = timeout || 500;
+    var poster = document.querySelector("#posters li[data-game='" + title + "']");
+
+    // Hide previous poster
+    if(currentPoster && (!poster || currentPoster.getAttribute('data-game') != poster.getAttribute('data-game'))) {
+      currentPoster.style.opacity = 0;
+    }
+
+    currentPoster = poster;
+    // Display title's poster
+    if(currentPoster) {
+      currentPoster.style.opacity = 1;
+    }
+  }
+
+  var popScreen = function(timeout) {
+    var nesScreen = $(".nes-screen");
+    if(!nesScreen.data("popped")) {
+      timeout = timeout || 1000;
+      nesScreen.data("popped", true);
+      setTimeout(function() {
+        // We're scaling element up; if this causes a slowdown
+        // in rendering, we should be removing a negative scale here.
+        nesScreen.
+          css("-webkit-transform", "skewY(0) scale(5)").
+          css("left", "-79px");
+        $("#container-main").css("opacity", "0.4");
+      }, timeout);
+    }
+  }
+
+  var loadGame = function(title) {
+    var roms = document.querySelector(".nes-roms select");
+
+    // Load game's ROM
+    for(var j = 0; j < roms.options.length; j++) {
+      var rom = roms.options.item(j);
+      if(rom.innerHTML == title) {
+        roms.selectedIndex = j;
+        $(".nes-roms select").change();
+      }
+    }
+  }
 
   document.onready = function() {
-    document.getElementById("nes").onclick = function() {
-      pair();
-    };
-    var games = document.getElementsByClassName("game");
-    for(var i = 0; i < games.length; i++) {
-      games.item(i).onclick = function(event) {
-        var title = event.target.getAttribute("id");
-        var roms = document.querySelector(".nes-roms select");
 
-        for(var j = 0; j < roms.options.length; j++) {
-          var game = roms.options.item(j);
-          if(game.innerHTML == title) {
-            roms.selectedIndex = j;
-            $(".nes-roms select").change();
-          }
+    if(!canRun) { return ; }
+    // Game setup (cartridges, posters)
+    var games = document.querySelectorAll("#games li");
+    for(var i = 0; i < games.length; i++) {
+
+      var game = games.item(i);
+
+      game.onmouseover = function(event) {
+        var title = event.target.getAttribute("data-game");
+        displayPoster(title);
+      }
+
+      // Restore poster to loaded game
+      game.onmouseout = function(event) {
+        var gameIndex = document.querySelector("select").selectedIndex;
+        var games = document.querySelectorAll("select option");
+        var title = games.item(gameIndex).innerHTML;
+
+        displayPoster(title);
+      }
+    
+      game.onclick = function(event) {
+        var title = event.target.getAttribute("data-game");
+        if (partnerIdPresent) {
+          // We're sending a request to master to select a game
+          socket.emit("proxy", {"command": "change-request", "data": title})
+        }
+        else {
+          displayPoster(title);
+          loadGame(title);
         }
       }
     }
@@ -64,30 +188,63 @@
 
 <div id="wrapper-main">
 	<div id="container-main" >
+		<div id="container-title">
+			<div id="title">
+        <div id="shareId">Share this game! <span></span></div>
+        <!-- <p>This is the title.</p> -->
+			</div>
+		</div>
+    <div id="container-message-box">
+      <div id="message-box"><span class="trigger"></span></div>
+    </div>
 		<div id="container-tv">
 			<div id="tv">
-				<p>This is a tv.</p>
+				<!-- <p>This is a tv.</p> -->
 			</div>
 		</div>
 		<div id="container-nes">
 			<div id="nes">
-				<p>This is a nes system.</p>
+				<!-- <p>This is a nes system.</p> -->
 			</div>
 		</div>
-		<div id="container-games">
-			<ul id="games">
-				<li id="Dr. Mario" class="game" style="margin-left: 400px;">Game 1</li>
-				<li id="Contra" class="game" style="margin-left: 400px;">Game 2</li>
-				<li id="Bubble Bobble" class="game" style="margin-left: 400px;">Game 3</li>
-				<li id="Bubble Bobble 2" class="game" style="margin-left: 400px;">Game 4</li>
-			</ul>
-		</div>
-    <div id="container-floor">
-      <div id="floor">
-        <p>This is the floor.</p>
-      </div>
+    <div id="container-posters">
+      <ul id="posters">
+        <li data-game="Dr. Mario"/>
+        <li data-game="Contra"/>
+        <li data-game="Bubble Bobble"/>
+        <li data-game="Bubble Bobble 2"/>
+      </ul>
     </div>
+		<div id="container-controllers">
+      <ul>
+        <li class="controller" id="controller1"></li>
+        <li class="controller" id="controller2"></li>
+      </ul>
+		</div>
+    <div id="container-games">
+      <ul id="games">
+        <li data-game="Dr. Mario" />
+        <li data-game="Contra" />
+        <li data-game="Bubble Bobble" />
+        <li data-game="Bubble Bobble 2" />
+      </ul>
+    </div>
+		<div id="container-couch">
+			<div id="couch">
+				<!-- <p>This is the couch.</p> -->
+			</div>
+		</div>
+		<div id="container-bg">
+			<div id="bg">
+				<!-- <p>This is the background</p> -->
+			</div>
+		</div>
+<!-- 		<div id="container-floor">
+			<div id="floor">
+				<p>This is the floor</p>
+			</div>
+		</div> -->
 	</div>
+  <div id="emulator"></div>
 </div>
 
-<div id="emulator"></div>

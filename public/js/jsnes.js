@@ -38,14 +38,14 @@ var JSNES = function(opts) {
     this.opts = {
         ui: JSNES.DummyUI,
         swfPath: 'lib/',
-        
+
         preferredFrameRate: 60,
         fpsInterval: 500, // Time between updating FPS in ms
         showDisplay: true,
 
         emulateSound: false,
         sampleRate: 44100, // Sound sample rate in hz
-        
+
         CPU_FREQ_NTSC: 1789772.5, //1789772.72727272d;
         CPU_FREQ_PAL: 1773447.4
     };
@@ -57,16 +57,16 @@ var JSNES = function(opts) {
             }
         }
     }
-    
+
     this.frameTime = 1000 / this.opts.preferredFrameRate;
-    
+
     this.ui = new this.opts.ui(this);
     this.cpu = new JSNES.CPU(this);
     this.ppu = new JSNES.PPU(this);
     this.papu = new JSNES.PAPU(this);
     this.mmap = null; // set in loadRom()
     this.keyboard = new JSNES.Keyboard();
-    
+
     this.ui.updateStatus("Ready to load a ROM.");
 };
 
@@ -77,25 +77,25 @@ JSNES.prototype = {
     fpsFrameCount: 0,
     limitFrames: true,
     romData: null,
-    
+
     // Resets the system
     reset: function() {
         if (this.mmap !== null) {
             this.mmap.reset();
         }
-        
+
         this.cpu.reset();
         this.ppu.reset();
         this.papu.reset();
     },
-    
+
     start: function() {
         var self = this;
-        
+
         if (this.rom !== null && this.rom.valid) {
             if (!this.isRunning) {
                 this.isRunning = true;
-                
+
                 this.frameInterval = setInterval(function() {
                     self.frame();
                 }, this.frameTime / 2);
@@ -110,7 +110,7 @@ JSNES.prototype = {
             this.ui.updateStatus("There is no ROM loaded, or it is invalid.");
         }
     },
-    
+
     frame: function() {
         this.ppu.startFrame();
         var cycles = 0;
@@ -143,13 +143,13 @@ JSNES.prototype = {
                     cpu.cyclesToHalt = 0;
                 }
             }
-            
+
             for (; cycles > 0; cycles--) {
                 if(ppu.curX === ppu.spr0HitX &&
                         ppu.f_spVisibility === 1 &&
                         ppu.scanline - 21 === ppu.spr0HitY) {
                     // Set sprite 0 hit flag:
-                    ppu.setStatusFlag(ppu.STATUS_SPRITE0HIT, true);
+                    ppu.setSprite0HitFlag();
                 }
 
                 if (ppu.requestEndFrame) {
@@ -178,7 +178,7 @@ JSNES.prototype = {
         this.fpsFrameCount++;
         this.lastFrameTime = +new Date();
     },
-    
+
     printFps: function() {
         var now = +new Date();
         var s = 'Running';
@@ -191,32 +191,32 @@ JSNES.prototype = {
         this.fpsFrameCount = 0;
         this.lastFpsTime = now;
     },
-    
+
     stop: function() {
         clearInterval(this.frameInterval);
         clearInterval(this.fpsInterval);
         this.isRunning = false;
     },
-    
+
     reloadRom: function() {
         if (this.romData !== null) {
             this.loadRom(this.romData);
         }
     },
-    
+
     // Loads a ROM file into the CPU and PPU.
     // The ROM file is validated first.
     loadRom: function(data) {
         if (this.isRunning) {
             this.stop();
         }
-        
+
         this.ui.updateStatus("Loading ROM...");
-        
+
         // Load ROM file:
         this.rom = new JSNES.ROM(this);
         this.rom.load(data);
-        
+
         if (this.rom.valid) {
             this.reset();
             this.mmap = this.rom.createMapper();
@@ -226,7 +226,7 @@ JSNES.prototype = {
             this.mmap.loadROM();
             this.ppu.setMirroring(this.rom.getMirroringType());
             this.romData = data;
-            
+
             this.ui.updateStatus("Successfully loaded. Ready to be started.");
         }
         else {
@@ -234,18 +234,18 @@ JSNES.prototype = {
         }
         return this.rom.valid;
     },
-    
+
     resetFps: function() {
         this.lastFpsTime = null;
         this.fpsFrameCount = 0;
     },
-    
+
     setFramerate: function(rate){
         this.opts.preferredFrameRate = rate;
         this.frameTime = 1000 / rate;
         //this.papu.setSampleRate(this.opts.sampleRate, false);
     },
-    
+
     setLimitFrames: function(limit) {
         this.limitFrames = limit;
         this.lastFrameTime = null;
@@ -300,7 +300,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 JSNES.CPU = function(nes) {
     this.nes = nes;
-    
+
     // Keep Chrome happy
     this.mem = null;
     this.REG_ACC = null;
@@ -327,7 +327,7 @@ JSNES.CPU = function(nes) {
     this.crash = null;
     this.irqRequested = null;
     this.irqType = null;
-    
+
     this.reset();
 }
 
@@ -336,11 +336,11 @@ JSNES.CPU.prototype = {
     IRQ_NORMAL: 0,
     IRQ_NMI: 1,
     IRQ_RESET: 2,
-    
+
     reset: function() {
-        // Main memory 
+        // Main memory
         this.mem = new Array(0x10000);
-        
+
         for (var i=0; i < 0x2000; i++) {
             this.mem[i] = 0xFF;
         }
@@ -354,7 +354,7 @@ JSNES.CPU.prototype = {
         for (var i=0x2001; i < this.mem.length; i++) {
             this.mem[i] = 0;
         }
-        
+
         // CPU Registers:
         this.REG_ACC = 0;
         this.REG_X = 0;
@@ -366,9 +366,9 @@ JSNES.CPU.prototype = {
         this.REG_PC_NEW = 0x8000-1;
         // Reset Status register:
         this.REG_STATUS = 0x28;
-        
+
         this.setStatus(0x28);
-        
+
         // Set flags:
         this.F_CARRY = 0;
         this.F_DECIMAL = 0;
@@ -382,26 +382,26 @@ JSNES.CPU.prototype = {
         this.F_NOTUSED_NEW = 1;
         this.F_BRK = 1;
         this.F_BRK_NEW = 1;
-        
+
         this.palCnt = 0;
         this.opdata = new JSNES.CPU.OpData().opdata;
         this.cyclesToHalt = 0;
-        
+
         // Reset crash flag:
         this.crash = false;
-        
+
         // Interrupt notification:
         this.irqRequested = false;
         this.irqType = null;
 
     },
-    
-    
+
+
     // Emulates a single CPU instruction, returns the number of cycles
     emulate: function() {
         var temp;
         var add;
-        
+
         // Check interrupts:
         if(this.irqRequested){
             temp =
@@ -454,11 +454,11 @@ JSNES.CPU.prototype = {
         // Increment PC by number of op bytes:
         var opaddr = this.REG_PC;
         this.REG_PC += ((opinf >> 16) & 0xFF);
-        
+
         var addr = 0;
         switch(addrMode){
             case 0:{
-                // Zero Page mode. Use the address given after the opcode, 
+                // Zero Page mode. Use the address given after the opcode,
                 // but without high byte.
                 addr = this.load(opaddr+2);
                 break;
@@ -476,12 +476,12 @@ JSNES.CPU.prototype = {
                 // Ignore. Address is implied in instruction.
                 break;
             }case 3:{
-                // Absolute mode. Use the two bytes following the opcode as 
+                // Absolute mode. Use the two bytes following the opcode as
                 // an address.
                 addr = this.load16bit(opaddr+2);
                 break;
             }case 4:{
-                // Accumulator mode. The address is in the accumulator 
+                // Accumulator mode. The address is in the accumulator
                 // register.
                 addr = this.REG_ACC;
                 break;
@@ -490,19 +490,19 @@ JSNES.CPU.prototype = {
                 addr = this.REG_PC;
                 break;
             }case 6:{
-                // Zero Page Indexed mode, X as index. Use the address given 
+                // Zero Page Indexed mode, X as index. Use the address given
                 // after the opcode, then add the
                 // X register to it to get the final address.
                 addr = (this.load(opaddr+2)+this.REG_X)&0xFF;
                 break;
             }case 7:{
-                // Zero Page Indexed mode, Y as index. Use the address given 
+                // Zero Page Indexed mode, Y as index. Use the address given
                 // after the opcode, then add the
                 // Y register to it to get the final address.
                 addr = (this.load(opaddr+2)+this.REG_Y)&0xFF;
                 break;
             }case 8:{
-                // Absolute Indexed Mode, X as index. Same as zero page 
+                // Absolute Indexed Mode, X as index. Same as zero page
                 // indexed, but with the high byte.
                 addr = this.load16bit(opaddr+2);
                 if((addr&0xFF00)!=((addr+this.REG_X)&0xFF00)){
@@ -511,7 +511,7 @@ JSNES.CPU.prototype = {
                 addr+=this.REG_X;
                 break;
             }case 9:{
-                // Absolute Indexed Mode, Y as index. Same as zero page 
+                // Absolute Indexed Mode, Y as index. Same as zero page
                 // indexed, but with the high byte.
                 addr = this.load16bit(opaddr+2);
                 if((addr&0xFF00)!=((addr+this.REG_Y)&0xFF00)){
@@ -520,9 +520,9 @@ JSNES.CPU.prototype = {
                 addr+=this.REG_Y;
                 break;
             }case 10:{
-                // Pre-indexed Indirect mode. Find the 16-bit address 
+                // Pre-indexed Indirect mode. Find the 16-bit address
                 // starting at the given location plus
-                // the current X register. The value is the contents of that 
+                // the current X register. The value is the contents of that
                 // address.
                 addr = this.load(opaddr+2);
                 if((addr&0xFF00)!=((addr+this.REG_X)&0xFF00)){
@@ -533,9 +533,9 @@ JSNES.CPU.prototype = {
                 addr = this.load16bit(addr);
                 break;
             }case 11:{
-                // Post-indexed Indirect mode. Find the 16-bit address 
+                // Post-indexed Indirect mode. Find the 16-bit address
                 // contained in the given location
-                // (and the one following). Add to that address the contents 
+                // (and the one following). Add to that address the contents
                 // of the Y register. Fetch the value
                 // stored at that adress.
                 addr = this.load16bit(this.load(opaddr+2));
@@ -545,7 +545,7 @@ JSNES.CPU.prototype = {
                 addr+=this.REG_Y;
                 break;
             }case 12:{
-                // Indirect Absolute mode. Find the 16-bit address contained 
+                // Indirect Absolute mode. Find the 16-bit address contained
                 // at the given location.
                 addr = this.load16bit(opaddr+2);// Find op
                 if(addr < 0x1FFF) {
@@ -1127,7 +1127,7 @@ JSNES.CPU.prototype = {
                     temp = this.load(addr);
                     add = this.F_CARRY;
                     this.F_CARRY = (temp>>7)&1;
-                    temp = ((temp<<1)&0xFF)+add;    
+                    temp = ((temp<<1)&0xFF)+add;
                     this.write(addr, temp);
 
                 }
@@ -1146,7 +1146,7 @@ JSNES.CPU.prototype = {
 
                     add = this.F_CARRY<<7;
                     this.F_CARRY = this.REG_ACC&1;
-                    temp = (this.REG_ACC>>1)+add;   
+                    temp = (this.REG_ACC>>1)+add;
                     this.REG_ACC = temp;
 
                 }else{
@@ -1169,7 +1169,7 @@ JSNES.CPU.prototype = {
                 // *******
 
                 // Return from interrupt. Pull status and PC from stack.
-                
+
                 temp = this.pull();
                 this.F_CARRY     = (temp   )&1;
                 this.F_ZERO      = ((temp>>1)&1)==0?1:0;
@@ -1196,10 +1196,10 @@ JSNES.CPU.prototype = {
                 // *******
 
                 // Return from subroutine. Pull PC from stack.
-                
+
                 this.REG_PC = this.pull();
                 this.REG_PC += (this.pull()<<8);
-                
+
                 if(this.REG_PC==0xFFFF){
                     return; // return from NSF play routine:
                 }
@@ -1368,7 +1368,7 @@ JSNES.CPU.prototype = {
         return cycleCount;
 
     },
-    
+
     load: function(addr){
         if (addr < 0x2000) {
             return this.mem[addr & 0x7FF];
@@ -1377,17 +1377,17 @@ JSNES.CPU.prototype = {
             return this.nes.mmap.load(addr);
         }
     },
-    
+
     load16bit: function(addr){
         if (addr < 0x1FFF) {
-            return this.mem[addr&0x7FF] 
+            return this.mem[addr&0x7FF]
                 | (this.mem[(addr+1)&0x7FF]<<8);
         }
         else {
             return this.nes.mmap.load(addr) | (this.nes.mmap.load(addr+1) << 8);
         }
     },
-    
+
     write: function(addr, val){
         if(addr < 0x2000) {
             this.mem[addr&0x7FF] = val;
@@ -1489,12 +1489,12 @@ JSNES.CPU.prototype = {
 // Generates and provides an array of details about instructions
 JSNES.CPU.OpData = function() {
     this.opdata = new Array(256);
-    
+
     // Set all to invalid instruction (to detect crashes):
     for(var i=0;i<256;i++) this.opdata[i]=0xFF;
-    
+
     // Now fill in all valid opcodes:
-    
+
     // ADC:
     this.setOp(this.INS_ADC,0x69,this.ADDR_IMM,2,2);
     this.setOp(this.INS_ADC,0x65,this.ADDR_ZP,2,3);
@@ -1504,7 +1504,7 @@ JSNES.CPU.OpData = function() {
     this.setOp(this.INS_ADC,0x79,this.ADDR_ABSY,3,4);
     this.setOp(this.INS_ADC,0x61,this.ADDR_PREIDXIND,2,6);
     this.setOp(this.INS_ADC,0x71,this.ADDR_POSTIDXIND,2,5);
-    
+
     // AND:
     this.setOp(this.INS_AND,0x29,this.ADDR_IMM,2,2);
     this.setOp(this.INS_AND,0x25,this.ADDR_ZP,2,3);
@@ -1514,57 +1514,57 @@ JSNES.CPU.OpData = function() {
     this.setOp(this.INS_AND,0x39,this.ADDR_ABSY,3,4);
     this.setOp(this.INS_AND,0x21,this.ADDR_PREIDXIND,2,6);
     this.setOp(this.INS_AND,0x31,this.ADDR_POSTIDXIND,2,5);
-    
+
     // ASL:
     this.setOp(this.INS_ASL,0x0A,this.ADDR_ACC,1,2);
     this.setOp(this.INS_ASL,0x06,this.ADDR_ZP,2,5);
     this.setOp(this.INS_ASL,0x16,this.ADDR_ZPX,2,6);
     this.setOp(this.INS_ASL,0x0E,this.ADDR_ABS,3,6);
     this.setOp(this.INS_ASL,0x1E,this.ADDR_ABSX,3,7);
-    
+
     // BCC:
     this.setOp(this.INS_BCC,0x90,this.ADDR_REL,2,2);
-    
+
     // BCS:
     this.setOp(this.INS_BCS,0xB0,this.ADDR_REL,2,2);
-    
+
     // BEQ:
     this.setOp(this.INS_BEQ,0xF0,this.ADDR_REL,2,2);
-    
+
     // BIT:
     this.setOp(this.INS_BIT,0x24,this.ADDR_ZP,2,3);
     this.setOp(this.INS_BIT,0x2C,this.ADDR_ABS,3,4);
-    
+
     // BMI:
     this.setOp(this.INS_BMI,0x30,this.ADDR_REL,2,2);
-    
+
     // BNE:
     this.setOp(this.INS_BNE,0xD0,this.ADDR_REL,2,2);
-    
+
     // BPL:
     this.setOp(this.INS_BPL,0x10,this.ADDR_REL,2,2);
-    
+
     // BRK:
     this.setOp(this.INS_BRK,0x00,this.ADDR_IMP,1,7);
-    
+
     // BVC:
     this.setOp(this.INS_BVC,0x50,this.ADDR_REL,2,2);
-    
+
     // BVS:
     this.setOp(this.INS_BVS,0x70,this.ADDR_REL,2,2);
-    
+
     // CLC:
     this.setOp(this.INS_CLC,0x18,this.ADDR_IMP,1,2);
-    
+
     // CLD:
     this.setOp(this.INS_CLD,0xD8,this.ADDR_IMP,1,2);
-    
+
     // CLI:
     this.setOp(this.INS_CLI,0x58,this.ADDR_IMP,1,2);
-    
+
     // CLV:
     this.setOp(this.INS_CLV,0xB8,this.ADDR_IMP,1,2);
-    
+
     // CMP:
     this.setOp(this.INS_CMP,0xC9,this.ADDR_IMM,2,2);
     this.setOp(this.INS_CMP,0xC5,this.ADDR_ZP,2,3);
@@ -1574,29 +1574,29 @@ JSNES.CPU.OpData = function() {
     this.setOp(this.INS_CMP,0xD9,this.ADDR_ABSY,3,4);
     this.setOp(this.INS_CMP,0xC1,this.ADDR_PREIDXIND,2,6);
     this.setOp(this.INS_CMP,0xD1,this.ADDR_POSTIDXIND,2,5);
-    
+
     // CPX:
     this.setOp(this.INS_CPX,0xE0,this.ADDR_IMM,2,2);
     this.setOp(this.INS_CPX,0xE4,this.ADDR_ZP,2,3);
     this.setOp(this.INS_CPX,0xEC,this.ADDR_ABS,3,4);
-    
+
     // CPY:
     this.setOp(this.INS_CPY,0xC0,this.ADDR_IMM,2,2);
     this.setOp(this.INS_CPY,0xC4,this.ADDR_ZP,2,3);
     this.setOp(this.INS_CPY,0xCC,this.ADDR_ABS,3,4);
-    
+
     // DEC:
     this.setOp(this.INS_DEC,0xC6,this.ADDR_ZP,2,5);
     this.setOp(this.INS_DEC,0xD6,this.ADDR_ZPX,2,6);
     this.setOp(this.INS_DEC,0xCE,this.ADDR_ABS,3,6);
     this.setOp(this.INS_DEC,0xDE,this.ADDR_ABSX,3,7);
-    
+
     // DEX:
     this.setOp(this.INS_DEX,0xCA,this.ADDR_IMP,1,2);
-    
+
     // DEY:
     this.setOp(this.INS_DEY,0x88,this.ADDR_IMP,1,2);
-    
+
     // EOR:
     this.setOp(this.INS_EOR,0x49,this.ADDR_IMM,2,2);
     this.setOp(this.INS_EOR,0x45,this.ADDR_ZP,2,3);
@@ -1606,26 +1606,26 @@ JSNES.CPU.OpData = function() {
     this.setOp(this.INS_EOR,0x59,this.ADDR_ABSY,3,4);
     this.setOp(this.INS_EOR,0x41,this.ADDR_PREIDXIND,2,6);
     this.setOp(this.INS_EOR,0x51,this.ADDR_POSTIDXIND,2,5);
-    
+
     // INC:
     this.setOp(this.INS_INC,0xE6,this.ADDR_ZP,2,5);
     this.setOp(this.INS_INC,0xF6,this.ADDR_ZPX,2,6);
     this.setOp(this.INS_INC,0xEE,this.ADDR_ABS,3,6);
     this.setOp(this.INS_INC,0xFE,this.ADDR_ABSX,3,7);
-    
+
     // INX:
     this.setOp(this.INS_INX,0xE8,this.ADDR_IMP,1,2);
-    
+
     // INY:
     this.setOp(this.INS_INY,0xC8,this.ADDR_IMP,1,2);
-    
+
     // JMP:
     this.setOp(this.INS_JMP,0x4C,this.ADDR_ABS,3,3);
     this.setOp(this.INS_JMP,0x6C,this.ADDR_INDABS,3,5);
-    
+
     // JSR:
     this.setOp(this.INS_JSR,0x20,this.ADDR_ABS,3,6);
-    
+
     // LDA:
     this.setOp(this.INS_LDA,0xA9,this.ADDR_IMM,2,2);
     this.setOp(this.INS_LDA,0xA5,this.ADDR_ZP,2,3);
@@ -1635,32 +1635,32 @@ JSNES.CPU.OpData = function() {
     this.setOp(this.INS_LDA,0xB9,this.ADDR_ABSY,3,4);
     this.setOp(this.INS_LDA,0xA1,this.ADDR_PREIDXIND,2,6);
     this.setOp(this.INS_LDA,0xB1,this.ADDR_POSTIDXIND,2,5);
-    
-    
+
+
     // LDX:
     this.setOp(this.INS_LDX,0xA2,this.ADDR_IMM,2,2);
     this.setOp(this.INS_LDX,0xA6,this.ADDR_ZP,2,3);
     this.setOp(this.INS_LDX,0xB6,this.ADDR_ZPY,2,4);
     this.setOp(this.INS_LDX,0xAE,this.ADDR_ABS,3,4);
     this.setOp(this.INS_LDX,0xBE,this.ADDR_ABSY,3,4);
-    
+
     // LDY:
     this.setOp(this.INS_LDY,0xA0,this.ADDR_IMM,2,2);
     this.setOp(this.INS_LDY,0xA4,this.ADDR_ZP,2,3);
     this.setOp(this.INS_LDY,0xB4,this.ADDR_ZPX,2,4);
     this.setOp(this.INS_LDY,0xAC,this.ADDR_ABS,3,4);
     this.setOp(this.INS_LDY,0xBC,this.ADDR_ABSX,3,4);
-    
+
     // LSR:
     this.setOp(this.INS_LSR,0x4A,this.ADDR_ACC,1,2);
     this.setOp(this.INS_LSR,0x46,this.ADDR_ZP,2,5);
     this.setOp(this.INS_LSR,0x56,this.ADDR_ZPX,2,6);
     this.setOp(this.INS_LSR,0x4E,this.ADDR_ABS,3,6);
     this.setOp(this.INS_LSR,0x5E,this.ADDR_ABSX,3,7);
-    
+
     // NOP:
     this.setOp(this.INS_NOP,0xEA,this.ADDR_IMP,1,2);
-    
+
     // ORA:
     this.setOp(this.INS_ORA,0x09,this.ADDR_IMM,2,2);
     this.setOp(this.INS_ORA,0x05,this.ADDR_ZP,2,3);
@@ -1670,39 +1670,39 @@ JSNES.CPU.OpData = function() {
     this.setOp(this.INS_ORA,0x19,this.ADDR_ABSY,3,4);
     this.setOp(this.INS_ORA,0x01,this.ADDR_PREIDXIND,2,6);
     this.setOp(this.INS_ORA,0x11,this.ADDR_POSTIDXIND,2,5);
-    
+
     // PHA:
     this.setOp(this.INS_PHA,0x48,this.ADDR_IMP,1,3);
-    
+
     // PHP:
     this.setOp(this.INS_PHP,0x08,this.ADDR_IMP,1,3);
-    
+
     // PLA:
     this.setOp(this.INS_PLA,0x68,this.ADDR_IMP,1,4);
-    
+
     // PLP:
     this.setOp(this.INS_PLP,0x28,this.ADDR_IMP,1,4);
-    
+
     // ROL:
     this.setOp(this.INS_ROL,0x2A,this.ADDR_ACC,1,2);
     this.setOp(this.INS_ROL,0x26,this.ADDR_ZP,2,5);
     this.setOp(this.INS_ROL,0x36,this.ADDR_ZPX,2,6);
     this.setOp(this.INS_ROL,0x2E,this.ADDR_ABS,3,6);
     this.setOp(this.INS_ROL,0x3E,this.ADDR_ABSX,3,7);
-    
+
     // ROR:
     this.setOp(this.INS_ROR,0x6A,this.ADDR_ACC,1,2);
     this.setOp(this.INS_ROR,0x66,this.ADDR_ZP,2,5);
     this.setOp(this.INS_ROR,0x76,this.ADDR_ZPX,2,6);
     this.setOp(this.INS_ROR,0x6E,this.ADDR_ABS,3,6);
     this.setOp(this.INS_ROR,0x7E,this.ADDR_ABSX,3,7);
-    
+
     // RTI:
     this.setOp(this.INS_RTI,0x40,this.ADDR_IMP,1,6);
-    
+
     // RTS:
     this.setOp(this.INS_RTS,0x60,this.ADDR_IMP,1,6);
-    
+
     // SBC:
     this.setOp(this.INS_SBC,0xE9,this.ADDR_IMM,2,2);
     this.setOp(this.INS_SBC,0xE5,this.ADDR_ZP,2,3);
@@ -1712,16 +1712,16 @@ JSNES.CPU.OpData = function() {
     this.setOp(this.INS_SBC,0xF9,this.ADDR_ABSY,3,4);
     this.setOp(this.INS_SBC,0xE1,this.ADDR_PREIDXIND,2,6);
     this.setOp(this.INS_SBC,0xF1,this.ADDR_POSTIDXIND,2,5);
-    
+
     // SEC:
     this.setOp(this.INS_SEC,0x38,this.ADDR_IMP,1,2);
-    
+
     // SED:
     this.setOp(this.INS_SED,0xF8,this.ADDR_IMP,1,2);
-    
+
     // SEI:
     this.setOp(this.INS_SEI,0x78,this.ADDR_IMP,1,2);
-    
+
     // STA:
     this.setOp(this.INS_STA,0x85,this.ADDR_ZP,2,3);
     this.setOp(this.INS_STA,0x95,this.ADDR_ZPX,2,4);
@@ -1730,35 +1730,35 @@ JSNES.CPU.OpData = function() {
     this.setOp(this.INS_STA,0x99,this.ADDR_ABSY,3,5);
     this.setOp(this.INS_STA,0x81,this.ADDR_PREIDXIND,2,6);
     this.setOp(this.INS_STA,0x91,this.ADDR_POSTIDXIND,2,6);
-    
+
     // STX:
     this.setOp(this.INS_STX,0x86,this.ADDR_ZP,2,3);
     this.setOp(this.INS_STX,0x96,this.ADDR_ZPY,2,4);
     this.setOp(this.INS_STX,0x8E,this.ADDR_ABS,3,4);
-    
+
     // STY:
     this.setOp(this.INS_STY,0x84,this.ADDR_ZP,2,3);
     this.setOp(this.INS_STY,0x94,this.ADDR_ZPX,2,4);
     this.setOp(this.INS_STY,0x8C,this.ADDR_ABS,3,4);
-    
+
     // TAX:
     this.setOp(this.INS_TAX,0xAA,this.ADDR_IMP,1,2);
-    
+
     // TAY:
     this.setOp(this.INS_TAY,0xA8,this.ADDR_IMP,1,2);
-    
+
     // TSX:
     this.setOp(this.INS_TSX,0xBA,this.ADDR_IMP,1,2);
-    
+
     // TXA:
     this.setOp(this.INS_TXA,0x8A,this.ADDR_IMP,1,2);
-    
+
     // TXS:
     this.setOp(this.INS_TXS,0x9A,this.ADDR_IMP,1,2);
-    
+
     // TYA:
     this.setOp(this.INS_TYA,0x98,this.ADDR_IMP,1,2);
-    
+
     this.cycTable = new Array(
     /*0x00*/ 7,6,2,8,3,3,5,5,3,2,2,2,4,4,6,6,
     /*0x10*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7,
@@ -1777,10 +1777,10 @@ JSNES.CPU.OpData = function() {
     /*0xE0*/ 2,6,3,8,3,3,5,5,2,2,2,2,4,4,6,6,
     /*0xF0*/ 2,5,2,8,4,4,6,6,2,4,2,7,4,4,7,7
     );
-    
-    
+
+
     this.instname = new Array(56);
-    
+
     // Instruction Names:
     this.instname[ 0] = "ADC";
     this.instname[ 1] = "AND";
@@ -1838,7 +1838,7 @@ JSNES.CPU.OpData = function() {
     this.instname[53] = "TXA";
     this.instname[54] = "TXS";
     this.instname[55] = "TYA";
-    
+
     this.addrDesc = new Array(
         "Zero Page           ",
         "Relative            ",
@@ -1860,7 +1860,7 @@ JSNES.CPU.OpData.prototype = {
     INS_ADC: 0,
     INS_AND: 1,
     INS_ASL: 2,
-    
+
     INS_BCC: 3,
     INS_BCS: 4,
     INS_BEQ: 5,
@@ -1871,7 +1871,7 @@ JSNES.CPU.OpData.prototype = {
     INS_BRK: 10,
     INS_BVC: 11,
     INS_BVS: 12,
-    
+
     INS_CLC: 13,
     INS_CLD: 14,
     INS_CLI: 15,
@@ -1879,39 +1879,39 @@ JSNES.CPU.OpData.prototype = {
     INS_CMP: 17,
     INS_CPX: 18,
     INS_CPY: 19,
-    
+
     INS_DEC: 20,
     INS_DEX: 21,
     INS_DEY: 22,
-    
+
     INS_EOR: 23,
-    
+
     INS_INC: 24,
     INS_INX: 25,
     INS_INY: 26,
-    
+
     INS_JMP: 27,
     INS_JSR: 28,
-    
+
     INS_LDA: 29,
     INS_LDX: 30,
     INS_LDY: 31,
     INS_LSR: 32,
-    
+
     INS_NOP: 33,
-    
+
     INS_ORA: 34,
-    
+
     INS_PHA: 35,
     INS_PHP: 36,
     INS_PLA: 37,
     INS_PLP: 38,
-    
+
     INS_ROL: 39,
     INS_ROR: 40,
     INS_RTI: 41,
     INS_RTS: 42,
-    
+
     INS_SBC: 43,
     INS_SEC: 44,
     INS_SED: 45,
@@ -1919,18 +1919,18 @@ JSNES.CPU.OpData.prototype = {
     INS_STA: 47,
     INS_STX: 48,
     INS_STY: 49,
-    
+
     INS_TAX: 50,
     INS_TAY: 51,
     INS_TSX: 52,
     INS_TXA: 53,
     INS_TXS: 54,
     INS_TYA: 55,
-    
+
     INS_DUMMY: 56, // dummy instruction used for 'halting' the processor some cycles
-    
+
     // -------------------------------- //
-    
+
     // Addressing modes:
     ADDR_ZP        : 0,
     ADDR_REL       : 1,
@@ -1945,12 +1945,12 @@ JSNES.CPU.OpData.prototype = {
     ADDR_PREIDXIND : 10,
     ADDR_POSTIDXIND: 11,
     ADDR_INDABS    : 12,
-    
+
     setOp: function(inst, op, addr, size, cycles){
-        this.opdata[op] = 
-            ((inst  &0xFF)    )| 
-            ((addr  &0xFF)<< 8)| 
-            ((size  &0xFF)<<16)| 
+        this.opdata[op] =
+            ((inst  &0xFF)    )|
+            ((addr  &0xFF)<< 8)|
+            ((size  &0xFF)<<16)|
             ((cycles&0xFF)<<24);
     }
 }
@@ -1977,7 +1977,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Keyboard events are bound in the UI
 JSNES.Keyboard = function() {
     var i;
-    
+
     this.keys = {
         KEY_A: 0,
         KEY_B: 1,
@@ -2010,7 +2010,7 @@ JSNES.Keyboard.prototype = {
             case 40: this.state1[this.keys.KEY_DOWN] = value; break;   // Down
             case 37: this.state1[this.keys.KEY_LEFT] = value; break;   // Left
             case 39: this.state1[this.keys.KEY_RIGHT] = value; break;  // Right
-            
+
             case 103: this.state2[this.keys.KEY_A] = value; break;     // Num-7
             case 105: this.state2[this.keys.KEY_B] = value; break;     // Num-9
             case 99: this.state2[this.keys.KEY_SELECT] = value; break; // Num-3
@@ -2029,13 +2029,13 @@ JSNES.Keyboard.prototype = {
             evt.preventDefault();
         }
     },
-    
+
     keyUp: function(evt) {
         if (!this.setKey(evt.keyCode, 0x40) && evt.preventDefault) {
             evt.preventDefault();
         }
     },
-    
+
     keyPress: function(evt) {
         evt.preventDefault();
     }
@@ -2071,17 +2071,17 @@ JSNES.Mappers[0].prototype = {
         this.joy1StrobeState = 0;
         this.joy2StrobeState = 0;
         this.joypadLastWrite = 0;
-        
+
         this.mousePressed = false;
         this.mouseX = null;
         this.mouseY = null;
     },
-    
+
     write: function(address, value) {
         if (address < 0x2000) {
             // Mirroring of RAM:
             this.nes.cpu.mem[address & 0x7FF] = value;
-        
+
         }
         else if (address > 0x4017) {
             this.nes.cpu.mem[address] = value;
@@ -2099,7 +2099,7 @@ JSNES.Mappers[0].prototype = {
             this.regWrite(address, value);
         }
     },
-    
+
     writelow: function(address, value) {
         if (address < 0x2000) {
             // Mirroring of RAM:
@@ -2119,7 +2119,7 @@ JSNES.Mappers[0].prototype = {
     load: function(address) {
         // Wrap around:
         address &= 0xFFFF;
-    
+
         // Check address range:
         if (address > 0x4017) {
             // ROM:
@@ -2139,10 +2139,10 @@ JSNES.Mappers[0].prototype = {
         switch (address >> 12) { // use fourth nibble (0xF000)
             case 0:
                 break;
-            
+
             case 1:
                 break;
-            
+
             case 2:
                 // Fall through to case 3
             case 3:
@@ -2156,7 +2156,7 @@ JSNES.Mappers[0].prototype = {
                         // PPU as flags):
                         // (not in the real NES)
                         return this.nes.cpu.mem[0x2000];
-                    
+
                     case 0x1:
                         // 0x2001:
                         // PPU Control Register 2.
@@ -2165,7 +2165,7 @@ JSNES.Mappers[0].prototype = {
                         // PPU as flags):
                         // (not in the real NES)
                         return this.nes.cpu.mem[0x2001];
-                    
+
                     case 0x2:
                         // 0x2002:
                         // PPU Status Register.
@@ -2174,20 +2174,20 @@ JSNES.Mappers[0].prototype = {
                         // to as flags in the PPU.
                         // (not in the real NES)
                         return this.nes.ppu.readStatusRegister();
-                    
+
                     case 0x3:
                         return 0;
-                    
+
                     case 0x4:
                         // 0x2004:
                         // Sprite Memory read.
                         return this.nes.ppu.sramLoad();
                     case 0x5:
                         return 0;
-                    
+
                     case 0x6:
                         return 0;
-                    
+
                     case 0x7:
                         // 0x2007:
                         // VRAM read:
@@ -2201,27 +2201,27 @@ JSNES.Mappers[0].prototype = {
                         // 0x4015:
                         // Sound channel enable, DMC Status
                         return this.nes.papu.readReg(address);
-                    
+
                     case 1:
                         // 0x4016:
                         // Joystick 1 + Strobe
                         return this.joy1Read();
-                    
+
                     case 2:
                         // 0x4017:
                         // Joystick 2 + Strobe
                         if (this.mousePressed) {
-                        
+
                             // Check for white pixel nearby:
                             var sx = Math.max(0, this.mouseX - 4);
                             var ex = Math.min(256, this.mouseX + 4);
                             var sy = Math.max(0, this.mouseY - 4);
                             var ey = Math.min(240, this.mouseY + 4);
                             var w = 0;
-                        
+
                             for (var y=sy; y<ey; y++) {
                                 for (var x=sx; x<ex; x++) {
-                               
+
                                     if (this.nes.ppu.buffer[(y<<8)+x] == 0xFFFFFF) {
                                         w |= 0x1<<3;
                                         console.debug("Clicked on white!");
@@ -2229,14 +2229,14 @@ JSNES.Mappers[0].prototype = {
                                     }
                                 }
                             }
-                        
+
                             w |= (this.mousePressed?(0x1<<4):0);
                             return (this.joy2Read()|w) & 0xFFFF;
                         }
                         else {
                             return this.joy2Read();
                         }
-                    
+
                 }
                 break;
         }
@@ -2250,48 +2250,48 @@ JSNES.Mappers[0].prototype = {
                 this.nes.cpu.mem[address] = value;
                 this.nes.ppu.updateControlReg1(value);
                 break;
-            
+
             case 0x2001:
                 // PPU Control register 2
                 this.nes.cpu.mem[address] = value;
                 this.nes.ppu.updateControlReg2(value);
                 break;
-            
+
             case 0x2003:
                 // Set Sprite RAM address:
                 this.nes.ppu.writeSRAMAddress(value);
                 break;
-            
+
             case 0x2004:
                 // Write to Sprite RAM:
                 this.nes.ppu.sramWrite(value);
                 break;
-            
+
             case 0x2005:
                 // Screen Scroll offsets:
                 this.nes.ppu.scrollWrite(value);
                 break;
-            
+
             case 0x2006:
                 // Set VRAM address:
                 this.nes.ppu.writeVRAMAddress(value);
                 break;
-            
+
             case 0x2007:
                 // Write to VRAM:
                 this.nes.ppu.vramWrite(value);
                 break;
-            
+
             case 0x4014:
                 // Sprite Memory DMA Access
                 this.nes.ppu.sramDMA(value);
                 break;
-            
+
             case 0x4015:
                 // Sound Channel Switch, DMC Status
                 this.nes.papu.writeReg(address, value);
                 break;
-            
+
             case 0x4016:
                 // Joystick 1 + Strobe
                 if (value === 0 && this.joypadLastWrite === 1) {
@@ -2300,25 +2300,25 @@ JSNES.Mappers[0].prototype = {
                 }
                 this.joypadLastWrite = value;
                 break;
-            
+
             case 0x4017:
                 // Sound channel frame sequencer:
                 this.nes.papu.writeReg(address, value);
                 break;
-            
+
             default:
                 // Sound registers
                 ////System.out.println("write to sound reg");
                 if (address >= 0x4000 && address <= 0x4017) {
                     this.nes.papu.writeReg(address,value);
                 }
-                
+
         }
     },
 
     joy1Read: function() {
         var ret;
-    
+
         switch (this.joy1StrobeState) {
             case 0:
             case 1:
@@ -2349,18 +2349,18 @@ JSNES.Mappers[0].prototype = {
             default:
                 ret = 0;
         }
-        
+
         this.joy1StrobeState++;
         if (this.joy1StrobeState == 24) {
             this.joy1StrobeState = 0;
         }
-    
+
         return ret;
     },
 
     joy2Read: function() {
         var ret;
-    
+
         switch (this.joy2StrobeState) {
             case 0:
             case 1:
@@ -2396,7 +2396,7 @@ JSNES.Mappers[0].prototype = {
         if (this.joy2StrobeState == 24) {
             this.joy2StrobeState = 0;
         }
-    
+
         return ret;
     },
 
@@ -2405,16 +2405,16 @@ JSNES.Mappers[0].prototype = {
             alert("NoMapper: Invalid ROM! Unable to load.");
             return;
         }
-    
+
         // Load ROM into memory:
         this.loadPRGROM();
-    
+
         // Load CHR-ROM:
         this.loadCHRROM();
-    
+
         // Load Battery RAM (if present):
         this.loadBatteryRam();
-    
+
         // Reset IRQ:
         //nes.getCpu().doResetInterrupt();
         this.nes.cpu.requestIrq(this.nes.cpu.IRQ_RESET);
@@ -2469,14 +2469,15 @@ JSNES.Mappers[0].prototype = {
     },
 
     loadVromBank: function(bank, address) {
+      if(this.nes.ppu.debug) { console.log("loadVromBank"); }
         if (this.nes.rom.vromCount === 0) {
             return;
         }
         this.nes.ppu.triggerRendering();
-    
-        JSNES.Utils.arraycopy(this.nes.rom.vrom[bank % this.nes.rom.vromCount], 
+
+        JSNES.Utils.arraycopy(this.nes.rom.vrom[bank % this.nes.rom.vromCount],
             0, this.nes.ppu.vramMem, address, 4096);
-    
+
         var vromTile = this.nes.rom.vromTile[bank % this.nes.rom.vromCount];
         JSNES.Utils.arraycopy(vromTile, 0, this.nes.ppu.ptTile,address >> 4, 256);
     },
@@ -2487,6 +2488,7 @@ JSNES.Mappers[0].prototype = {
     },
 
     load8kVromBank: function(bank4kStart, address) {
+      if(this.nes.ppu.debug) { console.log("load8kVromBank"); }
         if (this.nes.rom.vromCount === 0) {
             return;
         }
@@ -2498,16 +2500,18 @@ JSNES.Mappers[0].prototype = {
     },
 
     load1kVromBank: function(bank1k, address) {
+      if(this.nes.ppu.debug) { console.log("load1kVromBank"); }
+
         if (this.nes.rom.vromCount === 0) {
             return;
         }
         this.nes.ppu.triggerRendering();
-    
+
         var bank4k = parseInt(bank1k / 4, 10) % this.nes.rom.vromCount;
         var bankoffset = (bank1k % 4) * 1024;
-        JSNES.Utils.arraycopy(this.nes.rom.vrom[bank4k], 0, 
+        JSNES.Utils.arraycopy(this.nes.rom.vrom[bank4k], 0,
             this.nes.ppu.vramMem, bankoffset, 1024);
-    
+
         // Update tiles:
         var vromTile = this.nes.rom.vromTile[bank4k];
         var baseIndex = address >> 4;
@@ -2517,16 +2521,18 @@ JSNES.Mappers[0].prototype = {
     },
 
     load2kVromBank: function(bank2k, address) {
+      if(this.nes.ppu.debug) { console.log("load2kVromBank"); }
+
         if (this.nes.rom.vromCount === 0) {
             return;
         }
         this.nes.ppu.triggerRendering();
-    
+
         var bank4k = parseInt(bank2k / 2, 10) % this.nes.rom.vromCount;
         var bankoffset = (bank2k % 2) * 2048;
         JSNES.Utils.arraycopy(this.nes.rom.vrom[bank4k], bankoffset,
             this.nes.ppu.vramMem, address, 2048);
-    
+
         // Update tiles:
         var vromTile = this.nes.rom.vromTile[bank4k];
         var baseIndex = address >> 4;
@@ -2538,9 +2544,9 @@ JSNES.Mappers[0].prototype = {
     load8kRomBank: function(bank8k, address) {
         var bank16k = parseInt(bank8k / 2, 10) % this.nes.rom.romCount;
         var offset = (bank8k % 2) * 8192;
-    
+
         //this.nes.cpu.mem.write(address,this.nes.rom.rom[bank16k],offset,8192);
-        JSNES.Utils.arraycopy(this.nes.rom.rom[bank16k], offset, 
+        JSNES.Utils.arraycopy(this.nes.rom.rom[bank16k], offset,
                   this.nes.cpu.mem, address, 8192);
     },
 
@@ -2562,7 +2568,7 @@ JSNES.Mappers[1].prototype = new JSNES.Mappers[0]();
 
 JSNES.Mappers[1].prototype.reset = function() {
     JSNES.Mappers[0].prototype.reset.apply(this);
-    
+
     // 5-bit buffer:
     this.regBuffer = 0;
     this.regBufferCounter = 0;
@@ -2597,26 +2603,26 @@ JSNES.Mappers[1].prototype.write = function(address, value) {
         // Reset buffering:
         this.regBufferCounter = 0;
         this.regBuffer = 0;
-    
+
         // Reset register:
         if (this.getRegNumber(address) === 0) {
-        
+
             this.prgSwitchingArea = 1;
             this.prgSwitchingSize = 1;
-        
+
         }
     }
     else {
-    
+
         // Continue buffering:
         //regBuffer = (regBuffer & (0xFF-(1<<regBufferCounter))) | ((value & (1<<regBufferCounter))<<regBufferCounter);
         this.regBuffer = (this.regBuffer & (0xFF - (1 << this.regBufferCounter))) | ((value & 1) << this.regBufferCounter);
         this.regBufferCounter++;
-        
+
         if (this.regBufferCounter == 5) {
             // Use the buffered value:
             this.setReg(this.getRegNumber(address), this.regBuffer);
-        
+
             // Reset buffer:
             this.regBuffer = 0;
             this.regBufferCounter = 0;
@@ -2649,28 +2655,28 @@ JSNES.Mappers[1].prototype.setReg = function(reg, value) {
                     this.nes.ppu.setMirroring(this.nes.rom.VERTICAL_MIRRORING);
                 }
             }
-    
+
             // PRG Switching Area;
             this.prgSwitchingArea = (value >> 2) & 1;
-    
+
             // PRG Switching Size:
             this.prgSwitchingSize = (value >> 3) & 1;
-    
+
             // VROM Switching Size:
             this.vromSwitchingSize = (value >> 4) & 1;
-        
+
             break;
-    
+
         case 1:
             // ROM selection:
             this.romSelectionReg0 = (value >> 4) & 1;
-    
+
             // Check whether the cart has VROM:
             if (this.nes.rom.vromCount > 0) {
-        
+
                 // Select VROM bank at 0x0000:
                 if (this.vromSwitchingSize === 0) {
-        
+
                     // Swap 8kB VROM:
                     if (this.romSelectionReg0 === 0) {
                         this.load8kVromBank((value & 0xF), 0x0000);
@@ -2678,11 +2684,11 @@ JSNES.Mappers[1].prototype.setReg = function(reg, value) {
                     else {
                         this.load8kVromBank(
                             parseInt(this.nes.rom.vromCount / 2, 10) +
-                                (value & 0xF), 
+                                (value & 0xF),
                             0x0000
                         );
                     }
-            
+
                 }
                 else {
                     // Swap 4kB VROM:
@@ -2698,16 +2704,16 @@ JSNES.Mappers[1].prototype.setReg = function(reg, value) {
                     }
                 }
             }
-        
+
             break;
-    
+
         case 2:
             // ROM selection:
             this.romSelectionReg1 = (value >> 4) & 1;
-    
+
             // Check whether the cart has VROM:
             if (this.nes.rom.vromCount > 0) {
-                
+
                 // Select VROM bank at 0x1000:
                 if (this.vromSwitchingSize === 1) {
                     // Swap 4kB of VROM:
@@ -2724,14 +2730,14 @@ JSNES.Mappers[1].prototype.setReg = function(reg, value) {
                 }
             }
             break;
-    
+
         default:
             // Select ROM bank:
             // -------------------------
             tmp = value & 0xF;
             var bank;
             var baseBank = 0;
-    
+
             if (this.nes.rom.romCount >= 32) {
                 // 1024 kB cart
                 if (this.vromSwitchingSize === 0) {
@@ -2740,7 +2746,7 @@ JSNES.Mappers[1].prototype.setReg = function(reg, value) {
                     }
                 }
                 else {
-                    baseBank = (this.romSelectionReg0 
+                    baseBank = (this.romSelectionReg0
                                 | (this.romSelectionReg1 << 1)) << 3;
                 }
             }
@@ -2750,7 +2756,7 @@ JSNES.Mappers[1].prototype.setReg = function(reg, value) {
                     baseBank = 8;
                 }
             }
-    
+
             if (this.prgSwitchingSize === 0) {
                 // 32kB
                 bank = baseBank + (value & 0xF);
@@ -2765,7 +2771,7 @@ JSNES.Mappers[1].prototype.setReg = function(reg, value) {
                 else {
                     this.loadRomBank(bank, 0x8000);
                 }
-            }  
+            }
     }
 };
 
@@ -2858,7 +2864,7 @@ JSNES.Mappers[2].prototype.loadROM = function(rom) {
 
 JSNES.Mappers[4] = function(nes) {
     this.nes = nes;
-    
+
     this.CMD_SEL_2_1K_VROM_0000 = 0;
     this.CMD_SEL_2_1K_VROM_0800 = 1;
     this.CMD_SEL_1K_VROM_1000 = 2;
@@ -2867,7 +2873,7 @@ JSNES.Mappers[4] = function(nes) {
     this.CMD_SEL_1K_VROM_1C00 = 5;
     this.CMD_SEL_ROM_PAGE1 = 6;
     this.CMD_SEL_ROM_PAGE2 = 7;
-    
+
     this.command = null;
     this.prgAddressSelect = null;
     this.chrAddressSelect = null;
@@ -2898,13 +2904,13 @@ JSNES.Mappers[4].prototype.write = function(address, value) {
             this.prgAddressSelect = tmp;
             this.chrAddressSelect = (value >> 7) & 1;
             break;
-    
+
         case 0x8001:
             // Page number for command
             this.executeCommand(this.command, value);
             break;
-    
-        case 0xA000:        
+
+        case 0xA000:
             // Mirroring select
             if ((value & 1) !== 0) {
                 this.nes.ppu.setMirroring(
@@ -2915,35 +2921,35 @@ JSNES.Mappers[4].prototype.write = function(address, value) {
                 this.nes.ppu.setMirroring(this.nes.rom.VERTICAL_MIRRORING);
             }
             break;
-        
+
         case 0xA001:
             // SaveRAM Toggle
             // TODO
             //nes.getRom().setSaveState((value&1)!=0);
             break;
-    
+
         case 0xC000:
             // IRQ Counter register
             this.irqCounter = value;
             //nes.ppu.mapperIrqCounter = 0;
             break;
-    
+
         case 0xC001:
             // IRQ Latch register
             this.irqLatchValue = value;
             break;
-    
+
         case 0xE000:
             // IRQ Control Reg 0 (disable)
             //irqCounter = irqLatchValue;
             this.irqEnable = 0;
             break;
-    
-        case 0xE001:        
+
+        case 0xE001:
             // IRQ Control Reg 1 (enable)
             this.irqEnable = 1;
             break;
-    
+
         default:
             // Not a MMC3 register.
             // The game has probably crashed,
@@ -2965,8 +2971,8 @@ JSNES.Mappers[4].prototype.executeCommand = function(cmd, arg) {
                 this.load1kVromBank(arg + 1, 0x1400);
             }
             break;
-        
-        case this.CMD_SEL_2_1K_VROM_0800:           
+
+        case this.CMD_SEL_2_1K_VROM_0800:
             // Select 2 1KB VROM pages at 0x0800:
             if (this.chrAddressSelect === 0) {
                 this.load1kVromBank(arg, 0x0800);
@@ -2977,8 +2983,8 @@ JSNES.Mappers[4].prototype.executeCommand = function(cmd, arg) {
                 this.load1kVromBank(arg + 1, 0x1C00);
             }
             break;
-    
-        case this.CMD_SEL_1K_VROM_1000:         
+
+        case this.CMD_SEL_1K_VROM_1000:
             // Select 1K VROM Page at 0x1000:
             if (this.chrAddressSelect === 0) {
                 this.load1kVromBank(arg, 0x1000);
@@ -2987,8 +2993,8 @@ JSNES.Mappers[4].prototype.executeCommand = function(cmd, arg) {
                 this.load1kVromBank(arg, 0x0000);
             }
             break;
-    
-        case this.CMD_SEL_1K_VROM_1400:         
+
+        case this.CMD_SEL_1K_VROM_1400:
             // Select 1K VROM Page at 0x1400:
             if (this.chrAddressSelect === 0) {
                 this.load1kVromBank(arg, 0x1400);
@@ -2997,7 +3003,7 @@ JSNES.Mappers[4].prototype.executeCommand = function(cmd, arg) {
                 this.load1kVromBank(arg, 0x0400);
             }
             break;
-    
+
         case this.CMD_SEL_1K_VROM_1800:
             // Select 1K VROM Page at 0x1800:
             if (this.chrAddressSelect === 0) {
@@ -3007,7 +3013,7 @@ JSNES.Mappers[4].prototype.executeCommand = function(cmd, arg) {
                 this.load1kVromBank(arg, 0x0800);
             }
             break;
-    
+
         case this.CMD_SEL_1K_VROM_1C00:
             // Select 1K VROM Page at 0x1C00:
             if (this.chrAddressSelect === 0) {
@@ -3016,11 +3022,11 @@ JSNES.Mappers[4].prototype.executeCommand = function(cmd, arg) {
                 this.load1kVromBank(arg, 0x0C00);
             }
             break;
-    
+
         case this.CMD_SEL_ROM_PAGE1:
             if (this.prgAddressChanged) {
                 // Load the two hardwired banks:
-                if (this.prgAddressSelect === 0) { 
+                if (this.prgAddressSelect === 0) {
                     this.load8kRomBank(
                         ((this.nes.rom.romCount - 1) * 2),
                         0xC000
@@ -3034,7 +3040,7 @@ JSNES.Mappers[4].prototype.executeCommand = function(cmd, arg) {
                 }
                 this.prgAddressChanged = false;
             }
-    
+
             // Select first switchable ROM page:
             if (this.prgAddressSelect === 0) {
                 this.load8kRomBank(arg, 0x8000);
@@ -3043,21 +3049,21 @@ JSNES.Mappers[4].prototype.executeCommand = function(cmd, arg) {
                 this.load8kRomBank(arg, 0xC000);
             }
             break;
-        
+
         case this.CMD_SEL_ROM_PAGE2:
             // Select second switchable ROM page:
             this.load8kRomBank(arg, 0xA000);
-    
+
             // hardwire appropriate bank:
             if (this.prgAddressChanged) {
                 // Load the two hardwired banks:
-                if (this.prgAddressSelect === 0) { 
+                if (this.prgAddressSelect === 0) {
                     this.load8kRomBank(
                         ((this.nes.rom.romCount - 1) * 2),
                         0xC000
                     );
                 }
-                else {              
+                else {
                     this.load8kRomBank(
                         ((this.nes.rom.romCount - 1) * 2),
                         0x8000
@@ -3113,7 +3119,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 JSNES.PAPU = function(nes) {
     this.nes = nes;
-    
+
     this.square1 = new JSNES.PAPU.ChannelSquare(this, true);
     this.square2 = new JSNES.PAPU.ChannelSquare(this, false);
     this.triangle = new JSNES.PAPU.ChannelTriangle(this);
@@ -3184,10 +3190,10 @@ JSNES.PAPU = function(nes) {
     this.stereoPosRDMC = null;
 
     this.extraCycles = null;
-    
+
     this.maxSample = null;
     this.minSample = null;
-    
+
     // Panning:
     this.panning = [80, 170, 100, 150, 128];
     this.setPanning(this.panning);
@@ -3197,7 +3203,7 @@ JSNES.PAPU = function(nes) {
     this.initDmcFrequencyLookup();
     this.initNoiseWavelengthLookup();
     this.initDACtables();
-    
+
     // Init sound registers:
     for (var i = 0; i < 0x14; i++) {
         if (i === 0x10){
@@ -3207,7 +3213,7 @@ JSNES.PAPU = function(nes) {
             this.writeReg(0x4000 + i, 0);
         }
     }
-    
+
     this.reset();
 };
 
@@ -3216,11 +3222,11 @@ JSNES.PAPU.prototype = {
         this.sampleRate = this.nes.opts.sampleRate;
         this.sampleTimerMax = parseInt(
             (1024.0 * this.nes.opts.CPU_FREQ_NTSC *
-                this.nes.opts.preferredFrameRate) / 
+                this.nes.opts.preferredFrameRate) /
                 (this.sampleRate * 60.0),
             10
         );
-    
+
         this.frameTime = parseInt(
             (14915.0 * this.nes.opts.preferredFrameRate) / 60.0,
             10
@@ -3228,7 +3234,7 @@ JSNES.PAPU.prototype = {
 
         this.sampleTimer = 0;
         this.bufferIndex = 0;
-    
+
         this.updateChannelEnable(0);
         this.masterFrameCounter = 0;
         this.derivedFrameCounter = 0;
@@ -3262,7 +3268,7 @@ JSNES.PAPU.prototype = {
         this.prevSampleR = 0;
         this.smpAccumL = 0;
         this.smpAccumR = 0;
-    
+
         this.maxSample = -500000;
         this.minSample = 500000;
     },
@@ -3280,7 +3286,7 @@ JSNES.PAPU.prototype = {
 
         this.frameIrqActive = false;
         this.dmc.irqGenerated = false;
-    
+
         return tmp & 0xFFFF;
     },
 
@@ -3403,20 +3409,20 @@ JSNES.PAPU.prototype = {
             nCycles -= this.extraCycles;
 
         }else{
-        
+
             this.extraCycles = 0;
-        
+
         }
-    
+
         var dmc = this.dmc;
         var triangle = this.triangle;
         var square1 = this.square1;
         var square2 = this.square2;
         var noise = this.noise;
-    
+
         // Clock DMC:
         if (dmc.isEnabled) {
-        
+
             dmc.shiftCounter-=(nCycles<<3);
             while(dmc.shiftCounter<=0 && dmc.dmaFrequency>0){
                 dmc.shiftCounter += dmc.dmaFrequency;
@@ -3427,10 +3433,10 @@ JSNES.PAPU.prototype = {
 
         // Clock Triangle channel Prog timer:
         if (triangle.progTimerMax>0) {
-        
+
             triangle.progTimerCount -= nCycles;
             while(triangle.progTimerCount <= 0){
-            
+
                 triangle.progTimerCount += triangle.progTimerMax+1;
                 if (triangle.linearCounter>0 && triangle.lengthCounter>0) {
 
@@ -3460,7 +3466,7 @@ JSNES.PAPU.prototype = {
             square1.squareCounter++;
             square1.squareCounter&=0x7;
             square1.updateSampleValue();
-            
+
         }
 
         // Clock Square channel 2 Prog timer:
@@ -3472,37 +3478,37 @@ JSNES.PAPU.prototype = {
             square2.squareCounter++;
             square2.squareCounter&=0x7;
             square2.updateSampleValue();
-        
+
         }
 
         // Clock noise channel Prog timer:
         var acc_c = nCycles;
         if (noise.progTimerCount-acc_c > 0) {
-        
+
             // Do all cycles at once:
             noise.progTimerCount -= acc_c;
             noise.accCount       += acc_c;
             noise.accValue       += acc_c * noise.sampleValue;
-        
+
         }else{
-        
+
             // Slow-step:
             while((acc_c--) > 0){
-            
+
                 if (--noise.progTimerCount <= 0 && noise.progTimerMax>0) {
-    
+
                     // Update noise shift register:
                     noise.shiftReg <<= 1;
                     noise.tmp = (((noise.shiftReg << (noise.randomMode===0?1:6)) ^ noise.shiftReg) & 0x8000 );
                     if (noise.tmp !== 0) {
-                    
+
                         // Sample value must be 0.
                         noise.shiftReg |= 0x01;
                         noise.randomBit = 0;
                         noise.sampleValue = 0;
-                    
+
                     }else{
-                    
+
                         // Find sample value:
                         noise.randomBit = 1;
                         if (noise.isEnabled && noise.lengthCounter>0) {
@@ -3510,19 +3516,19 @@ JSNES.PAPU.prototype = {
                         }else{
                             noise.sampleValue = 0;
                         }
-                    
+
                     }
-                
+
                     noise.progTimerCount += noise.progTimerMax;
-                    
+
                 }
-        
+
                 noise.accValue += noise.sampleValue;
                 noise.accCount++;
-        
+
             }
         }
-    
+
 
         // Frame IRQ handling:
         if (this.frameIrqEnabled && this.frameIrqActive){
@@ -3536,7 +3542,7 @@ JSNES.PAPU.prototype = {
             this.masterFrameCounter -= this.frameTime;
             this.frameCounterTick();
         }
-    
+
         // Accumulate sample value:
         this.accSample(nCycles);
 
@@ -3560,47 +3566,47 @@ JSNES.PAPU.prototype = {
             if (this.triangle.triangleCounter >= 16) {
                 this.triValue = 16 - this.triValue;
             }
-        
+
             // Add non-interpolated sample value:
             this.triValue += this.triangle.sampleValue;
         }
-    
+
         // Now sample normally:
         if (cycles === 2) {
-        
+
             this.smpTriangle += this.triValue                << 1;
             this.smpDmc      += this.dmc.sample         << 1;
             this.smpSquare1  += this.square1.sampleValue    << 1;
             this.smpSquare2  += this.square2.sampleValue    << 1;
             this.accCount    += 2;
-        
+
         }else if (cycles === 4) {
-        
+
             this.smpTriangle += this.triValue                << 2;
             this.smpDmc      += this.dmc.sample         << 2;
             this.smpSquare1  += this.square1.sampleValue    << 2;
             this.smpSquare2  += this.square2.sampleValue    << 2;
             this.accCount    += 4;
-        
+
         }else{
-        
+
             this.smpTriangle += cycles * this.triValue;
             this.smpDmc      += cycles * this.dmc.sample;
             this.smpSquare1  += cycles * this.square1.sampleValue;
             this.smpSquare2  += cycles * this.square2.sampleValue;
             this.accCount    += cycles;
-        
+
         }
-    
+
     },
 
     frameCounterTick: function(){
-    
+
         this.derivedFrameCounter++;
         if (this.derivedFrameCounter >= this.frameIrqCounterMax) {
             this.derivedFrameCounter = 0;
         }
-    
+
         if (this.derivedFrameCounter===1 || this.derivedFrameCounter===3) {
 
             // Clock length & sweep:
@@ -3615,24 +3621,24 @@ JSNES.PAPU.prototype = {
 
         if (this.derivedFrameCounter >= 0 && this.derivedFrameCounter < 4) {
 
-            // Clock linear & decay:            
+            // Clock linear & decay:
             this.square1.clockEnvDecay();
             this.square2.clockEnvDecay();
             this.noise.clockEnvDecay();
             this.triangle.clockLinearCounter();
 
         }
-    
+
         if (this.derivedFrameCounter === 3 && this.countSequence===0) {
-        
+
             // Enable IRQ:
             this.frameIrqActive = true;
-        
+
         }
-    
-    
+
+
         // End of 240Hz tick
-    
+
     },
 
 
@@ -3640,7 +3646,7 @@ JSNES.PAPU.prototype = {
     // writes to buffer and (if enabled) file.
     sample: function(){
         var sq_index, tnd_index;
-        
+
         if (this.accCount > 0) {
 
             this.smpSquare1 <<= 4;
@@ -3653,7 +3659,7 @@ JSNES.PAPU.prototype = {
 
             this.smpDmc <<= 4;
             this.smpDmc = parseInt(this.smpDmc / this.accCount, 10);
-        
+
             this.accCount = 0;
         }
         else {
@@ -3662,22 +3668,22 @@ JSNES.PAPU.prototype = {
             this.smpTriangle = this.triangle.sampleValue;
             this.smpDmc = this.dmc.sample << 4;
         }
-    
-        var smpNoise = parseInt((this.noise.accValue << 4) / 
+
+        var smpNoise = parseInt((this.noise.accValue << 4) /
                 this.noise.accCount, 10);
         this.noise.accValue = smpNoise >> 4;
         this.noise.accCount = 1;
 
         // Stereo sound.
-    
+
         // Left channel:
         sq_index  = (
-                this.smpSquare1 * this.stereoPosLSquare1 + 
+                this.smpSquare1 * this.stereoPosLSquare1 +
                 this.smpSquare2 * this.stereoPosLSquare2
             ) >> 8;
         tnd_index = (
-                3 * this.smpTriangle * this.stereoPosLTriangle + 
-                (smpNoise<<1) * this.stereoPosLNoise + this.smpDmc * 
+                3 * this.smpTriangle * this.stereoPosLTriangle +
+                (smpNoise<<1) * this.stereoPosLNoise + this.smpDmc *
                 this.stereoPosLDMC
             ) >> 8;
         if (sq_index >= this.square_table.length) {
@@ -3686,15 +3692,15 @@ JSNES.PAPU.prototype = {
         if (tnd_index >= this.tnd_table.length) {
             tnd_index = this.tnd_table.length - 1;
         }
-        var sampleValueL = this.square_table[sq_index] + 
+        var sampleValueL = this.square_table[sq_index] +
                 this.tnd_table[tnd_index] - this.dcValue;
 
         // Right channel:
-        sq_index = (this.smpSquare1 * this.stereoPosRSquare1 +  
+        sq_index = (this.smpSquare1 * this.stereoPosRSquare1 +
                 this.smpSquare2 * this.stereoPosRSquare2
             ) >> 8;
-        tnd_index = (3 * this.smpTriangle * this.stereoPosRTriangle + 
-                (smpNoise << 1) * this.stereoPosRNoise + this.smpDmc * 
+        tnd_index = (3 * this.smpTriangle * this.stereoPosRTriangle +
+                (smpNoise << 1) * this.stereoPosRNoise + this.smpDmc *
                 this.stereoPosRDMC
             ) >> 8;
         if (sq_index >= this.square_table.length) {
@@ -3703,7 +3709,7 @@ JSNES.PAPU.prototype = {
         if (tnd_index >= this.tnd_table.length) {
             tnd_index = this.tnd_table.length - 1;
         }
-        var sampleValueR = this.square_table[sq_index] + 
+        var sampleValueR = this.square_table[sq_index] +
                 this.tnd_table[tnd_index] - this.dcValue;
 
         // Remove DC from left channel:
@@ -3711,7 +3717,7 @@ JSNES.PAPU.prototype = {
         this.prevSampleL += smpDiffL;
         this.smpAccumL += smpDiffL - (this.smpAccumL >> 10);
         sampleValueL = this.smpAccumL;
-        
+
         // Remove DC from right channel:
         var smpDiffR     = sampleValueR - this.prevSampleR;
         this.prevSampleR += smpDiffR;
@@ -3727,7 +3733,7 @@ JSNES.PAPU.prototype = {
         }
         this.sampleBuffer[this.bufferIndex++] = sampleValueL;
         this.sampleBuffer[this.bufferIndex++] = sampleValueR;
-        
+
         // Write full buffer
         if (this.bufferIndex === this.sampleBuffer.length) {
             this.nes.ui.writeAudio(this.sampleBuffer);
@@ -3785,7 +3791,7 @@ JSNES.PAPU.prototype = {
         this.stereoPosLTriangle = (this.panning[2] * this.masterVolume) >> 8;
         this.stereoPosLNoise = (this.panning[3] * this.masterVolume) >> 8;
         this.stereoPosLDMC = (this.panning[4] * this.masterVolume) >> 8;
-    
+
         this.stereoPosRSquare1 = this.masterVolume - this.stereoPosLSquare1;
         this.stereoPosRSquare2 = this.masterVolume - this.stereoPosLSquare2;
         this.stereoPosRTriangle = this.masterVolume - this.stereoPosLTriangle;
@@ -3859,14 +3865,14 @@ JSNES.PAPU.prototype = {
         this.noiseWavelengthLookup[0xD] = 0x3F8;
         this.noiseWavelengthLookup[0xE] = 0x7F2;
         this.noiseWavelengthLookup[0xF] = 0xFE4;
-    
+
     },
 
     initDACtables: function(){
         var value, ival, i;
         var max_sqr = 0;
         var max_tnd = 0;
-        
+
         this.square_table = new Array(32*16);
         this.tnd_table = new Array(204*16);
 
@@ -3875,26 +3881,26 @@ JSNES.PAPU.prototype = {
             value *= 0.98411;
             value *= 50000.0;
             ival = parseInt(value, 10);
-        
+
             this.square_table[i] = ival;
             if (ival > max_sqr) {
                 max_sqr = ival;
             }
         }
-    
+
         for (i = 0; i < 204 * 16; i++) {
             value = 163.67 / (24329.0 / (i/16.0) + 100.0);
             value *= 0.98411;
             value *= 50000.0;
             ival = parseInt(value, 10);
-        
+
             this.tnd_table[i] = ival;
             if (ival > max_tnd) {
                 max_tnd = ival;
             }
 
         }
-    
+
         this.dacRange = max_sqr+max_tnd;
         this.dcValue = this.dacRange/2;
 
@@ -3904,15 +3910,15 @@ JSNES.PAPU.prototype = {
 
 JSNES.PAPU.ChannelDM = function(papu) {
     this.papu = papu;
-    
+
     this.MODE_NORMAL = 0;
     this.MODE_LOOP = 1;
     this.MODE_IRQ = 2;
-    
+
     this.isEnabled = null;
     this.hasSample = null;
     this.irqGenerated = false;
-    
+
     this.playMode = null;
     this.dmaFrequency = null;
     this.dmaCounter = null;
@@ -3927,18 +3933,18 @@ JSNES.PAPU.ChannelDM = function(papu) {
     this.sample = null;
     this.dacLsb = null;
     this.data = null;
-    
+
     this.reset();
 };
-    
+
 JSNES.PAPU.ChannelDM.prototype = {
     clockDmc: function() {
-    
+
         // Only alter DAC value if the sample buffer has data:
         if(this.hasSample) {
-        
+
             if ((this.data & 1) === 0) {
-            
+
                 // Decrement delta:
                 if(this.deltaCounter>0) {
                     this.deltaCounter--;
@@ -3950,78 +3956,78 @@ JSNES.PAPU.ChannelDM.prototype = {
                     this.deltaCounter++;
                 }
             }
-        
+
             // Update sample value:
             this.sample = this.isEnabled ? (this.deltaCounter << 1) + this.dacLsb : 0;
-        
+
             // Update shift register:
             this.data >>= 1;
-        
+
         }
-    
+
         this.dmaCounter--;
         if (this.dmaCounter <= 0) {
-        
+
             // No more sample bits.
             this.hasSample = false;
             this.endOfSample();
             this.dmaCounter = 8;
-        
+
         }
-    
+
         if (this.irqGenerated) {
             this.papu.nes.cpu.requestIrq(this.papu.nes.cpu.IRQ_NORMAL);
         }
-    
+
     },
 
     endOfSample: function() {
         if (this.playLengthCounter === 0 && this.playMode === this.MODE_LOOP) {
-        
+
             // Start from beginning of sample:
             this.playAddress = this.playStartAddress;
             this.playLengthCounter = this.playLength;
-        
+
         }
-    
+
         if (this.playLengthCounter > 0) {
-        
+
             // Fetch next sample:
             this.nextSample();
-        
+
             if (this.playLengthCounter === 0) {
-        
+
                 // Last byte of sample fetched, generate IRQ:
                 if (this.playMode === this.MODE_IRQ) {
-                
+
                     // Generate IRQ:
                     this.irqGenerated = true;
-                
+
                 }
-            
+
             }
-        
+
         }
-    
+
     },
 
     nextSample: function() {
         // Fetch byte:
         this.data = this.papu.nes.mmap.load(this.playAddress);
         this.papu.nes.cpu.haltCycles(4);
-    
+
         this.playLengthCounter--;
         this.playAddress++;
         if (this.playAddress > 0xFFFF) {
             this.playAddress = 0x8000;
         }
-    
+
         this.hasSample = true;
     },
 
     writeReg: function(address, value) {
         if (address === 0x4010) {
-        
+
             // Play mode, DMA Frequency
             if ((value >> 6) === 0) {
                 this.playMode = this.MODE_NORMAL;
@@ -4032,40 +4038,40 @@ JSNES.PAPU.ChannelDM.prototype = {
             else if ((value >> 6) === 2) {
                 this.playMode = this.MODE_IRQ;
             }
-        
+
             if ((value & 0x80) === 0) {
                 this.irqGenerated = false;
             }
-        
+
             this.dmaFrequency = this.papu.getDmcFrequency(value & 0xF);
-        
+
         }
         else if (address === 0x4011) {
-        
+
             // Delta counter load register:
             this.deltaCounter = (value >> 1) & 63;
             this.dacLsb = value & 1;
             this.sample = ((this.deltaCounter << 1) + this.dacLsb); // update sample value
-        
+
         }
         else if (address === 0x4012) {
-        
+
             // DMA address load register
             this.playStartAddress = (value << 6) | 0x0C000;
             this.playAddress = this.playStartAddress;
             this.reg4012 = value;
-        
+
         }
         else if (address === 0x4013) {
-        
+
             // Length of play code
             this.playLength = (value << 4) + 1;
             this.playLengthCounter = this.playLength;
             this.reg4013 = value;
-        
+
         }
         else if (address === 0x4015) {
-        
+
             // DMC/IRQ Status
             if (((value >> 4) & 1) === 0) {
                 // Disable:
@@ -4118,14 +4124,14 @@ JSNES.PAPU.ChannelDM.prototype = {
 
 JSNES.PAPU.ChannelNoise = function(papu) {
     this.papu = papu;
-    
+
     this.isEnabled = null;
     this.envDecayDisable = null;
     this.envDecayLoopEnable = null;
     this.lengthCounterEnable = null;
     this.envReset = null;
     this.shiftNow = null;
-    
+
     this.lengthCounter = null;
     this.progTimerCount = null;
     this.progTimerMax = null;
@@ -4140,7 +4146,7 @@ JSNES.PAPU.ChannelNoise = function(papu) {
     this.accValue=0;
     this.accCount=1;
     this.tmp = null;
-    
+
     this.reset();
 };
 
@@ -4189,7 +4195,7 @@ JSNES.PAPU.ChannelNoise.prototype = {
             }
             else {
                 this.envVolume = this.envDecayLoopEnable ? 0xF : 0;
-            }   
+            }
         }
         this.masterVolume = this.envDecayDisable ? this.envDecayRate : this.envVolume;
         this.updateSampleValue();
@@ -4209,12 +4215,12 @@ JSNES.PAPU.ChannelNoise.prototype = {
             this.envDecayLoopEnable = ((value&0x20) !== 0);
             this.lengthCounterEnable = ((value&0x20)===0);
             this.masterVolume = this.envDecayDisable?this.envDecayRate:this.envVolume;
-        
+
         }else if(address === 0x400E) {
             // Programmable timer:
             this.progTimerMax = this.papu.getNoiseWaveLength(value&0xF);
             this.randomMode = value>>7;
-        
+
         }else if(address === 0x400F) {
             // Length counter
             this.lengthCounter = this.papu.getLengthMax(value&248);
@@ -4240,7 +4246,7 @@ JSNES.PAPU.ChannelNoise.prototype = {
 
 JSNES.PAPU.ChannelSquare = function(papu, square1) {
     this.papu = papu;
-    
+
     this.dutyLookup = [
          0, 1, 0, 0, 0, 0, 0, 0,
          0, 1, 1, 0, 0, 0, 0, 0,
@@ -4253,7 +4259,7 @@ JSNES.PAPU.ChannelSquare = function(papu, square1) {
          1, 0, 0, 0,-1, 0, 0, 0,
         -1, 0, 1, 0, 0, 0, 0, 0
     ];
-    
+
     this.sqr1 = square1;
     this.isEnabled = null;
     this.lengthCounterEnable = null;
@@ -4263,7 +4269,7 @@ JSNES.PAPU.ChannelSquare = function(papu, square1) {
     this.envReset = null;
     this.sweepCarry = null;
     this.updateSweepPeriod = null;
-    
+
     this.progTimerCount = null;
     this.progTimerMax = null;
     this.lengthCounter = null;
@@ -4280,7 +4286,7 @@ JSNES.PAPU.ChannelSquare = function(papu, square1) {
     this.sweepResult = null;
     this.sampleValue = null;
     this.vol = null;
-    
+
     this.reset();
 };
 
@@ -4300,7 +4306,7 @@ JSNES.PAPU.ChannelSquare.prototype = {
         this.masterVolume = 0;
         this.dutyMode = 0;
         this.vol = 0;
-    
+
         this.isEnabled = false;
         this.lengthCounterEnable = false;
         this.sweepActive = false;
@@ -4333,17 +4339,17 @@ JSNES.PAPU.ChannelSquare.prototype = {
                 this.envVolume = this.envDecayLoopEnable ? 0xF : 0;
             }
         }
-    
+
         this.masterVolume = this.envDecayDisable ? this.envDecayRate : this.envVolume;
         this.updateSampleValue();
     },
 
     clockSweep: function() {
         if (--this.sweepCounter<=0) {
-        
+
             this.sweepCounter = this.sweepCounterMax + 1;
             if (this.sweepActive && this.sweepShiftAmount>0 && this.progTimerMax>7) {
-            
+
                 // Calculate result from shifter:
                 this.sweepCarry = false;
                 if (this.sweepMode===0) {
@@ -4357,7 +4363,7 @@ JSNES.PAPU.ChannelSquare.prototype = {
                 }
             }
         }
-    
+
         if (this.updateSweepPeriod) {
             this.updateSweepPeriod = false;
             this.sweepCounter = this.sweepCounterMax + 1;
@@ -4366,12 +4372,12 @@ JSNES.PAPU.ChannelSquare.prototype = {
 
     updateSampleValue: function() {
         if (this.isEnabled && this.lengthCounter>0 && this.progTimerMax>7) {
-        
+
             if (this.sweepMode===0 && (this.progTimerMax + (this.progTimerMax>>this.sweepShiftAmount)) > 4095) {
             //if (this.sweepCarry) {
                 this.sampleValue = 0;
             }else{
-                this.sampleValue = this.masterVolume*this.dutyLookup[(this.dutyMode<<3)+this.squareCounter];    
+                this.sampleValue = this.masterVolume*this.dutyLookup[(this.dutyMode<<3)+this.squareCounter];
             }
         }else{
             this.sampleValue = 0;
@@ -4389,7 +4395,7 @@ JSNES.PAPU.ChannelSquare.prototype = {
             this.lengthCounterEnable = ((value&0x20)===0);
             this.masterVolume = this.envDecayDisable?this.envDecayRate:this.envVolume;
             this.updateSampleValue();
-        
+
         }
         else if (address === 0x4001+addrAdd) {
             // Sweep:
@@ -4408,11 +4414,11 @@ JSNES.PAPU.ChannelSquare.prototype = {
             // Programmable timer, length counter
             this.progTimerMax &= 0xFF;
             this.progTimerMax |= ((value&0x7)<<8);
-        
+
             if (this.isEnabled){
                 this.lengthCounter = this.papu.getLengthMax(value&0xF8);
             }
-        
+
             this.envReset  = true;
         }
     },
@@ -4433,13 +4439,13 @@ JSNES.PAPU.ChannelSquare.prototype = {
 
 JSNES.PAPU.ChannelTriangle = function(papu) {
     this.papu = papu;
-    
+
     this.isEnabled = null;
     this.sampleCondition = null;
     this.lengthCounterEnable = null;
     this.lcHalt = null;
     this.lcControl = null;
-    
+
     this.progTimerCount = null;
     this.progTimerMax = null;
     this.triangleCounter = null;
@@ -4448,7 +4454,7 @@ JSNES.PAPU.ChannelTriangle = function(papu) {
     this.lcLoadValue = null;
     this.sampleValue = null;
     this.tmp = null;
-    
+
     this.reset();
 };
 
@@ -4508,7 +4514,7 @@ JSNES.PAPU.ChannelTriangle.prototype = {
             // New values for linear counter:
             this.lcControl  = (value&0x80)!==0;
             this.lcLoadValue =  value&0x7F;
-        
+
             // Length counter enable:
             this.lengthCounterEnable = !this.lcControl;
         }
@@ -4516,7 +4522,7 @@ JSNES.PAPU.ChannelTriangle.prototype = {
             // Programmable timer:
             this.progTimerMax &= 0x700;
             this.progTimerMax |= value;
-        
+
         }
         else if(address === 0x400B) {
             // Programmable timer, length counter
@@ -4525,17 +4531,17 @@ JSNES.PAPU.ChannelTriangle.prototype = {
             this.lengthCounter = this.papu.getLengthMax(value&0xF8);
             this.lcHalt = true;
         }
-    
+
         this.updateSampleCondition();
     },
 
     clockProgrammableTimer: function(nCycles){
         if (this.progTimerMax>0) {
             this.progTimerCount += nCycles;
-            while (this.progTimerMax > 0 && 
+            while (this.progTimerMax > 0 &&
                     this.progTimerCount >= this.progTimerMax) {
                 this.progTimerCount -= this.progTimerMax;
-                if (this.isEnabled && this.lengthCounter>0 && 
+                if (this.isEnabled && this.lengthCounter>0 &&
                         this.linearCounter > 0) {
                     this.clockTriangleGenerator();
                 }
@@ -4585,7 +4591,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 JSNES.PPU = function(nes) {
     this.nes = nes;
-    
+
     // Keep Chrome happy
     this.vramMem = null;
     this.spriteMem = null;
@@ -4602,7 +4608,7 @@ JSNES.PPU = function(nes) {
     this.validTileData = null;
     this.nmiCounter = null;
     this.scanlineAlreadyRendered = null;
-    this.f_nmiOnVblank = null;   
+    this.f_nmiOnVblank = null;
     this.f_spriteSize = null;
     this.f_bgPatternTable = null;
     this.f_spPatternTable = null;
@@ -4638,15 +4644,15 @@ JSNES.PPU = function(nes) {
     this.scanline = null;
     this.lastRenderedScanline = null;
     this.curX = null;
-    this.sprX = null; 
-    this.sprY = null; 
-    this.sprTile = null; 
-    this.sprCol = null; 
-    this.vertFlip = null; 
-    this.horiFlip = null; 
-    this.bgPriority = null; 
-    this.spr0HitX = null; 
-    this.spr0HitY = null; 
+    this.sprX = null;
+    this.sprY = null;
+    this.sprTile = null;
+    this.sprCol = null;
+    this.vertFlip = null;
+    this.horiFlip = null;
+    this.bgPriority = null;
+    this.spr0HitX = null;
+    this.spr0HitY = null;
     this.hitSpr0 = null;
     this.sprPalette = null;
     this.imgPalette = null;
@@ -4656,12 +4662,14 @@ JSNES.PPU = function(nes) {
     this.nameTable = null;
     this.vramMirrorTable = null;
     this.palTable = null;
-    
-    
+    this.controlReg1Value = null;
+    this.controlReg2Value = null;
+
+
     // Rendering Options:
     this.showSpr0Hit = false;
     this.clipToTvSize = true;
-    
+
     this.reset();
 };
 
@@ -4671,10 +4679,13 @@ JSNES.PPU.prototype = {
     STATUS_SLSPRITECOUNT: 5,
     STATUS_SPRITE0HIT: 6,
     STATUS_VBLANK: 7,
-    
+    debug: false,
+
     reset: function() {
+      if(this.debug) { console.log("rest") }
+
         var i;
-        
+
         // Memory
         this.vramMem = new Array(0x8000);
         this.spriteMem = new Array(0x100);
@@ -4684,7 +4695,7 @@ JSNES.PPU.prototype = {
         for (i=0; i<this.spriteMem.length; i++) {
             this.spriteMem[i] = 0;
         }
-        
+
         // VRAM I/O:
         this.vramAddress = null;
         this.vramTmpAddress = null;
@@ -4693,7 +4704,7 @@ JSNES.PPU.prototype = {
 
         // SPR-RAM I/O:
         this.sramAddress = 0; // 8-bit only.
-        
+
         this.mapperIrqCounter     = 0;
         this.currentMirroring = -1;
         this.requestEndFrame = false;
@@ -4702,7 +4713,7 @@ JSNES.PPU.prototype = {
         this.validTileData = false;
         this.nmiCounter = 0;
         this.scanlineAlreadyRendered = null;
-        
+
         // Control Flags Register 1:
         this.f_nmiOnVblank = 0;    // NMI on VBlank. 0=disable, 1=enable
         this.f_spriteSize = 0;     // Sprite size. 0=8x8, 1=8x16
@@ -4710,7 +4721,7 @@ JSNES.PPU.prototype = {
         this.f_spPatternTable = 0; // Sprite Pattern Table address. 0=0x0000,1=0x1000
         this.f_addrInc = 0;        // PPU Address Increment. 0=1,1=32
         this.f_nTblAddress = 0;    // Name Table Address. 0=0x2000,1=0x2400,2=0x2800,3=0x2C00
-        
+
         // Control Flags Register 2:
         this.f_color = 0;         // Background color. 0=black, 1=blue, 2=green, 4=red
         this.f_spVisibility = 0;   // Sprite visibility. 0=not displayed,1=displayed
@@ -4718,14 +4729,14 @@ JSNES.PPU.prototype = {
         this.f_spClipping = 0;     // Sprite clipping. 0=Sprites invisible in left 8-pixel column,1=No clipping
         this.f_bgClipping = 0;     // Background clipping. 0=BG invisible in left 8-pixel column, 1=No clipping
         this.f_dispType = 0;       // Display type. 0=color, 1=monochrome
-        
+
         // Counters:
         this.cntFV = 0;
         this.cntV = 0;
         this.cntH = 0;
         this.cntVT = 0;
         this.cntHT = 0;
-        
+
         // Registers:
         this.regFV = 0;
         this.regV = 0;
@@ -4734,12 +4745,12 @@ JSNES.PPU.prototype = {
         this.regHT = 0;
         this.regFH = 0;
         this.regS = 0;
-        
+
         // These are temporary variables used in rendering and sound procedures.
         // Their states outside of those procedures can be ignored.
         // TODO: the use of this is a bit weird, investigate
         this.curNt = null;
-        
+
         // Variables used when rendering:
         this.attrib = new Array(32);
         this.buffer = new Array(256*240);
@@ -4751,12 +4762,12 @@ JSNES.PPU.prototype = {
         this.validTileData = null;
 
         this.scantile = new Array(32);
-        
+
         // Initialize misc vars:
         this.scanline = 0;
         this.lastRenderedScanline = -1;
         this.curX = 0;
-        
+
         // Sprite data:
         this.sprX = new Array(64); // X coordinate
         this.sprY = new Array(64); // Y coordinate
@@ -4768,17 +4779,17 @@ JSNES.PPU.prototype = {
         this.spr0HitX = 0; // Sprite #0 hit X coordinate
         this.spr0HitY = 0; // Sprite #0 hit Y coordinate
         this.hitSpr0 = false;
-        
+
         // Palette data:
         this.sprPalette = new Array(16);
         this.imgPalette = new Array(16);
-        
+
         // Create pattern table tile buffers:
         this.ptTile = new Array(512);
         for (i=0; i<512; i++) {
             this.ptTile[i] = new JSNES.PPU.Tile();
         }
-        
+
         // Create nametable buffers:
         // Name table data:
         this.ntable1 = new Array(4);
@@ -4787,31 +4798,33 @@ JSNES.PPU.prototype = {
         for (i=0; i<4; i++) {
             this.nameTable[i] = new JSNES.PPU.NameTable(32, 32, "Nt"+i);
         }
-        
+
         // Initialize mirroring lookup table:
         this.vramMirrorTable = new Array(0x8000);
         for (i=0; i<0x8000; i++) {
             this.vramMirrorTable[i] = i;
         }
-        
+
         this.palTable = new JSNES.PPU.PaletteTable();
         this.palTable.loadNTSCPalette();
         //this.palTable.loadDefaultPalette();
-        
+
         this.updateControlReg1(0);
         this.updateControlReg2(0);
     },
-    
+
     // Sets Nametable mirroring.
     setMirroring: function(mirroring){
-    
+      if(this.debug) { console.log("setMirroring") }
+
+
         if (mirroring == this.currentMirroring) {
             return;
         }
-        
+
         this.currentMirroring = mirroring;
         this.triggerRendering();
-    
+
         // Remove mirroring:
         if (this.vramMirrorTable === null) {
             this.vramMirrorTable = new Array(0x8000);
@@ -4819,107 +4832,112 @@ JSNES.PPU.prototype = {
         for (var i=0; i<0x8000; i++) {
             this.vramMirrorTable[i] = i;
         }
-        
+
         // Palette mirroring:
         this.defineMirrorRegion(0x3f20,0x3f00,0x20);
         this.defineMirrorRegion(0x3f40,0x3f00,0x20);
         this.defineMirrorRegion(0x3f80,0x3f00,0x20);
         this.defineMirrorRegion(0x3fc0,0x3f00,0x20);
-        
+
         // Additional mirroring:
         this.defineMirrorRegion(0x3000,0x2000,0xf00);
         this.defineMirrorRegion(0x4000,0x0000,0x4000);
-    
+
         if (mirroring == this.nes.rom.HORIZONTAL_MIRRORING) {
             // Horizontal mirroring.
-            
+
             this.ntable1[0] = 0;
             this.ntable1[1] = 0;
             this.ntable1[2] = 1;
             this.ntable1[3] = 1;
-            
+
             this.defineMirrorRegion(0x2400,0x2000,0x400);
             this.defineMirrorRegion(0x2c00,0x2800,0x400);
-            
+
         }else if (mirroring == this.nes.rom.VERTICAL_MIRRORING) {
             // Vertical mirroring.
-            
+
             this.ntable1[0] = 0;
             this.ntable1[1] = 1;
             this.ntable1[2] = 0;
             this.ntable1[3] = 1;
-            
+
             this.defineMirrorRegion(0x2800,0x2000,0x400);
             this.defineMirrorRegion(0x2c00,0x2400,0x400);
-            
+
         }else if (mirroring == this.nes.rom.SINGLESCREEN_MIRRORING) {
-            
+
             // Single Screen mirroring
-            
+
             this.ntable1[0] = 0;
             this.ntable1[1] = 0;
             this.ntable1[2] = 0;
             this.ntable1[3] = 0;
-            
+
             this.defineMirrorRegion(0x2400,0x2000,0x400);
             this.defineMirrorRegion(0x2800,0x2000,0x400);
             this.defineMirrorRegion(0x2c00,0x2000,0x400);
-            
+
         }else if (mirroring == this.nes.rom.SINGLESCREEN_MIRRORING2) {
-            
-            
+
+
             this.ntable1[0] = 1;
             this.ntable1[1] = 1;
             this.ntable1[2] = 1;
             this.ntable1[3] = 1;
-            
+
             this.defineMirrorRegion(0x2400,0x2400,0x400);
             this.defineMirrorRegion(0x2800,0x2400,0x400);
             this.defineMirrorRegion(0x2c00,0x2400,0x400);
-            
+
         }else {
-            
+
             // Assume Four-screen mirroring.
-            
+
             this.ntable1[0] = 0;
             this.ntable1[1] = 1;
             this.ntable1[2] = 2;
             this.ntable1[3] = 3;
-            
-        }   
-        
+
+        }
+
     },
-    
-    
+
+
     // Define a mirrored area in the address lookup table.
     // Assumes the regions don't overlap.
     // The 'to' region is the region that is physically in memory.
     defineMirrorRegion: function(fromStart, toStart, size){
+      if(this.debug) { console.log("defineMirrorRegion") }
+
         for (var i=0;i<size;i++) {
             this.vramMirrorTable[fromStart+i] = toStart+i;
         }
     },
-    
+
     startVBlank: function(){
-        
+      if(this.debug) { console.log("startVBlank") }
+
         // Do NMI:
         this.nes.cpu.requestIrq(this.nes.cpu.IRQ_NMI);
-        
+
         // Make sure everything is rendered:
         if (this.lastRenderedScanline < 239) {
             this.renderFramePartially(
                 this.lastRenderedScanline+1,240-this.lastRenderedScanline
             );
         }
-        
+
         // End frame:
         this.endFrame();
-        
+
         // Reset scanline counter:
         this.lastRenderedScanline = -1;
     },
-    
+
     endScanline: function(){
+      if(this.debug) { console.log("endScanline: " + this.scanline) }
+
         switch (this.scanline) {
             case 19:
                 // Dummy scanline.
@@ -4933,7 +4951,7 @@ JSNES.PPU.prototype = {
 
                 }
                 break;
-                
+
             case 20:
                 // Clear VBlank flag:
                 this.setStatusFlag(this.STATUS_VBLANK,false);
@@ -4956,7 +4974,7 @@ JSNES.PPU.prototype = {
                     if (this.f_bgVisibility==1) {
                         // Render dummy scanline:
                         this.renderBgScanline(false,0);
-                    }   
+                    }
 
                 }
 
@@ -4972,19 +4990,19 @@ JSNES.PPU.prototype = {
                     this.nes.mmap.clockIrqCounter();
                 }
                 break;
-                
+
             case 261:
                 // Dead scanline, no rendering.
                 // Set VINT:
                 this.setStatusFlag(this.STATUS_VBLANK,true);
                 this.requestEndFrame = true;
                 this.nmiCounter = 9;
-            
+
                 // Wrap around:
                 this.scanline = -1; // will be incremented to 0
-                
+
                 break;
-                
+
             default:
                 if (this.scanline >= 21 && this.scanline <= 260) {
 
@@ -5021,17 +5039,24 @@ JSNES.PPU.prototype = {
                     }
                 }
         }
-        
+
         this.scanline++;
         this.regsToAddress();
         this.cntsToAddress();
-        
+
     },
-    
-    startFrame: function(){    
+
+    setSprite0HitFlag: function() {
+      if(this.debug) { console.log("setSprite0HitFlag"); }
+      this.setStatusFlag(this.STATUS_SPRITE0HIT, true);
+    },
+
+    startFrame: function(){
+      if(this.debug) { console.log("startFrame") }
+
         // Set background color:
         var bgColor=0;
-        
+
         if (this.f_dispType === 0) {
             // Color display.
             // f_color determines color emphasis.
@@ -5067,7 +5092,7 @@ JSNES.PPU.prototype = {
                     bgColor = 0x0;
             }
         }
-        
+
         var buffer = this.buffer;
         var i;
         for (i=0; i<256*240; i++) {
@@ -5078,17 +5103,19 @@ JSNES.PPU.prototype = {
             pixrendered[i]=65;
         }
     },
-    
+
     endFrame: function(){
+      if(this.debug) { console.log("endFrame") }
+
         var i, x, y;
         var buffer = this.buffer;
-        
+
         // Draw spr#0 hit coordinates:
         if (this.showSpr0Hit) {
             // Spr 0 position:
             if (this.sprX[0] >= 0 && this.sprX[0] < 256 &&
                     this.sprY[0] >= 0 && this.sprY[0] < 240) {
-                for (i=0; i<256; i++) {  
+                for (i=0; i<256; i++) {
                     buffer[(this.sprY[0]<<8)+i] = 0xFF5555;
                 }
                 for (i=0; i<240; i++) {
@@ -5106,7 +5133,7 @@ JSNES.PPU.prototype = {
                 }
             }
         }
-        
+
         // This is a bit lazy..
         // if either the sprites or the background should be clipped,
         // both are clipped after rendering is finished.
@@ -5118,7 +5145,7 @@ JSNES.PPU.prototype = {
                 }
             }
         }
-        
+
         if (this.clipToTvSize) {
             // Clip right 8-pixels column too:
             for (y=0; y<240; y++) {
@@ -5127,7 +5154,7 @@ JSNES.PPU.prototype = {
                 }
             }
         }
-        
+
         // Clip top and bottom 8 pixels:
         if (this.clipToTvSize) {
             for (y=0; y<8; y++) {
@@ -5137,168 +5164,189 @@ JSNES.PPU.prototype = {
                 }
             }
         }
-        
+
         if (this.nes.opts.showDisplay) {
             this.nes.ui.writeFrame(buffer);
         }
     },
-    
+
     updateControlReg1: function(value){
-        
+      if(this.debug) { console.log("updateControlReg1") }
+
+
         this.triggerRendering();
-        
+        this.controlReg1Value = value;
+
         this.f_nmiOnVblank =    (value>>7)&1;
         this.f_spriteSize =     (value>>5)&1;
         this.f_bgPatternTable = (value>>4)&1;
         this.f_spPatternTable = (value>>3)&1;
         this.f_addrInc =        (value>>2)&1;
         this.f_nTblAddress =     value&3;
-        
+
         this.regV = (value>>1)&1;
         this.regH = value&1;
         this.regS = (value>>4)&1;
-        
+
     },
-    
+
     updateControlReg2: function(value){
-        
+        if(this.debug) { console.log("updateControlReg2") }
+
         this.triggerRendering();
-        
+        this.controlReg2Value = value;
+
         this.f_color =       (value>>5)&7;
         this.f_spVisibility = (value>>4)&1;
         this.f_bgVisibility = (value>>3)&1;
         this.f_spClipping =   (value>>2)&1;
         this.f_bgClipping =   (value>>1)&1;
         this.f_dispType =      value&1;
-        
+
         if (this.f_dispType === 0) {
             this.palTable.setEmphasis(this.f_color);
         }
         this.updatePalettes();
     },
-    
+
     setStatusFlag: function(flag, value){
+      if(this.debug) { console.log("setStatusFlag(" + flag + "," + value + ")"); }
+
         var n = 1<<flag;
-        this.nes.cpu.mem[0x2002] = 
+        this.nes.cpu.mem[0x2002] =
             ((this.nes.cpu.mem[0x2002] & (255-n)) | (value?n:0));
     },
-    
+
     // CPU Register $2002:
     // Read the Status Register.
     readStatusRegister: function(){
-        
+      if(this.debug) { console.log("readStatusRegister") }
+
+
         var tmp = this.nes.cpu.mem[0x2002];
-        
+
         // Reset scroll & VRAM Address toggle:
         this.firstWrite = true;
-        
+
         // Clear VBlank flag:
         this.setStatusFlag(this.STATUS_VBLANK,false);
-        
+
         // Fetch status data:
         return tmp;
-        
+
     },
-    
+
     // CPU Register $2003:
     // Write the SPR-RAM address that is used for sramWrite (Register 0x2004 in CPU memory map)
     writeSRAMAddress: function(address) {
+      if(this.debug) { console.log("writeSRAMAddress") }
+
         this.sramAddress = address;
     },
-    
+
     // CPU Register $2004 (R):
     // Read from SPR-RAM (Sprite RAM).
     // The address should be set first.
     sramLoad: function() {
+      if(this.debug) { console.log("sramLoad") }
+
         /*short tmp = sprMem.load(sramAddress);
         sramAddress++; // Increment address
         sramAddress%=0x100;
         return tmp;*/
         return this.spriteMem[this.sramAddress];
     },
-    
+
     // CPU Register $2004 (W):
     // Write to SPR-RAM (Sprite RAM).
     // The address should be set first.
     sramWrite: function(value){
+      if(this.debug) { console.log("sramWrite") }
+
         this.spriteMem[this.sramAddress] = value;
         this.spriteRamWriteUpdate(this.sramAddress,value);
         this.sramAddress++; // Increment address
         this.sramAddress %= 0x100;
     },
-    
+
     // CPU Register $2005:
     // Write to scroll registers.
     // The first write is the vertical offset, the second is the
     // horizontal offset:
     scrollWrite: function(value){
+      if(this.debug) { console.log("scrollWrite") }
+
         this.triggerRendering();
-        
+
         if (this.firstWrite) {
             // First write, horizontal scroll:
             this.regHT = (value>>3)&31;
             this.regFH = value&7;
-            
+
         }else {
-            
+
             // Second write, vertical scroll:
             this.regFV = value&7;
             this.regVT = (value>>3)&31;
-            
+
         }
         this.firstWrite = !this.firstWrite;
-        
+
     },
-    
+
     // CPU Register $2006:
     // Sets the adress used when reading/writing from/to VRAM.
     // The first write sets the high byte, the second the low byte.
     writeVRAMAddress: function(address){
-        
+      if(this.debug) { console.log("writeVRAMAddress") }
+
+
         if (this.firstWrite) {
-            
+
             this.regFV = (address>>4)&3;
             this.regV = (address>>3)&1;
             this.regH = (address>>2)&1;
             this.regVT = (this.regVT&7) | ((address&3)<<3);
-            
+
         }else {
             this.triggerRendering();
-            
+
             this.regVT = (this.regVT&24) | ((address>>5)&7);
             this.regHT = address&31;
-            
+
             this.cntFV = this.regFV;
             this.cntV = this.regV;
             this.cntH = this.regH;
             this.cntVT = this.regVT;
             this.cntHT = this.regHT;
-            
+
             this.checkSprite0(this.scanline-20);
-            
+
         }
-        
+
         this.firstWrite = !this.firstWrite;
-        
+
         // Invoke mapper latch:
         this.cntsToAddress();
         if (this.vramAddress < 0x2000) {
             this.nes.mmap.latchAccess(this.vramAddress);
-        }   
+        }
     },
-    
+
     // CPU Register $2007(R):
     // Read from PPU memory. The address should be set first.
     vramLoad: function(){
+      if(this.debug) { console.log("vramLoad") }
+
         var tmp;
-        
+
         this.cntsToAddress();
         this.regsToAddress();
-        
+
         // If address is in range 0x0000-0x3EFF, return buffered values:
         if (this.vramAddress <= 0x3EFF) {
             tmp = this.vramBufferedReadValue;
-        
+
             // Update buffered value:
             if (this.vramAddress < 0x2000) {
                 this.vramBufferedReadValue = this.vramMem[this.vramAddress];
@@ -5308,65 +5356,69 @@ JSNES.PPU.prototype = {
                     this.vramAddress
                 );
             }
-            
+
             // Mapper latch access:
             if (this.vramAddress < 0x2000) {
                 this.nes.mmap.latchAccess(this.vramAddress);
             }
-            
+
             // Increment by either 1 or 32, depending on d2 of Control Register 1:
             this.vramAddress += (this.f_addrInc == 1 ? 32 : 1);
-            
+
             this.cntsFromAddress();
             this.regsFromAddress();
-            
+
             return tmp; // Return the previous buffered value.
         }
-            
+
         // No buffering in this mem range. Read normally.
         tmp = this.mirroredLoad(this.vramAddress);
-        
+
         // Increment by either 1 or 32, depending on d2 of Control Register 1:
-        this.vramAddress += (this.f_addrInc == 1 ? 32 : 1); 
-        
+        this.vramAddress += (this.f_addrInc == 1 ? 32 : 1);
+
         this.cntsFromAddress();
         this.regsFromAddress();
-        
+
         return tmp;
     },
-    
+
     // CPU Register $2007(W):
     // Write to PPU memory. The address should be set first.
     vramWrite: function(value){
-        
+      if(this.debug) { console.log("vramWrite") }
+
+
         this.triggerRendering();
         this.cntsToAddress();
         this.regsToAddress();
-        
+
         if (this.vramAddress >= 0x2000) {
             // Mirroring is used.
             this.mirroredWrite(this.vramAddress,value);
         }else {
-            
+
             // Write normally.
             this.writeMem(this.vramAddress,value);
-            
+
             // Invoke mapper latch:
             this.nes.mmap.latchAccess(this.vramAddress);
-            
+
         }
-        
+
         // Increment by either 1 or 32, depending on d2 of Control Register 1:
         this.vramAddress += (this.f_addrInc==1?32:1);
         this.regsFromAddress();
         this.cntsFromAddress();
-        
+
     },
-    
+
     // CPU Register $4014:
     // Write 256 bytes of main memory
     // into Sprite RAM.
     sramDMA: function(value){
+      if(this.debug) { console.log("sramDMA") }
+
         var baseAddress = value * 0x100;
         var data;
         for (var i=this.sramAddress; i < 256; i++) {
@@ -5374,65 +5426,70 @@ JSNES.PPU.prototype = {
             this.spriteMem[i] = data;
             this.spriteRamWriteUpdate(i, data);
         }
-        
+
         this.nes.cpu.haltCycles(513);
-        
+
     },
-    
+
     // Updates the scroll registers from a new VRAM address.
     regsFromAddress: function(){
-        
+      if(this.debug) { console.log("regsFromAddress") }
+
+
         var address = (this.vramTmpAddress>>8)&0xFF;
         this.regFV = (address>>4)&7;
         this.regV = (address>>3)&1;
         this.regH = (address>>2)&1;
         this.regVT = (this.regVT&7) | ((address&3)<<3);
-        
+
         address = this.vramTmpAddress&0xFF;
         this.regVT = (this.regVT&24) | ((address>>5)&7);
         this.regHT = address&31;
     },
-    
+
     // Updates the scroll registers from a new VRAM address.
     cntsFromAddress: function(){
-        
+        if(this.debug) { console.log("cntsFromAddress") }
+
         var address = (this.vramAddress>>8)&0xFF;
         this.cntFV = (address>>4)&3;
         this.cntV = (address>>3)&1;
         this.cntH = (address>>2)&1;
-        this.cntVT = (this.cntVT&7) | ((address&3)<<3);        
-        
+        this.cntVT = (this.cntVT&7) | ((address&3)<<3);
+
         address = this.vramAddress&0xFF;
         this.cntVT = (this.cntVT&24) | ((address>>5)&7);
         this.cntHT = address&31;
-        
+
     },
-    
+
     regsToAddress: function(){
         var b1  = (this.regFV&7)<<4;
         b1 |= (this.regV&1)<<3;
         b1 |= (this.regH&1)<<2;
         b1 |= (this.regVT>>3)&3;
-        
+
         var b2  = (this.regVT&7)<<5;
         b2 |= this.regHT&31;
-        
+
         this.vramTmpAddress = ((b1<<8) | b2)&0x7FFF;
     },
-    
+
     cntsToAddress: function(){
         var b1  = (this.cntFV&7)<<4;
         b1 |= (this.cntV&1)<<3;
         b1 |= (this.cntH&1)<<2;
         b1 |= (this.cntVT>>3)&3;
-        
+
         var b2  = (this.cntVT&7)<<5;
         b2 |= this.cntHT&31;
-        
+
         this.vramAddress = ((b1<<8) | b2)&0x7FFF;
     },
-    
-    incTileCounter: function(count) { 
+
+    incTileCounter: function(count) {
+      if(this.debug) { console.log("incTileCounter") }
+
         for (var i=count; i!==0; i--) {
             this.cntHT++;
             if (this.cntHT == 32) {
@@ -5453,43 +5510,47 @@ JSNES.PPU.prototype = {
             }
         }
     },
-    
+
     // Reads from memory, taking into account
     // mirroring/mapping of address ranges.
     mirroredLoad: function(address) {
+      if(this.debug) { console.log("mirroredLoad") }
+
         return this.vramMem[this.vramMirrorTable[address]];
     },
-    
+
     // Writes to memory, taking into account
     // mirroring/mapping of address ranges.
     mirroredWrite: function(address, value){
+      if(this.debug) { console.log("mirroredWrite") }
+
         if (address>=0x3f00 && address<0x3f20) {
             // Palette write mirroring.
             if (address==0x3F00 || address==0x3F10) {
                 this.writeMem(0x3F00,value);
                 this.writeMem(0x3F10,value);
-                
+
             }else if (address==0x3F04 || address==0x3F14) {
-                
+
                 this.writeMem(0x3F04,value);
                 this.writeMem(0x3F14,value);
-                
+
             }else if (address==0x3F08 || address==0x3F18) {
-                
+
                 this.writeMem(0x3F08,value);
                 this.writeMem(0x3F18,value);
-                
+
             }else if (address==0x3F0C || address==0x3F1C) {
-                
+
                 this.writeMem(0x3F0C,value);
                 this.writeMem(0x3F1C,value);
-                
+
             }else {
                 this.writeMem(address,value);
             }
-            
+
         }else {
-            
+
             // Use lookup table for mirrored address:
             if (address<this.vramMirrorTable.length) {
                 this.writeMem(this.vramMirrorTable[address],value);
@@ -5497,28 +5558,31 @@ JSNES.PPU.prototype = {
                 // FIXME
                 alert("Invalid VRAM address: "+address.toString(16));
             }
-            
+
         }
     },
-    
+
     triggerRendering: function(){
+      if(this.debug) { console.log("triggerRendering") }
+
         if (this.scanline >= 21 && this.scanline <= 260) {
             // Render sprites, and combine:
             this.renderFramePartially(
                 this.lastRenderedScanline+1,
                 this.scanline-21-this.lastRenderedScanline
             );
-            
+
             // Set last rendered scanline:
             this.lastRenderedScanline = this.scanline-21;
         }
     },
-    
+
     renderFramePartially: function(startScan, scanCount){
+
         if (this.f_spVisibility == 1) {
             this.renderSpritesPartially(startScan,scanCount,true);
         }
-        
+
         if(this.f_bgVisibility == 1) {
             var si = startScan<<8;
             var ei = (startScan+scanCount)<<8;
@@ -5534,26 +5598,26 @@ JSNES.PPU.prototype = {
                 }
             }
         }
-        
+
         if (this.f_spVisibility == 1) {
             this.renderSpritesPartially(startScan, scanCount, false);
         }
-        
+
         this.validTileData = false;
     },
-    
+
     renderBgScanline: function(bgbuffer, scan) {
         var baseTile = (this.regS === 0 ? 0 : 256);
         var destIndex = (scan<<8)-this.regFH;
 
         this.curNt = this.ntable1[this.cntV+this.cntV+this.cntH];
-        
+
         this.cntHT = this.regHT;
         this.cntH = this.regH;
         this.curNt = this.ntable1[this.cntV+this.cntV+this.cntH];
-        
+
         if (scan<240 && (scan-this.cntFV)>=0){
-            
+
             var tscanoffset = this.cntFV<<3;
             var scantile = this.scantile;
             var attrib = this.attrib;
@@ -5566,9 +5630,9 @@ JSNES.PPU.prototype = {
             var t, tpix, att, col;
 
             for (var tile=0;tile<32;tile++) {
-                
+
                 if (scan>=0) {
-                
+
                     // Fetch tile & attrib data:
                     if (this.validTileData) {
                         // Get data from array:
@@ -5583,7 +5647,7 @@ JSNES.PPU.prototype = {
                         scantile[tile] = t;
                         attrib[tile] = att;
                     }
-                    
+
                     // Render tile scanline:
                     var sx = 0;
                     var x = (tile<<3)-this.regFH;
@@ -5614,26 +5678,26 @@ JSNES.PPU.prototype = {
                             }
                         }
                     }
-                    
+
                 }
-                    
+
                 // Increase Horizontal Tile Counter:
                 if (++this.cntHT==32) {
                     this.cntHT=0;
                     this.cntH++;
                     this.cntH%=2;
-                    this.curNt = this.ntable1[(this.cntV<<1)+this.cntH];    
+                    this.curNt = this.ntable1[(this.cntV<<1)+this.cntH];
                 }
-                
-                
+
+
             }
-            
+
             // Tile data for one row should now have been fetched,
             // so the data in the array is valid.
             this.validTileData = true;
-            
+
         }
-        
+
         // update vertical scroll:
         this.cntFV++;
         if (this.cntFV==8) {
@@ -5647,40 +5711,40 @@ JSNES.PPU.prototype = {
             }else if (this.cntVT==32) {
                 this.cntVT = 0;
             }
-            
+
             // Invalidate fetched data:
             this.validTileData = false;
-            
+
         }
     },
-    
+
     renderSpritesPartially: function(startscan, scancount, bgPri){
         if (this.f_spVisibility === 1) {
-            
+
             for (var i=0;i<64;i++) {
-                if (this.bgPriority[i]==bgPri && this.sprX[i]>=0 && 
-                        this.sprX[i]<256 && this.sprY[i]+8>=startscan && 
+                if (this.bgPriority[i]==bgPri && this.sprX[i]>=0 &&
+                        this.sprX[i]<256 && this.sprY[i]+8>=startscan &&
                         this.sprY[i]<startscan+scancount) {
                     // Show sprite.
                     if (this.f_spriteSize === 0) {
                         // 8x8 sprites
-                        
+
                         this.srcy1 = 0;
                         this.srcy2 = 8;
-                        
+
                         if (this.sprY[i]<startscan) {
                             this.srcy1 = startscan - this.sprY[i]-1;
                         }
-                        
+
                         if (this.sprY[i]+8 > startscan+scancount) {
                             this.srcy2 = startscan+scancount-this.sprY[i]+1;
                         }
-                        
+
                         if (this.f_spPatternTable===0) {
-                            this.ptTile[this.sprTile[i]].render(this.buffer, 
-                                0, this.srcy1, 8, this.srcy2, this.sprX[i], 
-                                this.sprY[i]+1, this.sprCol[i], this.sprPalette, 
-                                this.horiFlip[i], this.vertFlip[i], i, 
+                            this.ptTile[this.sprTile[i]].render(this.buffer,
+                                0, this.srcy1, 8, this.srcy2, this.sprX[i],
+                                this.sprY[i]+1, this.sprCol[i], this.sprPalette,
+                                this.horiFlip[i], this.vertFlip[i], i,
                                 this.pixrendered
                             );
                         }else {
@@ -5692,18 +5756,18 @@ JSNES.PPU.prototype = {
                         if ((top&1)!==0) {
                             top = this.sprTile[i]-1+256;
                         }
-                        
+
                         var srcy1 = 0;
                         var srcy2 = 8;
-                        
+
                         if (this.sprY[i]<startscan) {
                             srcy1 = startscan - this.sprY[i]-1;
                         }
-                        
+
                         if (this.sprY[i]+8 > startscan+scancount) {
                             srcy2 = startscan+scancount-this.sprY[i];
                         }
-                        
+
                         this.ptTile[top+(this.vertFlip[i]?1:0)].render(
                             this.buffer,
                             0,
@@ -5719,18 +5783,18 @@ JSNES.PPU.prototype = {
                             i,
                             this.pixrendered
                         );
-                        
+
                         srcy1 = 0;
                         srcy2 = 8;
-                        
+
                         if (this.sprY[i]+8<startscan) {
                             srcy1 = startscan - (this.sprY[i]+8+1);
                         }
-                        
+
                         if (this.sprY[i]+16 > startscan+scancount) {
                             srcy2 = startscan+scancount-(this.sprY[i]+8);
                         }
-                        
+
                         this.ptTile[top+(this.vertFlip[i]?0:1)].render(
                             this.buffer,
                             0,
@@ -5746,40 +5810,42 @@ JSNES.PPU.prototype = {
                             i,
                             this.pixrendered
                         );
-                        
+
                     }
                 }
             }
         }
     },
-    
+
     checkSprite0: function(scan){
-        
+      if(this.debug) { console.log("checkSprite0") }
+
+
         this.spr0HitX = -1;
         this.spr0HitY = -1;
-        
+
         var toffset;
         var tIndexAdd = (this.f_spPatternTable === 0?0:256);
         var x, y, t, i;
         var bufferIndex;
         var col;
         var bgPri;
-        
+
         x = this.sprX[0];
         y = this.sprY[0]+1;
-        
+
         if (this.f_spriteSize === 0) {
             // 8x8 sprites.
 
             // Check range:
             if (y <= scan && y + 8 > scan && x >= -7 && x < 256) {
-                
+
                 // Sprite is in range.
                 // Draw scanline:
                 t = this.ptTile[this.sprTile[0] + tIndexAdd];
                 col = this.sprCol[0];
                 bgPri = this.bgPriority[0];
-                
+
                 if (this.vertFlip[0]) {
                     toffset = 7 - (scan -y);
                 }
@@ -5787,12 +5853,12 @@ JSNES.PPU.prototype = {
                     toffset = scan - y;
                 }
                 toffset *= 8;
-                
+
                 bufferIndex = scan * 256 + x;
                 if (this.horiFlip[0]) {
                     for (i = 7; i >= 0; i--) {
                         if (x >= 0 && x < 256) {
-                            if (bufferIndex>=0 && bufferIndex<61440 && 
+                            if (bufferIndex>=0 && bufferIndex<61440 &&
                                     this.pixrendered[bufferIndex] !==0 ) {
                                 if (t.pix[toffset+i] !== 0) {
                                     this.spr0HitX = bufferIndex % 256;
@@ -5808,7 +5874,7 @@ JSNES.PPU.prototype = {
                 else {
                     for (i = 0; i < 8; i++) {
                         if (x >= 0 && x < 256) {
-                            if (bufferIndex >= 0 && bufferIndex < 61440 && 
+                            if (bufferIndex >= 0 && bufferIndex < 61440 &&
                                     this.pixrendered[bufferIndex] !==0 ) {
                                 if (t.pix[toffset+i] !== 0) {
                                     this.spr0HitX = bufferIndex % 256;
@@ -5818,25 +5884,25 @@ JSNES.PPU.prototype = {
                             }
                         }
                         x++;
-                        bufferIndex++;  
-                    }   
+                        bufferIndex++;
+                    }
                 }
             }
         }
         else {
             // 8x16 sprites:
-        
+
             // Check range:
             if (y <= scan && y + 16 > scan && x >= -7 && x < 256) {
                 // Sprite is in range.
                 // Draw scanline:
-                
+
                 if (this.vertFlip[0]) {
                     toffset = 15-(scan-y);
                 }else {
                     toffset = scan-y;
                 }
-                
+
                 if (toffset<8) {
                     // first half of sprite.
                     t = this.ptTile[this.sprTile[0]+(this.vertFlip[0]?1:0)+((this.sprTile[0]&1)!==0?255:0)];
@@ -5853,7 +5919,7 @@ JSNES.PPU.prototype = {
                 toffset*=8;
                 col = this.sprCol[0];
                 bgPri = this.bgPriority[0];
-                
+
                 bufferIndex = scan*256+x;
                 if (this.horiFlip[0]) {
                     for (i=7;i>=0;i--) {
@@ -5869,10 +5935,10 @@ JSNES.PPU.prototype = {
                         x++;
                         bufferIndex++;
                     }
-                    
+
                 }
                 else {
-                    
+
                     for (i=0;i<8;i++) {
                         if (x>=0 && x<256) {
                             if (bufferIndex>=0 && bufferIndex<61440 && this.pixrendered[bufferIndex]!==0) {
@@ -5886,46 +5952,48 @@ JSNES.PPU.prototype = {
                         x++;
                         bufferIndex++;
                     }
-                    
+
                 }
-                
+
             }
-            
+
         }
-        
+
         return false;
     },
-    
+
     // This will write to PPU memory, and
     // update internally buffered data
     // appropriately.
     writeMem: function(address, value){
+      if(this.debug) { console.log("writeMem") }
+
         this.vramMem[address] = value;
-        
+
         // Update internally buffered data:
         if (address < 0x2000) {
             this.vramMem[address] = value;
             this.patternWrite(address,value);
         }
-        else if (address >=0x2000 && address <0x23c0) {    
+        else if (address >=0x2000 && address <0x23c0) {
             this.nameTableWrite(this.ntable1[0], address - 0x2000, value);
         }
-        else if (address >=0x23c0 && address <0x2400) {    
+        else if (address >=0x23c0 && address <0x2400) {
             this.attribTableWrite(this.ntable1[0],address-0x23c0,value);
         }
-        else if (address >=0x2400 && address <0x27c0) {    
+        else if (address >=0x2400 && address <0x27c0) {
             this.nameTableWrite(this.ntable1[1],address-0x2400,value);
         }
-        else if (address >=0x27c0 && address <0x2800) {    
+        else if (address >=0x27c0 && address <0x2800) {
             this.attribTableWrite(this.ntable1[1],address-0x27c0,value);
         }
-        else if (address >=0x2800 && address <0x2bc0) {    
+        else if (address >=0x2800 && address <0x2bc0) {
             this.nameTableWrite(this.ntable1[2],address-0x2800,value);
         }
-        else if (address >=0x2bc0 && address <0x2c00) {    
+        else if (address >=0x2bc0 && address <0x2c00) {
             this.attribTableWrite(this.ntable1[2],address-0x2bc0,value);
         }
-        else if (address >=0x2c00 && address <0x2fc0) {    
+        else if (address >=0x2c00 && address <0x2fc0) {
             this.nameTableWrite(this.ntable1[3],address-0x2c00,value);
         }
         else if (address >=0x2fc0 && address <0x3000) {
@@ -5935,12 +6003,14 @@ JSNES.PPU.prototype = {
             this.updatePalettes();
         }
     },
-    
-    // Reads data from $3f00 to $f20 
+
+    // Reads data from $3f00 to $f20
     // into the two buffered palettes.
     updatePalettes: function(){
+      if(this.debug) { console.log("updatePalettes") }
+
         var i;
-        
+
         for (i = 0; i < 16; i++) {
             if (this.f_dispType === 0) {
                 this.imgPalette[i] = this.palTable.getEntry(
@@ -5966,11 +6036,13 @@ JSNES.PPU.prototype = {
             }
         }
     },
-    
+
     // Updates the internal pattern
     // table buffers with this new byte.
     // In vNES, there is a version of this with 4 arguments which isn't used.
     patternWrite: function(address, value){
+      if(this.debug) { console.log("patternWrite") }
+
         var tileIndex = parseInt(address / 16, 10);
         var leftOver = address%16;
         if (leftOver<8) {
@@ -5992,30 +6064,36 @@ JSNES.PPU.prototype = {
     // Updates the internal name table buffers
     // with this new byte.
     nameTableWrite: function(index, address, value){
+      if(this.debug) { console.log("nameTableWrite") }
+
         this.nameTable[index].tile[address] = value;
-        
+
         // Update Sprite #0 hit:
         //updateSpr0Hit();
         this.checkSprite0(this.scanline-20);
     },
-    
+
     // Updates the internal pattern
     // table buffers with this new attribute
     // table byte.
     attribTableWrite: function(index, address, value){
+      if(this.debug) { console.log("attribTableWrite") }
+
         this.nameTable[index].writeAttrib(address,value);
     },
-    
+
     // Updates the internally buffered sprite
     // data with this new byte of info.
     spriteRamWriteUpdate: function(address, value){
+      if(this.debug) { console.log("spriteRamWriteUpdate") }
+
         var tIndex = parseInt(address / 4, 10);
-        
+
         if (tIndex === 0) {
             //updateSpr0Hit();
             this.checkSprite0(this.scanline-20);
         }
-        
+
         if (address%4 === 0) {
             // Y coordinate
             this.sprY[tIndex] = value;
@@ -6028,14 +6106,16 @@ JSNES.PPU.prototype = {
             this.horiFlip[tIndex] = ((value&0x40)!==0);
             this.bgPriority[tIndex] = ((value&0x20)!==0);
             this.sprCol[tIndex] = (value&3)<<2;
-            
+
         }else if (address%4 == 3) {
             // X coordinate
             this.sprX[tIndex] = value;
         }
     },
-    
+
     doNMI: function(){
+      if(this.debug) { console.log("doNMIu") }
+
         // Set VBlank flag:
         this.setStatusFlag(this.STATUS_VBLANK,true);
         //nes.getCpu().doNonMaskableInterrupt();
@@ -6043,11 +6123,11 @@ JSNES.PPU.prototype = {
     }
 };
 
-JSNES.PPU.NameTable = function(width, height, name) {   
+JSNES.PPU.NameTable = function(width, height, name) {
     this.width = width;
     this.height = height;
     this.name = name;
-    
+
     this.tile = new Array(width*height);
     this.attrib = new Array(width*height);
 };
@@ -6067,7 +6147,7 @@ JSNES.PPU.NameTable.prototype = {
         var add;
         var tx, ty;
         var attindex;
-    
+
         for (var sqy=0;sqy<2;sqy++) {
             for (var sqx=0;sqx<2;sqx++) {
                 add = (value>>(2*(sqy*2+sqx)))&3;
@@ -6095,25 +6175,25 @@ JSNES.PPU.PaletteTable.prototype = {
     reset: function() {
         this.setEmphasis(0);
     },
-    
+
     loadNTSCPalette: function() {
         this.curTable = [0x525252, 0xB40000, 0xA00000, 0xB1003D, 0x740069, 0x00005B, 0x00005F, 0x001840, 0x002F10, 0x084A08, 0x006700, 0x124200, 0x6D2800, 0x000000, 0x000000, 0x000000, 0xC4D5E7, 0xFF4000, 0xDC0E22, 0xFF476B, 0xD7009F, 0x680AD7, 0x0019BC, 0x0054B1, 0x006A5B, 0x008C03, 0x00AB00, 0x2C8800, 0xA47200, 0x000000, 0x000000, 0x000000, 0xF8F8F8, 0xFFAB3C, 0xFF7981, 0xFF5BC5, 0xFF48F2, 0xDF49FF, 0x476DFF, 0x00B4F7, 0x00E0FF, 0x00E375, 0x03F42B, 0x78B82E, 0xE5E218, 0x787878, 0x000000, 0x000000, 0xFFFFFF, 0xFFF2BE, 0xF8B8B8, 0xF8B8D8, 0xFFB6FF, 0xFFC3FF, 0xC7D1FF, 0x9ADAFF, 0x88EDF8, 0x83FFDD, 0xB8F8B8, 0xF5F8AC, 0xFFFFB0, 0xF8D8F8, 0x000000, 0x000000];
         this.makeTables();
         this.setEmphasis(0);
     },
-    
+
     loadPALPalette: function() {
         this.curTable = [0x525252, 0xB40000, 0xA00000, 0xB1003D, 0x740069, 0x00005B, 0x00005F, 0x001840, 0x002F10, 0x084A08, 0x006700, 0x124200, 0x6D2800, 0x000000, 0x000000, 0x000000, 0xC4D5E7, 0xFF4000, 0xDC0E22, 0xFF476B, 0xD7009F, 0x680AD7, 0x0019BC, 0x0054B1, 0x006A5B, 0x008C03, 0x00AB00, 0x2C8800, 0xA47200, 0x000000, 0x000000, 0x000000, 0xF8F8F8, 0xFFAB3C, 0xFF7981, 0xFF5BC5, 0xFF48F2, 0xDF49FF, 0x476DFF, 0x00B4F7, 0x00E0FF, 0x00E375, 0x03F42B, 0x78B82E, 0xE5E218, 0x787878, 0x000000, 0x000000, 0xFFFFFF, 0xFFF2BE, 0xF8B8B8, 0xF8B8D8, 0xFFB6FF, 0xFFC3FF, 0xC7D1FF, 0x9ADAFF, 0x88EDF8, 0x83FFDD, 0xB8F8B8, 0xF5F8AC, 0xFFFFB0, 0xF8D8F8, 0x000000, 0x000000];
         this.makeTables();
         this.setEmphasis(0);
     },
-    
+
     makeTables: function(){
         var r,g,b,col;
-        
+
         // Calculate a table for each possible emphasis setting:
         for (var emph=0;emph<8;emph++) {
-            
+
             // Determine color component factors:
             var rFactor=1.0, gFactor=1.0, bFactor=1.0;
             if ((emph&1)!==0) {
@@ -6128,9 +6208,9 @@ JSNES.PPU.PaletteTable.prototype = {
                 gFactor = 0.75;
                 bFactor = 0.75;
             }
-            
+
             this.emphTable[emph] = new Array(64);
-            
+
             // Calculate table:
             for (var i=0;i<64;i++) {
                 col = this.curTable[i];
@@ -6141,7 +6221,7 @@ JSNES.PPU.PaletteTable.prototype = {
             }
         }
     },
-    
+
     setEmphasis: function(emph){
         if (emph != this.currentEmph) {
             this.currentEmph = emph;
@@ -6150,27 +6230,27 @@ JSNES.PPU.PaletteTable.prototype = {
             }
         }
     },
-    
+
     getEntry: function(yiq){
         return this.curTable[yiq];
     },
-    
+
     getRed: function(rgb){
         return (rgb>>16)&0xFF;
     },
-    
+
     getGreen: function(rgb){
         return (rgb>>8)&0xFF;
     },
-    
+
     getBlue: function(rgb){
         return rgb&0xFF;
     },
-    
+
     getRgb: function(r, g, b){
         return ((r<<16)|(g<<8)|(b));
     },
-    
+
     loadDefaultPalette: function(){
         this.curTable[ 0] = this.getRgb(117,117,117);
         this.curTable[ 1] = this.getRgb( 39, 27,143);
@@ -6236,7 +6316,7 @@ JSNES.PPU.PaletteTable.prototype = {
         this.curTable[61] = this.getRgb(  0,  0,  0);
         this.curTable[62] = this.getRgb(  0,  0,  0);
         this.curTable[63] = this.getRgb(  0,  0,  0);
-        
+
         this.makeTables();
         this.setEmphasis(0);
     }
@@ -6245,7 +6325,7 @@ JSNES.PPU.PaletteTable.prototype = {
 JSNES.PPU.Tile = function() {
     // Tile data:
     this.pix = new Array(64);
-    
+
     this.fbIndex = null;
     this.tIndex = null;
     this.x = null;
@@ -6260,14 +6340,14 @@ JSNES.PPU.Tile = function() {
     this.initialized = false;
     this.opaque = new Array(8);
 };
-    
+
 JSNES.PPU.Tile.prototype = {
     setBuffer: function(scanline){
         for (this.y=0;this.y<8;this.y++) {
             this.setScanline(this.y,scanline[this.y],scanline[this.y+8]);
         }
     },
-    
+
     setScanline: function(sline, b1, b2){
         this.initialized = true;
         this.tIndex = sline<<3;
@@ -6279,7 +6359,7 @@ JSNES.PPU.Tile.prototype = {
             }
         }
     },
-    
+
     render: function(buffer, srcx1, srcy1, srcx2, srcy2, dx, dy, palAdd, palette, flipHorizontal, flipVertical, pri, priTable) {
 
         if (dx<-7 || dx>=256 || dy<-7 || dy>=240) {
@@ -6288,23 +6368,23 @@ JSNES.PPU.Tile.prototype = {
 
         this.w=srcx2-srcx1;
         this.h=srcy2-srcy1;
-    
+
         if (dx<0) {
             srcx1-=dx;
         }
         if (dx+srcx2>=256) {
             srcx2=256-dx;
         }
-    
+
         if (dy<0) {
             srcy1-=dy;
         }
         if (dy+srcy2>=240) {
             srcy2=240-dy;
         }
-    
+
         if (!flipHorizontal && !flipVertical) {
-        
+
             this.fbIndex = (dy<<8)+dx;
             this.tIndex = 0;
             for (this.y=0;this.y<8;this.y++) {
@@ -6313,7 +6393,7 @@ JSNES.PPU.Tile.prototype = {
                         this.palIndex = this.pix[this.tIndex];
                         this.tpri = priTable[this.fbIndex];
                         if (this.palIndex!==0 && pri<=(this.tpri&0xFF)) {
-                            //console.log("Rendering upright tile to buffer");
+                            //if(this.debug) { console.log("Rendering upright tile to buffer") }
                             buffer[this.fbIndex] = palette[this.palIndex+palAdd];
                             this.tpri = (this.tpri&0xF00)|pri;
                             priTable[this.fbIndex] =this.tpri;
@@ -6325,9 +6405,9 @@ JSNES.PPU.Tile.prototype = {
                 this.fbIndex-=8;
                 this.fbIndex+=256;
             }
-        
+
         }else if (flipHorizontal && !flipVertical) {
-        
+
             this.fbIndex = (dy<<8)+dx;
             this.tIndex = 7;
             for (this.y=0;this.y<8;this.y++) {
@@ -6348,10 +6428,10 @@ JSNES.PPU.Tile.prototype = {
                 this.fbIndex+=256;
                 this.tIndex+=16;
             }
-        
+
         }
         else if(flipVertical && !flipHorizontal) {
-        
+
             this.fbIndex = (dy<<8)+dx;
             this.tIndex = 56;
             for (this.y=0;this.y<8;this.y++) {
@@ -6372,7 +6452,7 @@ JSNES.PPU.Tile.prototype = {
                 this.fbIndex+=256;
                 this.tIndex-=16;
             }
-        
+
         }
         else {
             this.fbIndex = (dy<<8)+dx;
@@ -6394,11 +6474,11 @@ JSNES.PPU.Tile.prototype = {
                 this.fbIndex-=8;
                 this.fbIndex+=256;
             }
-        
+
         }
-    
+
     },
-    
+
     isTransparent: function(x, y){
         return (this.pix[(y<<3)+x] === 0);
     }
@@ -6425,9 +6505,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 JSNES.ROM = function(nes) {
     this.nes = nes;
-    
+
     this.mapperName = new Array(92);
-    
+
     for (var i=0;i<92;i++) {
         this.mapperName[i] = "Unknown Mapper";
     }
@@ -6458,7 +6538,7 @@ JSNES.ROM = function(nes) {
     this.mapperName[32] = "Irem G-101 chip";
     this.mapperName[33] = "Taito TC0190/TC0350";
     this.mapperName[34] = "32kB ROM switch";
-    
+
     this.mapperName[64] = "Tengen RAMBO-1 chip";
     this.mapperName[65] = "Irem H-3001 chip";
     this.mapperName[66] = "GNROM switch";
@@ -6480,12 +6560,12 @@ JSNES.ROM.prototype = {
     SINGLESCREEN_MIRRORING3: 5,
     SINGLESCREEN_MIRRORING4: 6,
     CHRROM_MIRRORING: 7,
-    
+
     header: null,
     rom: null,
     vrom: null,
     vromTile: null,
-    
+
     romCount: null,
     vromCount: null,
     mirroring: null,
@@ -6494,10 +6574,10 @@ JSNES.ROM.prototype = {
     fourScreen: null,
     mapperType: null,
     valid: false,
-    
+
     load: function(data) {
         var i, j, v;
-        
+
         if (data.indexOf("NES\x1a") === -1) {
             this.nes.ui.updateStatus("Not a valid NES ROM.");
             return;
@@ -6552,7 +6632,7 @@ JSNES.ROM.prototype = {
             }
             offset += 4096;
         }
-        
+
         // Create VROM tiles:
         this.vromTile = new Array(this.vromCount);
         for (i=0; i < this.vromCount; i++) {
@@ -6561,7 +6641,7 @@ JSNES.ROM.prototype = {
                 this.vromTile[i][j] = new JSNES.PPU.Tile();
             }
         }
-        
+
         // Convert CHR-ROM banks to tiles:
         var tileIndex;
         var leftOver;
@@ -6585,10 +6665,10 @@ JSNES.ROM.prototype = {
                 }
             }
         }
-        
+
         this.valid = true;
     },
-    
+
     getMirroringType: function() {
         if (this.fourScreen) {
             return this.FOURSCREEN_MIRRORING;
@@ -6598,18 +6678,18 @@ JSNES.ROM.prototype = {
         }
         return this.VERTICAL_MIRRORING;
     },
-    
+
     getMapperName: function() {
         if (this.mapperType >= 0 && this.mapperType < this.mapperName.length) {
             return this.mapperName[this.mapperType];
         }
         return "Unknown Mapper, "+this.mapperType;
     },
-    
+
     mapperSupported: function() {
         return typeof JSNES.Mappers[this.mapperType] !== 'undefined';
     },
-    
+
     createMapper: function() {
         if (this.mapperSupported()) {
             return new JSNES.Mappers[this.mapperType](this.nes);
@@ -6659,15 +6739,15 @@ if (typeof jQuery !== 'undefined') {
 
                 self.root = $('<div></div>');
                 self.screen = $('<canvas class="nes-screen" width="256" height="240"></canvas>').appendTo(self.root);
-                
+
                 if (!self.screen[0].getContext) {
                     parent.html("Your browser doesn't support the <code>&lt;canvas&gt;</code> tag. Try Google Chrome, Safari, Opera or Firefox!");
                     return;
                 }
-                
+
                 self.romContainer = $('<div class="nes-roms"></div>').appendTo(self.root);
                 self.romSelect = $('<select></select>').appendTo(self.romContainer);
-                
+
                 self.controls = $('<div class="nes-controls"></div>').appendTo(self.root);
                 self.buttons = {
                     pause: $('<input type="button" value="pause" class="nes-pause" disabled="disabled">').appendTo(self.controls),
@@ -6677,7 +6757,7 @@ if (typeof jQuery !== 'undefined') {
                 };
                 self.status = $('<p class="nes-status">Booting up...</p>').appendTo(self.root);
                 self.root.appendTo(parent);
-        
+
                 self.romSelect.change(function() {
                     self.updateStatus("Downloading...");
                     $.ajax({
@@ -6695,7 +6775,7 @@ if (typeof jQuery !== 'undefined') {
                         }
                     });
                 });
-        
+
                 self.buttons.pause.click(function() {
                     if (self.nes.isRunning) {
                         self.nes.stop();
@@ -6707,12 +6787,12 @@ if (typeof jQuery !== 'undefined') {
                         self.buttons.pause.attr("value", "pause");
                     }
                 });
-        
+
                 self.buttons.restart.click(function() {
                     self.nes.reloadRom();
                     self.nes.start();
                 });
-        
+
                 self.buttons.sound.click(function() {
                     if (self.nes.opts.emulateSound) {
                         self.nes.opts.emulateSound = false;
@@ -6723,7 +6803,7 @@ if (typeof jQuery !== 'undefined') {
                         self.buttons.sound.attr("value", "disable sound");
                     }
                 });
-        
+
                 self.zoomed = false;
                 self.buttons.zoom.click(function() {
                     if (self.zoomed) {
@@ -6743,7 +6823,7 @@ if (typeof jQuery !== 'undefined') {
                         self.zoomed = true;
                     }
                 });
-        
+
                 // Mouse experiments. Requires jquery.dimensions.js
                 if ($.offset) {
                     self.screen.mousedown(function(e) {
@@ -6763,47 +6843,47 @@ if (typeof jQuery !== 'undefined') {
                         }, 500);
                     });
                 }
-            
+
                 if (typeof roms != 'undefined') {
                     self.setRoms(roms);
                 }
-            
+
                 // Canvas
                 self.canvasContext = self.screen[0].getContext('2d');
-                
+
                 if (!self.canvasContext.getImageData) {
                     parent.html("Your browser doesn't support writing pixels directly to the <code>&lt;canvas&gt;</code> tag. Try the latest versions of Google Chrome, Safari, Opera or Firefox!");
                     return;
                 }
-                
+
                 self.canvasImageData = self.canvasContext.getImageData(0, 0, 256, 240);
                 self.canvasContext.fillStyle = 'black';
                 self.canvasContext.fillRect(0, 0, 256, 240); // set alpha to opaque
-            
+
                 // Set alpha
                 for (var i = 3; i < this.canvasImageData.data.length-3; i+=4) {
                     this.canvasImageData.data[i] = 0xFF;
                 }
-            
+
                 // Keyboard
                 $(document).
                     bind('keydown', function(evt) {
-                        self.nes.keyboard.keyDown(evt); 
+                        self.nes.keyboard.keyDown(evt);
                     }).
                     bind('keyup', function(evt) {
-                        self.nes.keyboard.keyUp(evt); 
+                        self.nes.keyboard.keyUp(evt);
                     }).
                     bind('keypress', function(evt) {
                         self.nes.keyboard.keyPress(evt);
                     });
-            
+
                 // Sound
                 self.dynamicaudio = new DynamicAudio({
                     swf: nes.opts.swfPath+'dynamicaudio.swf'
                 });
             };
-        
-            UI.prototype = {    
+
+            UI.prototype = {
                 // Enable and reset UI elements
                 enable: function() {
                     this.buttons.pause.attr("disabled", null);
@@ -6821,11 +6901,11 @@ if (typeof jQuery !== 'undefined') {
                         this.buttons.sound.attr("value", "enable sound");
                     }
                 },
-            
+
                 updateStatus: function(s) {
                     this.status.text(s);
                 },
-        
+
                 setRoms: function(roms) {
                     this.romSelect.children().remove();
                     $("<option>Select a ROM...</option>").appendTo(this.romSelect);
@@ -6842,11 +6922,11 @@ if (typeof jQuery !== 'undefined') {
                         }
                     }
                 },
-            
+
                 writeAudio: function(samples) {
                     return this.dynamicaudio.writeInt(samples);
                 },
-            
+
                 writeFrame: function(buffer) {
                     var imageData = this.canvasImageData.data;
                     var prevBuffer = this.prevBuffer;
@@ -6867,7 +6947,7 @@ if (typeof jQuery !== 'undefined') {
                     this.canvasContext.putImageData(this.canvasImageData, 0, 0);
                 }
             };
-        
+
             return UI;
         };
     })(jQuery);
