@@ -160,6 +160,24 @@ li#game4 {
 	/*float: left;*/
 }
 
+div#container-dude-1 {
+	background: green;
+	float: left;
+	/*margin: 0 0 0 100px;*/
+}
+
+div#dude-1 {
+	background: red url(images/dude-1.png) no-repeat;
+	width: 67px;
+	height: 90px;
+}
+
+div#dude-1 p {
+	/*text-indent: -9999px;*/
+	color: white;
+	background: blue;
+}
+
 div#container-couch {
 	float: left;
 	margin: -50px 0 0 -425px;
