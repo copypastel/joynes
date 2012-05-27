@@ -1,0 +1,99 @@
+/**************************************************
+Share Link Thing!
+**************************************************/
+
+div#share-container {
+ background: #000;
+ opacity: .99;
+ width: 600px;
+ height: auto;
+ margin: 0 auto;
+ padding: 10px;
+ border-radius: 5px;
+
+}
+
+div#shareId {
+ background: #333;
+ border-radius: 5px;
+ width: 400px;
+ margin: 10px auto;
+ 
+}
+
+h3 {
+ font-family: helvetica, sans-serif;
+ font-weight: normal;
+ color: #111;
+ text-shadow: 0 1px 0 #999;
+ width: 160px;
+ margin: 0 auto;
+ line-height: 30px;
+}
+
+div#share-button-container {
+ background: #c0c0c0;
+ width: 405px;
+ height: 50px;
+
+}
+
+div#share-box {
+ background: #f9f9f9;
+ width: 230px;
+ float: left;
+ line-height: 30px;
+ margin-left: 5px;
+ margin-right: 5px;
+ margin-top: 10px;
+}
+
+div#share-box span {
+ padding: 0px 5px;
+ color: #555;
+ font-family: georgia, serif;
+ font-weight: normal;
+ font-style: italic;
+ font-size: .95em;
+}
+
+
+
+div#share-button {
+	-moz-box-shadow:inset 0px 1px 0px 0px #c2e2ff;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #c2e2ff;
+	box-shadow:inset 0px 1px 0px 0px #c2e2ff;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #7abdff), color-stop(1, #328eeb) );
+	background:-moz-linear-gradient( center top, #7abdff 5%, #328eeb 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#7abdff', endColorstr='#328eeb');
+	background-color:#7abdff;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #264e8a;
+	display:inline-block;
+	color:#264e8a;
+	font-family:arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #a3c2ff;
+}.share-button:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #328eeb), color-stop(1, #7abdff) );
+	background:-moz-linear-gradient( center top, #328eeb 5%, #7abdff 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#328eeb', endColorstr='#7abdff');
+	background-color:#328eeb;
+}.share-button:active {
+	position:relative;
+	top:1px;
+}
+
+div#share-button-highlight {
+ width: 158px;
+ height: 33px;
+ background: white;
+ float: left;
+ border-radius: 5px;
+ margin-top: 9px;
+}

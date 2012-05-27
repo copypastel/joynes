@@ -248,4 +248,132 @@ li#game4:hover {
 }*/
 
 /**************************************************
+Share Link Thing!
 **************************************************/
+
+div#share-container {
+ background: #000;
+ opacity: .99;
+ width: 600px;
+ height: auto;
+ margin: 0 auto;
+ padding: 10px;
+ border-radius: 5px;
+
+}
+
+div#shareId {
+ background: #333;
+ border-radius: 5px;
+ width: 400px;
+ margin: 0 auto;
+ 
+}
+
+h3 {
+ font-family: helvetica, sans-serif;
+ width: 160px;
+ margin: 0 auto;
+ line-height: 30px;
+}
+
+div#share-button-container {
+ background: #444;
+ width: 400px;
+ height: 50px;
+}
+
+div#share-box {
+ background: #999;
+ width: 230px;
+ float: left;
+ line-height: 30px;
+ margin-left: 10px;
+ margin-top: 5px;
+}
+
+div#share-button {
+ background: #ff8800;
+ border-radius: 5px;
+ border: 1px solid #292929;
+ width: 145px;
+ float: left;
+ box-shadow: 0 1px 0 #999;
+ margin: 5px 5px;
+}
+
+div#share-button span {
+ font-family: helvetica, sans-serif;
+ font-weight: bolder;
+ font-size: .8em;
+ text-shadow: 0px 1px 1px #292929;
+ width: 120px;
+ margin: 0 0 0 25px;
+ line-height: 30px;
+}
+
+/**************************************************
+Share Link Thing!
+**************************************************/
+
+div#share-container {
+ background: #000;
+ opacity: .99;
+ width: 600px;
+ height: auto;
+ margin: 0 auto;
+ padding: 10px;
+ border-radius: 5px;
+
+}
+
+div#shareId {
+ background: #333;
+ border-radius: 5px;
+ width: 400px;
+ margin: 0 auto;
+ 
+}
+
+h3 {
+ font-family: helvetica, sans-serif;
+ width: 160px;
+ margin: 0 auto;
+ line-height: 30px;
+}
+
+div#share-button-container {
+ background: #444;
+ width: 400px;
+ height: 50px;
+}
+
+div#share-box {
+ background: #999;
+ width: 230px;
+ float: left;
+ line-height: 30px;
+ margin-left: 10px;
+ margin-top: 5px;
+}
+
+div#share-button {
+ background: #ff8800;
+ border-radius: 5px;
+ border: 1px solid #292929;
+ width: 145px;
+ float: left;
+ box-shadow: 0 1px 0 #999;
+ margin: 5px 5px;
+}
+
+div#share-button span {
+ font-family: helvetica, sans-serif;
+ font-weight: bolder;
+ font-size: .8em;
+ text-shadow: 0px 1px 1px #292929;
+ width: 120px;
+ margin: 0 0 0 25px;
+ line-height: 30px;
+}
+
