@@ -329,7 +329,7 @@ div#cta-button-container {
 }
 
 div#cta-button {
-  background: #2b2b2b;
+  background: #444444;
   width: 158px;
   height: 46px;
   border-radius: 5px;
@@ -432,6 +432,109 @@ div#green-glow {
 div#green-glow p {
   text-indent: -9999px;
 }
+
+/**************************************************
+Popup
+**************************************************/
+
+div#ui-popup-container {
+  background: url(/images/popup-bg.png) no-repeat;
+  width: 540px;
+  height: 200px;
+  margin: -30px auto;
+}
+
+div#ui-popup p {
+  text-indent: -9999px;
+}
+
+div#link-box {
+  background: #999;
+  width: 304px;
+  height: 32px;
+  margin: 20px 0 0 22px;
+  border-radius: 5px;
+  box-shadow: 0 1px 0 #5b5a5a;
+  float: left;
+}
+
+div#link-box input {
+  border-radius: 5px;
+  border: 1px solid #000000;
+  width: 300px;
+  height: 28px;
+  font-family: arial, sans-serif;
+  font-size: 1em;
+  text-indent: 10px;
+  /*margin: 20px 0 0 45px;*/
+  box-shadow:inset 0 0 5px #000000;
+
+}
+
+div#copy-link-button-container {
+  background: #555555;
+  width: 185px;
+  height: 46px;
+  border-radius: 5px;
+  margin: 13px 0 0 8px;
+  float: left;
+}
+
+#copy-link-button {
+  -moz-box-shadow:inset 0px 1px 0px 0px #97dffd;
+  -webkit-box-shadow:inset 0px 1px 0px 0px #97dffd;
+  box-shadow:inset 0px 1px 0px 0px #97dffd;
+  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #26a9e0), color-stop(1, #1b5d92) );
+  background:-moz-linear-gradient( center top, #26a9e0 5%, #1b5d92 100% );
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#26a9e0', endColorstr='#1b5d92');
+  background-color:#26a9e0;
+  -moz-border-radius:6px;
+  -webkit-border-radius:6px;
+  border-radius:6px;
+  border:1px solid #000000;
+  display:inline-block;
+  color: #154d7a;
+  font-family: Georgia, serif;
+  font-weight: normal;
+  font-style: italic;
+  font-size: 1.2em;
+  padding: 11px 18px;
+  text-decoration:none;
+  text-shadow:0px 1px 0px #5ca4d3;
+}#copy-link-button:hover {
+  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #1b5d92), color-stop(1, #26a9e0) );
+  background:-moz-linear-gradient( center top, #1b5d92 5%, #26a9e0 100% );
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#1b5d92', endColorstr='#26a9e0');
+  background-color:#1b5d92;
+}#copy-link-button:active {
+  position:relative;
+  top:1px;
+}
+
+div#bff-container {
+  width: 300px;
+  margin: 0 auto;
+}
+
+div#bff {
+
+}
+
+div#bff p {
+  text-align: center;
+  text-shadow: 0 2px 2px #000000;
+  font-style: italic;
+  color: #a9a9a9 ;
+  margin-top: 115px;
+}
+
+
+
+
+
+
+
+
 
 
 
