@@ -41,6 +41,7 @@ io.sockets.on("connection", function(player){
     // TODO: return an error
     var partnerAlreadyPaired = getPartner(partnerId);
     if(partnerAlreadyPaired) {
+      player.emit("state:partner_unavailable");
       return;
     }
     util.log(player.id + " wants to pair!");
@@ -55,13 +56,14 @@ io.sockets.on("connection", function(player){
     } else {
       // couldn't find a player given a partnerId;
       // might prefer to throw an error in this case...
-      waiting.push(player);
-      if (waiting.length >= 2) {
+      player.emit("state:partner_unavailable");
+      //waiting.push(player);
+      //if (waiting.length >= 2) {
         /* Pair the top two; this means our waiting queue should never
          * grow larger than 2
          */
-        pair(waiting.shift(), waiting.shift());
-      }
+      // pair(waiting.shift(), waiting.shift());
+     // }
     }
   });
 

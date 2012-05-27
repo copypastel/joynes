@@ -68,6 +68,11 @@
       document.querySelector("#link-box input").value = hostname + shareId;
     });
 
+    socket.on("state:partner_unavailable", function() {
+      alert("Sorry! Partner is already in a game (or died a fiery death)...");
+      document.location = 'http://' + document.location.hostname + ':' + (document.location.port || '80') + '/';
+    });
+
     socket.on("change-request", function(title) {
       requestedTitle = title;
       $("#message-box .trigger").click();
