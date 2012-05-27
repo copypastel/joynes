@@ -112,8 +112,11 @@ div#nes p {
   -webkit-transform: skewY(26deg);
   -webkit-transition: -webkit-transform 0.5s ease-in, left 0.5s ease-in;
   position: relative;
+  top: 44px;
+  left: 214;
+ /* Old TV Position Screen
   top: 36px;
-  left: 7px;
+  left: 7px;*/
   z-index: 9999;
 }
 
