@@ -43,15 +43,16 @@
       buttons: {
           wrapper:'<span class="message-box-confirm"></span>',
           separator:'  '
-      }  
+      }
     });
 
-    socket = io.connect('http://' + document.location.hostname + ':3333/');
+    socket = io.connect('http://' + document.location.hostname + ':' + (document.location.port || '80') + '/');
 
     // Display shareId
     socket.on("connect", function(evt) {
       var shareId = encodeShareId(socket.socket.sessionid);
       var hostname = location.protocol + "//" + location.host + "/";
+      console.log(hostname + shareId);
       document.querySelector("#shareId span").innerHTML += hostname + shareId;
     });
 
@@ -170,7 +171,7 @@
 
         displayPoster(title);
       }
-    
+
       game.onclick = function(event) {
         var title = event.target.getAttribute("data-game");
         if (partnerIdPresent) {

@@ -20,6 +20,8 @@ joynes.Base.prototype = {
     readStatusRegister: 17,
   },
 
+  compressor : LZMA,
+
   partner : function(command, data) {
     var self = this;
     self.socket.emit("proxy", {"command": command, "data": data })

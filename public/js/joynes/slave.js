@@ -22,6 +22,7 @@ joynes.Slave.prototype = {
     });
 
     self.socket.on("PPU:Initialize", function(data) {
+      data = JSON.parse(self.compressor.decompress(data));
       self.nes.ppu.vramMem = data["vramMem"];
       self.nes.ppu.spriteMem = data["spriteMem"];
       self.nes.ppu.vramAddress = data["vramAddress"];

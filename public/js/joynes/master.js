@@ -98,7 +98,7 @@ joynes.Master.prototype = {
     this.nes.ppu.ptTile[1].initialized = true;
     console.log(this.nes.ppu.ptTile[1]);
     var self = this;
-    self.partner("PPU:Initialize", {
+    var payload = {
       "instruction": self.instruction_id,
       "vramMem": this.nes.ppu.vramMem,
       "spriteMem": this.nes.ppu.spriteMem,
@@ -171,7 +171,9 @@ joynes.Master.prototype = {
       "palTable": this.nes.ppu.palTable,
       "controlReg1Value": this.nes.ppu.controlReg1Value,
       "controlReg2Value": this.nes.ppu.controlReg2Value,
-    });
+    }
+
+    self.partner("PPU:Initialize", self.compressor.compress(JSON.stringify(payload)));
 
     self.partner("MMAP:Initialize", {
       "mapperType": self.nes.rom.mapperType,
