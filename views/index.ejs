@@ -55,14 +55,17 @@
       }, 400);
     }, 2000);
 
+    $('#player-2').click(function() {
+      $('#ui-popup-container').show();
+    });
+
     socket = io.connect('http://' + document.location.hostname + ':' + (document.location.port || '80') + '/');
 
     // Display shareId
     socket.on("connect", function(evt) {
       var shareId = encodeShareId(socket.socket.sessionid);
       var hostname = location.protocol + "//" + location.host + "/";
-      console.log(hostname + shareId);
-      document.querySelector("#shareId span").innerHTML += hostname + shareId;
+      document.querySelector("#link-box input").value = hostname + shareId;
     });
 
     socket.on("change-request", function(title) {
@@ -88,12 +91,18 @@
       }
     });
 
+    socket.on("state:partner_joined", function() {
+      $("#player-2").removeClass("waiting").addClass("connected").unbind("click");
+      $("#ui-popup-container").hide();
+    });
+
     // partnerId is a URL parameter
     if(partnerIdPresent) {
       var partnerId = partnerIdPresent[1];
       socket.emit("register:s", decodeShareId(partnerId));
-      document.querySelector("#shareId").style.display = "none";
+      $("#player-2").addClass("connected").unbind("click");
     } else {
+      $("#player-2").addClass("waiting");
       socket.emit("register:m");
     }
   });
@@ -203,65 +212,26 @@
 			<div id="title">
           <p>This is the title.</p>
       </div>
-
-      <!--
-          <div id="ui-container">
-            <div id="ui-bar-container">
-              <div id="cta-container">
-                <div id="cta">
-                  <p>Nintendo is always better with a buddy.</p>
-                </div>
-                
-                <div id="cta-button-container">
-                  <div id="cta-button">
-                    <a href="#" id="cta-button-red">loading...</a>
-                  </div> 
-  
-                  <div id="cta-button">
-                    <a href="#" id="cta-button-green">Ready!</a>
-                  </div>
-
-                </div>
-            </div>
-
-              <div id="red-glow-container">
-                <div id="red-glow">
-                  <p>This is the red light.</p>
-                </div>
-              </div>
-
-              <div id="green-glow-container">
-                <div id="green-glow">
-                  <p>This is the green light.</p>
-                </div>
-              </div> 
-
-              <div id="ui-bar">
-                <p>This will be the UI Bar.</p>
-              </div>
-             </div>
-
-
-        <div id="ui-popup-container">
-          <div id="ui-popup">
-            <p>This will be the UI Popup.</p>
-          </div>
-          <div id="link-box">
-            <input type="text" name="sometext" size="100" value="http://localhost:3333/cefsqev8ov19" onClick='selectText(this);'>
-          </div>
-          <div id="copy-link-button-container">
-            <a href="#" id="copy-link-button">Click to copy link</a>
-          </div>
-          <div id="bff-container">
-            <div id="bff">
-              <p>Share this link with you BFF. Cause Nintendo is always better with a buddy.</p>
-            </div>
+      <div id="player-statuses">
+        <ul>
+          <li>Player 1</li>
+          <li id="player-2"></li>
+        </ul>
+      </div>
+      <div id="ui-popup-container">
+        <div id="ui-popup">
+          <p>This will be the UI Popup.</p>
+        </div>
+        <div id="link-box">
+          <input type="text" value="loading..." size="100" onClick='select(this);'>
+        </div>
+        <div id="bff-container">
+          <div id="bff">
+            <p>Share this link with you BFF. Cause Nintendo is always better with a buddy.</p>
           </div>
         </div>
-      -->
-
-			</div>
-		</div>
+      </div>
+    </div>
     <div id="container-message-box">
       <div id="message-box"><span class="trigger"></span></div>
     </div>
