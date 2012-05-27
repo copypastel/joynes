@@ -5,6 +5,7 @@
   var shareId;
   var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
   var requestedTitle;
+  var wiggleIntervalId;
 
   var promptChrome = function() {
     var chromeRegex = /chrome/i
@@ -45,6 +46,14 @@
           separator:'  '
       }
     });
+
+    wiggleIntervalId = setInterval(function() {
+      wiggleIndex = parseInt(Math.random() * $("#games li").length) + 1;
+      $("#games li:nth-child(" + wiggleIndex + ")").addClass("wiggle");
+      setTimeout(function() {
+        $("#games li:nth-child(" + wiggleIndex + ")").removeClass("wiggle");
+      }, 400);
+    }, 2000);
 
     socket = io.connect('http://' + document.location.hostname + ':' + (document.location.port || '80') + '/');
 
@@ -137,6 +146,7 @@
   }
 
   var loadGame = function(title) {
+    clearInterval(wiggleIntervalId);
     var roms = document.querySelector(".nes-roms select");
 
     // Load game's ROM
