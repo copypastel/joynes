@@ -4,7 +4,7 @@ body {
 }
 
 div#wrapper-main {
-	background: url(images/bg.png) no-repeat;
+	background: url(imageas/bg.png) no-repeat;
 	width: 1024px;
 	height: 768px;
 	margin: 0 auto;
@@ -240,7 +240,7 @@ div#ui-container {
 }
 
 div#ui-bar-container {
-	background: url(img/ui-bg.png) no-repeat;
+	background: url(images/ui-bg.png) no-repeat;
 	width: 630px;
 	height: 90px;
 	margin: 0 auto;
@@ -337,7 +337,7 @@ div#cta-button-container {
 }
 
 div#red-glow-container {
-	background: url(img/red-glow.png);
+	background: url(images/red-glow.png);
 	width: 32px;
 	height: 32px;
 	float: left;
@@ -355,7 +355,7 @@ div#red-glow p {
 }
 
 div#green-glow-container {
-	background: url(img/green-glow.png);
+	background: url(images/green-glow.png);
 	width: 32px;
 	height: 32px;
 	float: left;
