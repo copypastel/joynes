@@ -233,64 +233,142 @@ li#game4:hover {
 Share Link Thing!
 **************************************************/
 
-div#share-container {
- background: #000;
- opacity: .99;
- width: 600px;
- height: auto;
- margin: 0 auto;
- padding: 10px;
- border-radius: 5px;
+div#ui-container {
+	border: 1px solid blue;
+	width: 100%;
+	height: auto;
+}
+
+div#ui-bar-container {
+	background: url(img/ui-bg.png) no-repeat;
+	width: 630px;
+	height: 90px;
+	margin: 0 auto;
 
 }
 
-div#shareId {
- background: #333;
- border-radius: 5px;
- width: 400px;
- margin: 0 auto;
- 
+div#ui-bar p {
+	text-indent: -9999px;
 }
 
-h3 {
- font-family: helvetica, sans-serif;
- width: 160px;
- margin: 0 auto;
- line-height: 30px;
+div#cta-container {
+	margin: 12px 0 0 55px;
+	float: left;
 }
 
-div#share-button-container {
- background: #444;
- width: 400px;
- height: 50px;
+div#cta {
+	color: #f1f1f1;
+	font-family: georgia, serif;
+	font-style: italic;
+	font-size: 1.1em;
+	text-shadow: 0 2px 3px #292929;
+	float: left;
 }
 
-div#share-box {
- background: #999;
- width: 230px;
- float: left;
- line-height: 30px;
- margin-left: 10px;
- margin-top: 5px;
+div#cta-button-container {
+	/*background: red;*/
+	width: 125px;
+	margin-top: 6px;
+	margin-left: 48px;
+	float: left;
 }
 
-div#share-button {
- background: #ff8800;
- border-radius: 5px;
- border: 1px solid #292929;
- width: 145px;
- float: left;
- box-shadow: 0 1px 0 #999;
- margin: 5px 5px;
+
+#cta-button-red {
+	-moz-box-shadow:inset 0px 1px 0px 0px #393939;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #393939;
+	box-shadow:inset 0px 1px 0px 0px #393939;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #2e2d2d), color-stop(1, #191919) );
+	background:-moz-linear-gradient( center top, #2e2d2d 5%, #191919 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#2e2d2d', endColorstr='#191919');
+	background-color:#2e2d2d;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #000000;
+	display:inline-block;
+	color:#0c0c0c;
+	font-family: Georgia, serif;
+	font-weight: normal;
+	font-style: italic;
+	font-size: 1.2em;
+	padding: 11px 38px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #313131;
+}#cta-button-red:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #191919), color-stop(1, #2e2d2d) );
+	background:-moz-linear-gradient( center top, #191919 5%, #2e2d2d 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#191919', endColorstr='#2e2d2d');
+	background-color:#191919;
+}#cta-button-red:active {
+	position:relative;
+	top:1px;
 }
 
-div#share-button span {
- font-family: helvetica, sans-serif;
- font-weight: bolder;
- font-size: .8em;
- text-shadow: 0px 1px 1px #292929;
- width: 120px;
- margin: 0 0 0 25px;
- line-height: 30px;
+#cta-button-green {
+	-moz-box-shadow:inset 0px 1px 0px 0px #393939;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #393939;
+	box-shadow:inset 0px 1px 0px 0px #393939;
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #2e2d2d), color-stop(1, #191919) );
+	background:-moz-linear-gradient( center top, #2e2d2d 5%, #191919 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#2e2d2d', endColorstr='#191919');
+	background-color:#2e2d2d;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	border:1px solid #000000;
+	display:inline-block;
+	color: white;
+	font-family: Georgia, serif;
+	font-weight: normal;
+	font-style: italic;
+	font-size: 1.2em;
+	padding: 11px 48px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #313131;
+}#cta-button-green:hover {
+	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #191919), color-stop(1, #2e2d2d) );
+	background:-moz-linear-gradient( center top, #191919 5%, #2e2d2d 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#191919', endColorstr='#2e2d2d');
+	background-color:#191919;
+}#cta-button-green:active {
+	position:relative;
+	top:1px;
+}
+
+div#red-glow-container {
+	background: url(img/red-glow.png);
+	width: 32px;
+	height: 32px;
+	float: left;
+	margin: 18px 0 0 34px;
+}
+
+div#red-glow {
+	width: 32px;
+	height: 32px;
+	float: left;
+}
+
+div#red-glow p {
+	text-indent: -9999px;
+}
+
+div#green-glow-container {
+	background: url(img/green-glow.png);
+	width: 32px;
+	height: 32px;
+	float: left;
+	margin: -13px 0 0 34px;
+}
+
+div#green-glow {
+	width: 32px;
+	height: 32px;
+	float: left;
+}
+
+div#green-glow p {
+	text-indent: -9999px;
 }
 
