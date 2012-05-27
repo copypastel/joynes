@@ -55,9 +55,11 @@
       }, 400);
     }, 2000);
 
-    $('#player-2').click(function() {
+    var showShareLink = function() {
       $('#ui-popup-container').show();
-    });
+    };
+
+    $("#player-2").click(showShareLink);
 
     socket = io.connect('http://' + document.location.hostname + ':' + (document.location.port || '80') + '/');
 
@@ -68,9 +70,22 @@
       document.querySelector("#link-box input").value = hostname + shareId;
     });
 
+    var reboot = function() {
+      document.location = 'http://' + document.location.hostname + ':' + (document.location.port || '80') + '/';
+    }
+
     socket.on("state:partner_unavailable", function() {
       alert("Sorry! Partner is already in a game (or died a fiery death)...");
-      document.location = 'http://' + document.location.hostname + ':' + (document.location.port || '80') + '/';
+      reboot();
+    });
+
+    socket.on("state:partner_disconnect", function() {
+      if(partnerIdPresent) {
+        alert("Geez Louise, Player 1 has disconnected! Rebooting...");
+        reboot();
+      } else {
+        $("#player-2").removeClass("connected").addClass("waiting").click(showShareLink);
+      }
     });
 
     socket.on("change-request", function(title) {
@@ -106,10 +121,45 @@
       var partnerId = partnerIdPresent[1];
       socket.emit("register:s", decodeShareId(partnerId));
       $("#player-2").addClass("connected").unbind("click");
+      clearInterval(wiggleIntervalId);
     } else {
       $("#player-2").addClass("waiting");
       socket.emit("register:m");
     }
+
+    // Game setup (cartridges, posters)
+    var games = document.querySelectorAll("#games li");
+    for(var i = 0; i < games.length; i++) {
+
+      var game = games.item(i);
+
+      game.onmouseover = function(event) {
+        var title = event.target.getAttribute("data-game");
+        displayPoster(title);
+      }
+
+      // Restore poster to loaded game
+      game.onmouseout = function(event) {
+        var gameIndex = document.querySelector("select").selectedIndex;
+        var games = document.querySelectorAll("select option");
+        var title = games.item(gameIndex).innerHTML;
+
+        displayPoster(title);
+      }
+
+      game.onclick = function(event) {
+        var title = event.target.getAttribute("data-game");
+        if (partnerIdPresent) {
+          // We're sending a request to master to select a game
+          socket.emit("proxy", {"command": "change-request", "data": title})
+        }
+        else {
+          displayPoster(title);
+          loadGame(title);
+        }
+      }
+    }
+
   });
 
   var encodeShareId = function(payload) {
@@ -173,42 +223,6 @@
     }
   }
 
-  document.onready = function() {
-
-    if(!canRun) { return ; }
-    // Game setup (cartridges, posters)
-    var games = document.querySelectorAll("#games li");
-    for(var i = 0; i < games.length; i++) {
-
-      var game = games.item(i);
-
-      game.onmouseover = function(event) {
-        var title = event.target.getAttribute("data-game");
-        displayPoster(title);
-      }
-
-      // Restore poster to loaded game
-      game.onmouseout = function(event) {
-        var gameIndex = document.querySelector("select").selectedIndex;
-        var games = document.querySelectorAll("select option");
-        var title = games.item(gameIndex).innerHTML;
-
-        displayPoster(title);
-      }
-
-      game.onclick = function(event) {
-        var title = event.target.getAttribute("data-game");
-        if (partnerIdPresent) {
-          // We're sending a request to master to select a game
-          socket.emit("proxy", {"command": "change-request", "data": title})
-        }
-        else {
-          displayPoster(title);
-          loadGame(title);
-        }
-      }
-    }
-  }
 </script>
 
 <div id="wrapper-main">

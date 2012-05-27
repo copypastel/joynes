@@ -68,7 +68,21 @@ io.sockets.on("connection", function(player){
   });
 
   player.on("unpair", function() {
-    purge(player.id);
+    purge(player);
+  });
+
+  /*  Gracefully handle disconnects */
+  player.on("disconnect", function(){
+    util.log("Player "  + player.id + " has left the arcade.");
+    var partner = getPartner(player.id);
+    if( partner != undefined ){
+      /* Let the partner know they're now alone */
+      partner.emit("state:partner_disconnect");
+      purge(player);
+    }else{
+      /* Player was in the waiting list; we need to purge him. */
+      purge(player);
+    }
   });
 
   /* After pairing, we're just acting as a proxy for messages
@@ -92,19 +106,6 @@ io.sockets.on("connection", function(player){
       // util.debug("!! Tried sending message to ghost partner");
     }
   });
-});
-
-io.sockets.on("disconnect", function(player){
-  util.log("Player "  + player.id + " has left the arcade.");
-  var partner = getPartner(player.id);
-  if( partner != undefined ){
-    /* Let the partner know they're now alone */
-    partner.send(JSON.stringify({close: player.id}));
-    purge(player);
-  }else{
-    /* Player was in the waiting list; we need to purge him. */
-    purge(player);
-  }
 });
 
 var getPlayer = function(playerId) {
