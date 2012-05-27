@@ -6,6 +6,10 @@ var express = require('express');
 var app = express.createServer();
 var io = require('socket.io').listen(app);
 
+io.configure('production', function() {
+  io.set('log level', 1);
+});
+
 app.listen(3333);
 
 app.configure( function(){
@@ -72,20 +76,18 @@ io.sockets.on("connection", function(player){
     //util.log("Got message: " + message);
     var partner = getPartner(player.id);
     if(partner != undefined){
-      util.log("Sending message from " + player.id + " to " + partner.id);
       partner.send(message);
     } else {
-      util.debug("Player " + player.id + " sent a message while not paired.");
+      // util.debug("Player " + player.id + " sent a message while not paired.");
     }
   });
 
   player.on("proxy", function(data){
     var partner = getPartner(player.id);
     if(partner != undefined){
-      console.log("Sending data " + data);
       partner.emit(data['command'], data['data']);
     } else {
-      console.log("!! Tried sending message to ghost partner");
+      // util.debug("!! Tried sending message to ghost partner");
     }
   });
 });
