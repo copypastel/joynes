@@ -328,6 +328,12 @@ div#cta-button-container {
   float: left;
 }
 
+div#cta-button {
+  background: #2b2b2b;
+  width: 158px;
+  height: 46px;
+  border-radius: 5px;
+}
 
 #cta-button-red {
   -moz-box-shadow:inset 0px 1px 0px 0px #393939;
