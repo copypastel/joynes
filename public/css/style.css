@@ -436,3 +436,115 @@ div#bff p {
 #player-statuses .waiting:after {
   content: "Click to invite player";
 }
+
+/**************************************************
+Change Game Confirmation
+**************************************************/
+
+div#change-confirm-container {
+  width: 100%;
+  height: auto;
+  margin-top: 40px;
+}
+
+div#change-confirm {
+  width: 395px;
+  height: 127px;
+  background: url(images/change-bg.png);
+  margin: 0 auto;
+}
+
+div#confirm-message {
+  width: 285px;
+  height: 55px;
+  margin: 0 auto;
+  line-height: 55px;
+  color: #cacaca;
+  font-style: italic;
+  text-shadow: 0 1px 0 #000000;
+}
+
+div#change-confirm-btn-container {
+  float: left;
+  margin-left: 50px;
+}
+
+div#change-confirm-btn {
+  margin-left: 12px;
+}
+
+div#change-confirm-btn p {
+  float: left;
+  margin: 0 0 0 0;
+  padding: 0 10px 0 10px;
+  line-height: 43px;
+}
+
+div#thumbs-up {
+  background: url(images/confirm.png) no-repeat;
+  width: 41px;
+  height: 45px;
+  float: left;
+}
+
+div#thumbs-up p {
+  text-indent: -9999px;
+}
+
+div#change-deny-btn-container {
+  /*float: left;*/
+}
+
+div#change-deny-btn {
+  margin-left: 12px;
+}
+
+div#change-deny-btn p {
+  float: left;
+  margin: 0 0 0 0;
+  padding: 0 21px 0 21px;
+  line-height: 43px;
+}
+
+div#thumbs-down {
+  background: url(images/deny.png) no-repeat;
+  width: 41px;
+  height: 45px;
+  float: left;
+}
+
+div#thumbs-down p {
+  text-indent: -9999px;
+}
+
+.change-confirm-button {
+ -moz-box-shadow:inset 0px 1px 0px 0px #393939;
+  -webkit-box-shadow:inset 0px 1px 0px 0px #393939;
+  box-shadow:inset 0px 1px 0px 0px #393939;
+  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #2e2d2d), color-stop(1, #191919) );
+  background:-moz-linear-gradient( center top, #2e2d2d 5%, #191919 100% );
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#2e2d2d', endColorstr='#191919');
+  background-color:#2e2d2d;
+  -moz-border-radius:6px;
+  -webkit-border-radius:6px;
+  border-radius:6px;
+  border:1px solid #000000;
+  display:inline-block;
+  color:#cacaca;
+  font-family: Georgia, serif;
+  font-weight: normal;
+  font-style: italic;
+  font-size: 1em;
+  padding: 0px 0px;
+  text-decoration:none;
+  text-shadow:0px 1px 0px #000000;
+}.change-confirm-button:hover {
+  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #191919), color-stop(1, #2e2d2d) );
+  background:-moz-linear-gradient( center top, #191919 5%, #2e2d2d 100% );
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#191919', endColorstr='#2e2d2d');
+  background-color:#191919;
+}.change-confirm-button:active {
+  position:relative;
+  top:1px;
+}
+}
