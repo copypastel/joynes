@@ -477,13 +477,13 @@ div#change-confirm-btn p {
   float: left;
   margin: 0 0 0 0;
   padding: 0 10px 0 10px;
-  line-height: 43px;
+  line-height: 40px;
 }
 
 div#thumbs-up {
   background: url(/images/confirm.png) no-repeat;
   width: 41px;
-  height: 45px;
+  height: 40px;
   float: left;
 }
 
@@ -503,13 +503,13 @@ div#change-deny-btn p {
   float: left;
   margin: 0 0 0 0;
   padding: 0 21px 0 21px;
-  line-height: 43px;
+  line-height: 40px;
 }
 
 div#thumbs-down {
   background: url(/images/deny.png) no-repeat;
   width: 41px;
-  height: 45px;
+  height: 40px;
   float: left;
 }
 
@@ -538,6 +538,7 @@ div#thumbs-down p {
   padding: 0px 0px;
   text-decoration:none;
   text-shadow:0px 1px 0px #000000;
+  box-shadow: 0 1px 0 #272626;
 }.change-confirm-button:hover {
   background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #191919), color-stop(1, #2e2d2d) );
   background:-moz-linear-gradient( center top, #191919 5%, #2e2d2d 100% );
