@@ -450,7 +450,7 @@ div#change-confirm-container {
 div#change-confirm {
   width: 395px;
   height: 127px;
-  background: url(images/change-bg.png);
+  background: url(/images/change-bg.png);
   margin: 0 auto;
 }
 
@@ -481,7 +481,7 @@ div#change-confirm-btn p {
 }
 
 div#thumbs-up {
-  background: url(images/confirm.png) no-repeat;
+  background: url(/images/confirm.png) no-repeat;
   width: 41px;
   height: 45px;
   float: left;
@@ -507,7 +507,7 @@ div#change-deny-btn p {
 }
 
 div#thumbs-down {
-  background: url(images/deny.png) no-repeat;
+  background: url(/images/deny.png) no-repeat;
   width: 41px;
   height: 45px;
   float: left;
