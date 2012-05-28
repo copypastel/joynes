@@ -122,6 +122,7 @@
       socket.emit("register:s", decodeShareId(partnerId));
       $("#player-2").addClass("connected").unbind("click");
       clearInterval(wiggleIntervalId);
+      $("#games li").removeClass("wiggle");
     } else {
       $("#player-2").addClass("waiting");
       socket.emit("register:m");
@@ -210,6 +211,7 @@
   }
 
   var loadGame = function(title) {
+    $("#games li").removeClass("wiggle");
     clearInterval(wiggleIntervalId);
     var roms = document.querySelector(".nes-roms select");
 
