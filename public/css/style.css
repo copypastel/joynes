@@ -560,7 +560,7 @@ div#hud-container {
 }
 
 div#hud {
-  width: 499px;
+  width: 699px;
   height: 60px;
   background: url(/images/hud-bg.png) no-repeat;
   margin: 0 auto;
@@ -580,7 +580,7 @@ div#left-avatar p {
 }
 
 div#left-login-container {
-  width: 100px;
+  width: 200px;
   float: left;
 }
 
@@ -589,6 +589,8 @@ div#left-login {
 }
 
 div#left-login p {
+  width: 140px;
+  text-align: center;
  -moz-box-shadow:inset 0px 1px 0px 0px #393939;
   -webkit-box-shadow:inset 0px 1px 0px 0px #393939;
   box-shadow:inset 0px 1px 0px 0px #393939;
@@ -632,12 +634,14 @@ div#vs p {
 }
 
 div#right-share-container {
-  width: 100px;
+  width: 200px;
   float: left;
   margin: 0 0 0 10px;
 }
 
 div#right-share p {
+  width: 140px;
+  text-align: center;
   -moz-box-shadow:inset 0px 1px 0px 0px #393939;
   -webkit-box-shadow:inset 0px 1px 0px 0px #393939;
   box-shadow:inset 0px 1px 0px 0px #393939;
