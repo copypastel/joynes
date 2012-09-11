@@ -171,8 +171,8 @@ ul {
 }
 
 #games li:nth-child(2) {
-  left: -55px;
-  top: -10px;
+  left: -45px;
+  top: 10px;
 }
 
 #games li:nth-child(3) {
