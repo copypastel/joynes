@@ -28,6 +28,10 @@
     document.location = document.location.origin;
   }
 
+  var getName = function() {
+    return getNameField().value;
+  }
+
   promptChrome();
 	$(document).ready( function(){
     if(!canRun) {
@@ -120,6 +124,18 @@
       $("#ui-popup-container").hide();
     });
 
+    socket.on("nameChange", function(name) {
+      getPartnerNameField().value = name;
+
+      /* Changing an input field's value doesn't trigger its
+       * onChange event. Manually triggering the event here,
+       * but there must be a better solution.
+       */
+      var changeEvent = document.createEvent("HTMLEvents");
+      changeEvent.initEvent("change", true, true);
+      getPartnerNameField().dispatchEvent(changeEvent);
+    });
+
     // partnerId is a URL parameter
     if(partnerIdPresent) {
       var partnerId = partnerIdPresent[1];
@@ -166,6 +182,13 @@
     }
 
     var inputs = document.querySelectorAll("#hud input");
+
+    getNameField().addEventListener("change", function(evt) {
+      var username = evt.target.value;
+      socket.emit("nameChange", username);
+    });
+
+    // Twitter avatar fetching
     for (var i = 0; i < inputs.length; i++) {
       inputs[i].addEventListener("change", function(i) {
         return function(evt) {
@@ -189,6 +212,16 @@
   }
 
   var currentPoster = undefined;
+
+  var getNameField = function() {
+    var nameField = partnerIdPresent === null ? "#player_1" : "#player_2";
+    return document.querySelector(nameField);
+  }
+
+  var getPartnerNameField = function() {
+    var nameField = partnerIdPresent !== null ? "#player_1" : "#player_2";
+    return document.querySelector(nameField);
+  }
 
   var displayPoster = function(title, timeout) {
     console.log(title);
@@ -285,7 +318,7 @@
 
             <div id="right-share-container">
               <div id="right-share">
-                <input type="text" value="Invite" disabled="true"/>
+                <input id="player_2" type="text" value="Invite" disabled="true"/>
               </div>
             </div>
 

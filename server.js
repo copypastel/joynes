@@ -21,6 +21,7 @@ app.get('/:id?', function(req, res){
 });
 
 var channels = {};
+var names = {};
 var waiting = [];
 
 /* When a player connects, they join the waiting FIFO queue.
@@ -36,6 +37,7 @@ io.sockets.on("connection", function(player){
   player.on("register:m", function() {
     player.emit("role", {initialize: "m"});
   });
+
   player.on("register:s", function(partnerId) {
     // if player with partnerId is already paired, ignore request
     // TODO: return an error
@@ -53,6 +55,7 @@ io.sockets.on("connection", function(player){
       player.emit("role", {initialize: "s"});
       //TODO: Investigate race condition.  Master processes partner joined before slave finishes initializing
       partner.emit("state:partner_joined", partner.id);
+      player.emit("nameChange", names[partner.id]);
     } else {
       // couldn't find a player given a partnerId;
       // might prefer to throw an error in this case...
@@ -64,6 +67,14 @@ io.sockets.on("connection", function(player){
          */
       // pair(waiting.shift(), waiting.shift());
      // }
+    }
+  });
+
+  player.on("nameChange", function(name) {
+    names[player.id] = name;
+    var partner = getPartner(player.id);
+    if (partner != undefined) {
+      partner.emit("nameChange", name);
     }
   });
 
@@ -122,7 +133,6 @@ var pair = function(player, partner) {
   channels[partner.id] = player;
 
   util.log("Pairing players " + player.id + " & " + partner.id);
-
 }
 
 /* We know all pairs, so we only need one player
@@ -131,10 +141,12 @@ var unpair = function(player) {
   /* Dissolve pair */
   var partner = channels[player.id];
   delete channels[player.id];
+  delete names[player.id];
 
   if (partner != undefined) {
     /* Put partner in the waiting queue */
     delete channels[partner.id];
+    delete names[partner.id];
     waiting.push(partner);
   } else {
     util.debug("Tried to unpair solitary player " + player.id);
