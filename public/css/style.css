@@ -686,6 +686,9 @@ div#right-share input {
   text-shadow:0px 1px 0px #313131;
   cursor: pointer;
   margin-top: 14px;
+}
+
+input[disabled] {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;

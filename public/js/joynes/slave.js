@@ -131,17 +131,19 @@ joynes.Slave.prototype = {
     });
 
     /* TODO: we should only preventDefault for non-controller keys. */
-    $(document).
-    bind('keydown', function(evt) {
+    document.addEventListener('keydown', function(evt) {
       self.sendKey(evt.keyCode, 0x41);
-    }).
-    bind('keyup', function(evt) {
+    }, true);
+
+    document.addEventListener('keyup', function(evt) {
       self.sendKey(evt.keyCode, 0x40);
-    }).
+    }, true);
+
+    /*
     bind('keypress', function(evt) {
         evt.preventDefault()
     });
-
+    */
   },
   sendKey: function(key, value){
       switch (key) {
@@ -289,4 +291,4 @@ joynes.Slave.prototype = {
   }
 }
 
-$.extend(joynes.Slave.prototype,  joynes.Base.prototype);
+$.extend(joynes.Slave.prototype, joynes.Base.prototype);

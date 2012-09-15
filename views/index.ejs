@@ -69,7 +69,9 @@
       }, 400);
     }, 2000);
 
-    document.querySelector("#right-share").addEventListener("click", showShareLink);
+    if (!partnerIdPresent) {
+      document.querySelector("#right-share").addEventListener("click", showShareLink);
+    };
 
     socket = io.connect(document.location.origin);
 
@@ -210,6 +212,20 @@
         img.style.visibility = "visible";
       });
     }
+
+    getPartnerNameField().setAttribute("disabled");
+
+    if (partnerIdPresent) {
+      getNameField().value = "Player 2";
+
+      /* Changing an input field's value doesn't trigger its
+       * onChange event. Manually triggering the event here,
+       * but there must be a better solution.
+       */
+      var changeEvent = document.createEvent("HTMLEvents");
+      changeEvent.initEvent("change", true, true);
+      getNameField().dispatchEvent(changeEvent);
+    }
   });
 
   var encodeShareId = function(payload) {
@@ -331,7 +347,7 @@
 
             <div id="right-share-container">
               <div id="right-share">
-                <input id="player_2" type="text" value="Invite" disabled="true"/>
+                <input id="player_2" type="text" value="Invite"/>
               </div>
             </div>
 
