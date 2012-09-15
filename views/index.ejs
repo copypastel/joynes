@@ -3,7 +3,7 @@
   var socket;
   var canRun;
   var shareId;
-  var partnerIdPresent = /\/(\w+)/.exec(document.location.pathname);
+  var partnerIdPresent = /\/(\w+)$/.exec(document.location.pathname);
   var requestedTitle;
   var wiggleIntervalId;
 
@@ -304,9 +304,7 @@
           <input type="text" value="loading..." size="100" onClick="this.select();"/>
         </div>
         <div id="bff-container">
-          <div id="bff">
             <p>Share this link with you BFF. Cause Nintendo is always better with a buddy.</p>
-          </div>
         </div>
       </div>
     </div>
