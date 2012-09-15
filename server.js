@@ -130,11 +130,11 @@ var pair = function(player, partner) {
 var unpair = function(player) {
   /* Dissolve pair */
   var partner = channels[player.id];
-  channels[player.id] = undefined;
+  delete channels[player.id];
 
   if (partner != undefined) {
     /* Put partner in the waiting queue */
-    channels[partner.id] = undefined;
+    delete channels[partner.id];
     waiting.push(partner);
   } else {
     util.debug("Tried to unpair solitary player " + player.id);
