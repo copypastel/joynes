@@ -161,6 +161,15 @@
       }
     }
 
+    var inputs = document.querySelectorAll("#hud input");
+    for (var i = 0; i < inputs.length; i++) {
+      inputs[i].addEventListener("change", function(i) {
+        return function(evt) {
+          var username = evt.target.value;
+          loadTwitterAvatar(username, document.querySelectorAll(".avatar")[i]);
+        }
+      }(i));
+    }
   });
 
   var encodeShareId = function(payload) {
@@ -225,7 +234,12 @@
     }
   }
 
+  var loadTwitterAvatar = function(username, imgEl) {
+    username = escape(username);
+    imgEl.setAttribute("src", "http://twitter.com/api/users/profile_image/" + username);
+  }
 </script>
+
 
 <div id="wrapper-main">
 	<div id="container-main" >
@@ -247,14 +261,15 @@
       <div id="hud-container">
         <div id="hud">
             <div id="left-avatar-container">
-              <div id="left-avatar">
-                <p>Left Avatar</p>
+              <div id="left-avatar-chrome">
+                <img src="/images/avatar-container.png"/>
               </div>
+              <img src="" class="avatar"/>
             </div>
-
+asdad
             <div id="left-login-container">
               <div id="left-login">
-                <p>Player 1</p>
+                <input id="player_1" type="text" value="Player 1"/>
               </div>
             </div>
 
@@ -266,14 +281,15 @@
 
             <div id="right-share-container">
               <div id="right-share">
-                <p>Invite</p>
+                <input type="text" value="Invite" disabled="true"/>
               </div>
             </div>
 
             <div id="right-avatar-container">
-              <div id="right-avatar">
-                <p>right Avatar</p>
+              <div id="right-avatar-chrome">
+                <img src="/images/avatar-container.png"/>
               </div>
+              <img src="" class="avatar"/>
             </div>
           </div>
       </div>

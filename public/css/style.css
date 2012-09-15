@@ -567,12 +567,32 @@ div#hud {
 }
 
 div#left-avatar-container {
-  background: url(/images/avatar-container.png) no-repeat;
   width: 102px;
   height: 102px;
   float: left;
   margin: -12px 0 0 0;
   float: left;
+}
+
+div#left-avatar-chrome img {
+  position: relative;
+  z-index: 1; /* Change here if we decide it looks better with avatar above */
+  opacity: 0.9;
+}
+
+div#right-avatar-chrome img {
+  position: relative;
+  z-index: 1; /* Change here if we decide it looks better with avatar above */
+  opacity: 0.9;
+}
+
+.avatar {
+  position: relative;
+  top: -91px;
+  height: 55px;
+  left: 24px;
+  z-index: 0;
+  border-radius: 100px;
 }
 
 div#left-avatar p {
@@ -588,10 +608,10 @@ div#left-login {
 
 }
 
-div#left-login p {
+div#left-login input {
   width: 140px;
   text-align: center;
- -moz-box-shadow:inset 0px 1px 0px 0px #393939;
+  -moz-box-shadow:inset 0px 1px 0px 0px #393939;
   -webkit-box-shadow:inset 0px 1px 0px 0px #393939;
   box-shadow:inset 0px 1px 0px 0px #393939;
   background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #2e2d2d), color-stop(1, #191919) );
@@ -602,8 +622,7 @@ div#left-login p {
   -webkit-border-radius:6px;
   border-radius:6px;
   border:1px solid #000000;
-  display:inline-block;
-  color:#0c0c0c;
+  color: white;
   font-family: Georgia, serif;
   font-weight: normal;
   font-style: italic;
@@ -611,12 +630,18 @@ div#left-login p {
   padding: 5px 29px;
   text-decoration:none;
   text-shadow:0px 1px 0px #313131;
-}#left-login p:hover {
+  cursor: pointer;
+  margin-top: 14px;
+}
+
+#left-login input:hover {
   background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #191919), color-stop(1, #2e2d2d) );
   background:-moz-linear-gradient( center top, #191919 5%, #2e2d2d 100% );
   filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#191919', endColorstr='#2e2d2d');
-  backg56ound-color:#191919;
-}#left-login p:active {
+  background-color:#191919;
+}
+
+#left-login input:active {
   position:relative;
   top:1px;
 }
@@ -639,7 +664,7 @@ div#right-share-container {
   margin: 0 0 0 10px;
 }
 
-div#right-share p {
+div#right-share input {
   width: 140px;
   text-align: center;
   -moz-box-shadow:inset 0px 1px 0px 0px #393939;
@@ -653,8 +678,7 @@ div#right-share p {
   -webkit-border-radius:6px;
   border-radius:6px;
   border:1px solid #000000;
-  display:inline-block;
-  color:#0c0c0c;
+  color: white;
   font-family: Georgia, serif;
   font-weight: normal;
   font-style: italic;
@@ -662,18 +686,26 @@ div#right-share p {
   padding: 5px 29px;
   text-decoration:none;
   text-shadow:0px 1px 0px #313131;
-}#right-share p:hover {
+  cursor: pointer;
+  margin-top: 14px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+#right-share input:hover {
   background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #191919), color-stop(1, #2e2d2d) );
   background:-moz-linear-gradient( center top, #191919 5%, #2e2d2d 100% );
   filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#191919', endColorstr='#2e2d2d');
-  backg56ound-color:#191919;
-}#right-share p:active {
+  background-color:#191919;
+}
+
+#right-share input:active {
   position:relative;
   top:1px;
 }
 
 div#right-avatar-container {
-  background: url(/images/avatar-container.png) no-repeat;
   width: 102px;
   height: 102px;
   float: left;

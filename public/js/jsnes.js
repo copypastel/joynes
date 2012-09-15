@@ -2037,7 +2037,8 @@ JSNES.Keyboard.prototype = {
     },
 
     keyPress: function(evt) {
-        evt.preventDefault();
+        // comment this out to allow input fields to work
+        //evt.preventDefault();
     }
 };
 
@@ -6866,16 +6867,15 @@ if (typeof jQuery !== 'undefined') {
                 }
 
                 // Keyboard
-                $(document).
-                    bind('keydown', function(evt) {
-                        self.nes.keyboard.keyDown(evt);
-                    }).
-                    bind('keyup', function(evt) {
-                        self.nes.keyboard.keyUp(evt);
-                    }).
-                    bind('keypress', function(evt) {
-                        self.nes.keyboard.keyPress(evt);
-                    });
+                document.addEventListener('keydown', function(evt) {
+                  self.nes.keyboard.keyDown(evt);
+                }, true);
+                document.addEventListener('keyup', function(evt) {
+                  self.nes.keyboard.keyUp(evt);
+                }, true);
+                document.addEventListener('keypress', function(evt) {
+                  self.nes.keyboard.keyPress(evt);
+                }, true);
 
                 // Sound
                 self.dynamicaudio = new DynamicAudio({
