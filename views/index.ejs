@@ -8,21 +8,32 @@
   var wiggleIntervalId;
 
   var promptChrome = function() {
-    var chromeRegex = /chrome/i
+    var chromeRegex = /chrome/i;
     if (navigator.userAgent.match(chromeRegex)) {
       canRun = true;
     } else {
       canRun = false;
-      var answer = confirm("Does not run in chrome, press ok to be redirected to aquire it.");
+      var answer = confirm("We currently require Chrome, press ok to visit http://google.com/chrome");
       if(answer) {
         window.location = "http://google.com/chrome";
       }
     }
   }
 
+  var showShareLink = function() {
+    $('#ui-popup-container').show();
+  }
+
+  var reboot = function() {
+    document.location = document.location.origin;
+  }
+
   promptChrome();
 	$(document).ready( function(){
-    if(!canRun) { return ; }
+    if(!canRun) {
+      return;
+    }
+
     var roms = [["Contra", "/roms/Contra.nes"],
                  ["Dr. Mario", "/roms/Dr_Mario.nes"],
                  ["Bubble Bobble", "/roms/Bubble_Bobble.nes"],
@@ -36,7 +47,6 @@
 		});
 
     $('#message-box .trigger').click( function() {
-      console.log(requestedTitle);
       loadGame(requestedTitle);
     }).confirm({
       dialogShow:'fadeIn',
@@ -55,26 +65,16 @@
       }, 400);
     }, 2000);
 
-    var showShareLink = function() {
-      $('#ui-popup-container').show();
-    };
-
-    $("#player-2").click(showShareLink);
-
     document.querySelector("#right-share").addEventListener("click", showShareLink);
 
-    socket = io.connect('http://' + document.location.hostname + ':' + (document.location.port || '80') + '/');
+    socket = io.connect(document.location.origin);
 
     // Display shareId
     socket.on("connect", function(evt) {
       var shareId = encodeShareId(socket.socket.sessionid);
-      var hostname = location.protocol + "//" + location.host + "/";
+      var hostname = location.origin + "/";
       document.querySelector("#link-box input").value = hostname + shareId;
     });
-
-    var reboot = function() {
-      document.location = 'http://' + document.location.hostname + ':' + (document.location.port || '80') + '/';
-    }
 
     socket.on("state:partner_unavailable", function() {
       alert("Sorry! Partner is already in a game (or died a fiery death)...");
@@ -86,6 +86,7 @@
         alert("Geez Louise, Player 1 has disconnected! Rebooting...");
         reboot();
       } else {
+        // TODO: Reset player 2 input here
         $("#player-2").removeClass("connected").addClass("waiting").click(showShareLink);
       }
     });
@@ -99,7 +100,7 @@
       switch (message.initialize) {
         case 'm': joynesClient = new joynes.Master(emulator, socket); break;
         case 's': joynesClient = new joynes.Slave(emulator, socket); break;
-        default: alert("something's wrong");
+        default: alert("D'oh! Something broke. Try refreshing!");
       }
 
       joynesClient.onRomLoaded = function(gameUrl) {
@@ -114,6 +115,7 @@
     });
 
     socket.on("state:partner_joined", function() {
+      // TODO: Update player 2 input here
       $("#player-2").removeClass("waiting").addClass("connected").unbind("click");
       $("#ui-popup-container").hide();
     });
