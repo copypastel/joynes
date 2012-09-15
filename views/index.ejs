@@ -197,6 +197,19 @@
         }
       }(i));
     }
+
+    var avatars = document.querySelectorAll(".avatar");
+
+    for (var i = 0; i < avatars.length; i++) {
+      avatars[i].addEventListener("error", function(evt) {
+        var img = evt.target;
+        img.style.visibility = "hidden";
+      });
+      avatars[i].addEventListener("load", function(evt) {
+        var img = evt.target;
+        img.style.visibility = "visible";
+      });
+    }
   });
 
   var encodeShareId = function(payload) {
