@@ -70,7 +70,7 @@
     }, 2000);
 
     if (!partnerIdPresent) {
-      document.querySelector("#right-share").addEventListener("click", showShareLink);
+      document.querySelector("#right-share").addEventListener("click", showShareLink, false);
     };
 
     socket = io.connect(document.location.origin);
@@ -121,9 +121,9 @@
     });
 
     socket.on("state:partner_joined", function() {
-      // TODO: Update player 2 input here
-      $("#player-2").removeClass("waiting").addClass("connected").unbind("click");
+      $("#player_2").removeClass("waiting").addClass("connected").unbind("click");
       $("#ui-popup-container").hide();
+      document.querySelector("#right-share").removeEventListener("click", showShareLink, false);
     });
 
     socket.on("nameChange", function(name) {
