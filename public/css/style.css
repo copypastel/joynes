@@ -187,32 +187,31 @@ ul {
 
 #posters li {
   position: absolute;
-  -webkit-transform: skewY(-26deg);
   height: 130px;
   width: 80px;
-  position: absolute;
+  background-size: 80px;
   opacity: 0;
   display: block;
   top: 210px;
   left: 300px;
-  background-size: 100%;
+  -webkit-transform: skewY(-26deg);
   -webkit-transition: opacity 0.5s linear;
 }
 
 #posters li:nth-child(1) {
-  background: url(/images/dr_mario.png);
+  background-image: url(/images/dr_mario.png);
 }
 
 #posters li:nth-child(2) {
-  background: url(/images/contra.png);
+  background-image: url(/images/contra.png);
 }
 
 #posters li:nth-child(3) {
-  background: url(/images/bubble_bobble.png);
+  background-image: url(/images/bubble_bobble.png);
 }
 
 #posters li:nth-child(4) {
-  background: url(/images/bubble_bobble_2.png);
+  background-image: url(/images/bubble_bobble_2.png);
 }
 
 

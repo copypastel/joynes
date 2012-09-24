@@ -240,7 +240,6 @@
     return parseInt(prefix, 36).toString() + parseInt(suffix, 36).toString();
   }
 
-  var currentPoster = undefined;
 
   var getNameField = function() {
     var nameField = partnerIdPresent === null ? "#player_1" : "#player_2";
@@ -252,8 +251,9 @@
     return document.querySelector(nameField);
   }
 
+  var currentPoster = undefined;
+
   var displayPoster = function(title, timeout) {
-    console.log(title);
     timeout = timeout || 500;
     var poster = document.querySelector("#posters li[data-game='" + title + "']");
 
